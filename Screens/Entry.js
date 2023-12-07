@@ -4,13 +4,17 @@ import data from '../constants/journal-data.json'
 import React, {useState, useEffect} from 'react';
 
 
-const MenuModal = ({visible, handleCloseModal, deleteEntry, id}) => {
+const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor}) => {
   const menuItems = ["Share", "Delete", "Details", "Mark as Done"];
 
   const handlePressBtn = (item) =>{
     console.log(item);
     if(item == "Delete"){
       deleteEntry(id);
+    }
+    else if(item == "Mark as Done"){
+      statusColor("#077E8C");
+      alert("Marked as done")
     }
     handleCloseModal();
   }
@@ -50,7 +54,7 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id}) => {
   );
 }
 
-export default function Entry({visible, handleButton, handleChangeText, date, scripture, observation, application, prayer, status, type, handleDelete, itemId, handleScripture}) {
+export default function Entry({visible, handleButton, handleChangeText, date, scripture, observation, application, prayer, status, type, handleDelete, itemId, handleScripture, currentStatus, statusColor}) {
 
   const [scriptureModalVisible, setScriptureModalVisible] = useState(false)
   const [month, setMonth] = useState("");
@@ -91,7 +95,7 @@ export default function Entry({visible, handleButton, handleChangeText, date, sc
       {/*HEADER*/}
       <View style={styles.header}> 
 
-        <Pressable style={[styles.border, styles.btn]} onPress={ ()=>handleButton(date, scripture, observation, application, prayer, status, type, itemId) }>
+        <Pressable style={[styles.border, styles.btn]} onPress={ ()=>handleButton(date, scripture, observation, application, prayer, status, type, itemId, currentStatus) }>
           <Image style={{width: 20, height: 20, transform:[{rotate: '180deg'}],}} source={require("../assets/arrow-right.png")}/>
         </Pressable>
 
@@ -102,8 +106,9 @@ export default function Entry({visible, handleButton, handleChangeText, date, sc
         </Pressable>
 
       </View>
-
-      <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={itemId} />
+      
+      {/*MODAL FOR HEADER MENU*/}
+      <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={itemId} statusColor={statusColor} />
 
       {/*FORMS*/}
       <KeyboardAvoidingView behavior='height' style={[styles.modal]}>
@@ -148,7 +153,8 @@ export default function Entry({visible, handleButton, handleChangeText, date, sc
           )
         : null}
 
-
+        
+            
         <View style={styles.inputContainer}>
           <Text>Observation</Text>
           <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "observation") } value={observation}  multiline={true} />

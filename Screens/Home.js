@@ -8,24 +8,27 @@ export default function Home() {
 
   const [visible, setVisible] = useState(false);
   const [visibleDisplay, setVisibleDisplay] = useState(false);
-  const [note, setNotes] = useState([]);
-  const [date, setDate] = useState("");
+  const [notes, setNotes] = useState([]);
+  const [date, setDate] = useState("date");
   const [scripture, setScripture] = useState("");
   const [observation, setObservation] = useState("");
   const [application, setApplication] = useState("");
   const [prayer, setPrayer] = useState("");
   const [status, setStatus] = useState("");
   const [type, setType] = useState("");
-  const [entry, setEntry] = useState();
+  const [entry, setEntry] = useState([]);
   const [key, setKey] = useState(0);
+  const [currentStatus, setCurrentStatus] = useState("");
 
-  const handleButton = (date, scripture, observation, application, prayer, status, type, itemId)  => {
+
+
+  const handleButton = (date, scripture, observation, application, prayer, status, type, itemId, currentStatus)  => {
 
     if (date == "" && scripture == "" && observation == "" && application == "" && prayer == ""){
       return setVisible(false);
     } 
     // adding entry to db
-    if(status == "add"){
+    if(currentStatus == "add"){
 
       db.transaction((tx) => {
         tx.executeSql(
@@ -44,13 +47,13 @@ export default function Home() {
       cleanStates();
     }
 
-    if(status == "ongoing"){
+    if(currentStatus == "ongoing"){
       //updating the entry
-      if(date != entry.date || scripture != entry.scripture || observation != entry.observation || application != entry.application || prayer != entry.prayer){
+      if(date != entry.date ||  scripture != entry.scripture || observation != entry.observation || application != entry.application || prayer != entry.prayer || status != entry.status){
         db.transaction((tx) => {
           tx.executeSql(
-            'UPDATE entries SET date = ?, scripture = ?, observation = ?, application = ?, prayer = ? WHERE id = ?;',
-            [date, scripture, observation, application, prayer, itemId],
+            'UPDATE entries SET date = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ? WHERE id = ?;',
+            [date, scripture, observation, application, prayer, status, itemId ],
             (_, result) => {
               console.log('Data updated successfully');
             },
@@ -88,23 +91,25 @@ export default function Home() {
     setObservation("");
     setApplication("");
     setPrayer("");
+    setEntry([]);
   }
 
-  //for showing the present entries
+  //for showing the SELECTED ENTRY
   const handleVisibleModal = (item) => {
-    setStatus("ongoing");
+    setCurrentStatus("ongoing");
     setVisibleDisplay(true);
+    setKey(item.id); 
     setDate(item.date);
     setScripture(item.scripture);
     setObservation(item.observation);
     setApplication(item.application);
     setPrayer(item.prayer);
-    setKey(item.id);
     setEntry(item);
   };
 
   const handleAddButton = () => {
-    setStatus("add");
+    setCurrentStatus("add");
+    setStatus("#F7CB73");
     setType("journal");
     setVisible(true);
   }
@@ -128,6 +133,7 @@ export default function Home() {
   }
   // getting the data in the db
   const fetchData = () => {
+    setNotes([]);
     db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM entries;',
@@ -202,6 +208,10 @@ export default function Home() {
     setScripture(verse);
   }
 
+  const handleStatusColor = (color) =>{
+    setStatus(color);
+  }
+
   useEffect(() => {
     setupDatabase();
     fetchData();
@@ -214,12 +224,12 @@ export default function Home() {
       <Text>Journal Entries</Text>
 
       <View style={styles.notelist}>
-        {note.length === 0 ? (
+        {notes.length === 0 ? (
           <Text style={{fontSize: 30,}}>No data available</Text>
         ) : (
           <FlatList
             style={{width:"100%",}}
-            data={note}
+            data={notes}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
             
@@ -228,7 +238,7 @@ export default function Home() {
                 <Text>date</Text>
                 <Text>{` ${item.scripture}`}</Text>
                 {/* <Text>{`${item.status}`}</Text> */}
-                <View style={[styles.border, {width: 30, height: 30,}]}></View>
+                <View style={[styles.border, {width: 30, height: 30, backgroundColor: item.status}]}></View>
 
               </TouchableOpacity>
             )}
@@ -251,9 +261,10 @@ export default function Home() {
 
     {/*ADD ITEM MODAL*/}
     <Entry visible={visible} handleButton={handleButton} handleChangeText={handleChangeText} date={date} scripture={scripture} observation={observation} application={application} prayer={prayer} status={status} type={type} itemId={key}
-    handleScripture={handleChangeScripture}/>
+    handleScripture={handleChangeScripture} currentStatus={currentStatus}/>
     {/*For displaying the component*/}
-    <Entry visible={visibleDisplay} handleButton={handleButton} handleChangeText={handleChangeText} date={date} scripture={scripture} observation={observation} application={application} prayer={prayer} status={status} type={type} handleDelete={handleDelete} itemId={key} handleScripture={handleChangeScripture} />
+    <Entry visible={visibleDisplay} handleButton={handleButton} handleChangeText={handleChangeText} date={date} scripture={scripture} observation={observation} application={application} prayer={prayer} status={status} type={type} handleDelete={handleDelete} itemId={key} handleScripture={handleChangeScripture}
+    statusColor={handleStatusColor}  currentStatus={currentStatus}/>
 
     </>
   )
