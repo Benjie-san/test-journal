@@ -125,7 +125,7 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor, ent
   );
 }
 
-export default function Entry({visible, handleButton, handleChangeText, date, title, scripture, observation, application, prayer, status, type, handleDelete, itemId, handleScripture, currentStatus, statusColor, handleChangeDate}) {
+export default function Entry({visible, handleButton, handleChangeText, date, title, question, scripture, observation, application, prayer, status, type, handleDelete, itemId, handleScripture, currentStatus, statusColor, handleChangeDate}) {
 
   const [scriptureModalVisible, setScriptureModalVisible] = useState(false);
   const [dateModalVisible, setDateModalVisible] = useState(false)
@@ -170,7 +170,7 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
   }
 
   const handleBackButton = () =>{
-    handleButton(date, title, scripture, observation, application, prayer, status, type, itemId, currentStatus);
+    handleButton(date, title, question, scripture, observation, application, prayer, status, type, itemId, currentStatus);
     setErrorColor("#fff");
     handleScriptureModal();
   }
@@ -223,7 +223,7 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
           <Image style={{width: 20, height: 20, transform:[{rotate: '180deg'}],}} source={require("../assets/arrow-right.png")}/>
         </Pressable>
 
-        <Text style={{fontSize: 20}}>Journal Entry</Text>
+        <Text style={{fontSize: 20}}>{type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
 
         {
         currentStatus != "add" ? 
@@ -272,7 +272,7 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
               }
 
               <View style={styles.inputSubContainer}>
-                <Text>Scripture:</Text>
+                <Text>{scripture === "Sermon Notes" ? "Text:": type == "opm" ? 'OPM Passage:' : 'Scripture:' }</Text>
                 <TouchableOpacity style={styles.touchable} onPress={handleScriptureModal}> 
                   <Text>{scripture}</Text>
                 </TouchableOpacity>
@@ -304,22 +304,31 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
 
 
             <View style={styles.inputContainer}>
-              <Text>Title:</Text>
+              <Text>{scripture === "Sermon Notes" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
               <TextInput style={[styles.input, {minHeight: 50, maxHeight: 100}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
             </View>
 
+            { type != "journal" ?
+              (
+                <View style={styles.inputContainer}>
+                  <Text>Question:</Text>
+                  <TextInput style={[styles.input, {minHeight: 50, maxHeight: 100}]} editable onChangeText={ text => handleChangeText(text, "question") } value={question} multiline={true} />
+                </View>
+              ) : null
+            }
+
             <View style={styles.inputContainer}>
-              <Text>Observation:</Text>
+              <Text>{scripture === "Sermon Notes" ? "Sermon Point:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
               <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "observation") } value={observation}  multiline={true} />
             </View>
 
             <View style={styles.inputContainer}>
-              <Text>Application:</Text>
+              <Text>{scripture === "Sermon Notes" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
               <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
             </View>
 
             <KeyboardAvoidingView behavior='padding' style={styles.inputContainer} >
-              <Text>Prayer:</Text>
+              <Text>{scripture === "Sermon Notes" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
               <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
             </KeyboardAvoidingView>
 
@@ -330,7 +339,6 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
         
 
     </Modal>
-    {/* <ScriptureModal openModal={scriptureModalVisible} handleVisible={handlePress} fetchVerse={handleFetchVerse}/> */}
   </>
   )
 }

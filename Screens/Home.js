@@ -1,9 +1,46 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Pressable, Image, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Pressable, Image, Modal } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import * as SQLite from 'expo-sqlite';
 import data from '../constants/journal-data.json'
-const db = SQLite.openDatabase('JournalDB_Beta.db');
+const db = SQLite.openDatabase('database_journal.db');
 import Entry from './Entry';
+
+const AddModal = ({visible, type, handleModal}) => {
+  const handlePress = (item) =>{
+    type(item);
+    handleModal();
+  }
+
+  return(
+    <>
+      <Modal animationType="fade" transparent={true} visible={visible}>
+        <TouchableOpacity style={[styles.flex,{backgroundColor: '#000000aa'}]} 
+        onPress={handleModal}>
+          <View style={{
+              backgroundColor: "#fff", 
+              width: "80%", 
+              height:"30%",
+              padding: 30,
+              borderRadius: 10,
+              alignItems:'left',
+              flexDirection:'column',
+              justifyContent:"center",
+          }} >
+            <Text style={{fontSize: 20}}>Add</Text>
+            <Pressable onPress={() => handlePress("journal")} style={[styles.btn, {alignItems: "left"}]}>
+              <Text style={{fontSize: 18}}>Journal Entry</Text>
+            </Pressable>
+
+            <Pressable onPress={() => handlePress("opm")} style={[styles.btn, {alignItems: "left"}]}>
+              <Text style={{fontSize: 18}}>OPM Reflection</Text>
+            </Pressable>
+
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </>
+  );
+}
 
 export default function Home() {
 
@@ -17,8 +54,8 @@ export default function Home() {
   const [application, setApplication] = useState("");
   const [prayer, setPrayer] = useState("");
   const [status, setStatus] = useState("");
+  const [question, setQuestion] = useState("")
   const [type, setType] = useState("");
-  const [entry, setEntry] = useState([]);
   const [key, setKey] = useState(0);
   const [currentStatus, setCurrentStatus] = useState("");
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -28,10 +65,9 @@ export default function Home() {
     month: months[todayDate.getMonth()],
   };
   const todayVerse = data[today.month][today.day-1]["verse"];
+  const [visibleAddModal, setVisibleAddModal] = useState(false);
 
-
-  const handleButton = (date, title, scripture, observation, application, prayer, status, type, itemId, currentStatus)  => {
-
+  const handleButton = (date, title, question, scripture, observation, application, prayer, status, type, itemId, currentStatus)  => {
     if (date == "" && scripture == "" && observation == "" && application == "" && prayer == "" && title == ""){
       return setVisible(false);
     } 
@@ -44,8 +80,8 @@ export default function Home() {
     if(currentStatus == "add"){
       db.transaction((tx) => {
         tx.executeSql(
-          'INSERT INTO entries (date, title, scripture, observation, application, prayer, status, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?);',
-          [date, title, scripture, observation, application, prayer, status, type],
+          'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
+          [date, title, question, scripture, observation, application, prayer, status, type],
           (tx, results) => {
             console.log("Success!!!");
             fetchData();
@@ -61,11 +97,10 @@ export default function Home() {
 
     if(currentStatus == "ongoing"){
       //updating the entry
-      // if(date != entry.date ||  scripture != entry.scripture || observation != entry.observation || application != entry.application || prayer != entry.prayer || status != entry.status){
         db.transaction((tx) => {
           tx.executeSql(
-            'UPDATE entries SET date = ?, title = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ? WHERE id = ?;',
-            [date, title, scripture, observation, application, prayer, status, itemId ],
+            'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ? WHERE id = ?;',
+            [date, title, question, scripture, observation, application, prayer, status, itemId ],
             (_, result) => {
               console.log('Data updated successfully');
             },
@@ -88,7 +123,7 @@ export default function Home() {
     switch(valueFor){
       case 'date': setDate(text) ;break;
       case 'title': setTitle(text) ;break;
-
+      case 'question': setQuestion(text) ;break;
       case 'scripture': setScripture(text) ;break;
       case 'observation': setObservation(text) ;break;
       case 'application': setApplication(text) ;break;
@@ -101,12 +136,12 @@ export default function Home() {
   const cleanStates = () =>{
     setDate("");
     setTitle("");
+    setQuestion("");
     setScripture("");
     setObservation("");
     setApplication("");
     setPrayer("");
-    setStatus(""),
-    setEntry([]);
+    setStatus("");
   }
 
   //for showing the SELECTED ENTRY
@@ -121,21 +156,25 @@ export default function Home() {
     setApplication(item.application);
     setPrayer(item.prayer);
     setStatus(item.status);
-    setEntry(item);
   };
 
   const handleAddButton = (type) => {
- 
     if(type == "today"){
       const currentDate = todayDate.toDateString();
       setDate(currentDate);
       setScripture(todayVerse);
-    }   
+      setType("journal");
+    } else if(type == "journal"){
+      setType("journal");
+    } else if(type == "opm"){
+      setType("opm");
+    }
     setCurrentStatus("add");
     setStatus("#F7CB73");
-    setType("journal");
     setVisible(true);
   }
+
+
   // for deleting the entry
   const handleDelete = (id) => {
     db.transaction((tx) => {
@@ -190,7 +229,7 @@ export default function Home() {
             // Table doesn't exist, create it
             db.transaction((tx) => {
               tx.executeSql(
-                'CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, title TEXT, scripture TEXT, observation TEXT, application TEXT, prayer TEXT, status TEXT, type TEXT);',
+                'CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, title TEXT, question TEXT, scripture TEXT, observation TEXT, application TEXT, prayer TEXT, status TEXT, type TEXT);',
                 [],
                 (_, result) => {
                   console.log('Table created successfully');
@@ -239,6 +278,10 @@ export default function Home() {
     setDate(item);
   }
 
+  const handleVisibleAddModal = () => {
+    setVisibleAddModal(!visibleAddModal);
+  }
+
   useEffect(() => {
     setupDatabase();
     fetchData();
@@ -250,9 +293,9 @@ export default function Home() {
     <View style={[styles.homeContainer, styles.flex]}>
 
       {/*Todays passage*/}
-      <View style={[{width: "90%", height: "20%", top: 0, position: "absolute", marginTop: 20}]}>
+      <View style={[{width: "90%", height: "20%", top: 0, position: "absolute", marginTop: 30}]}>
       <Text style={{padding: 10, fontSize: 20, textAlign: "center"}}>Journal 2023</Text>
-        <View style={styles.passageToday}>
+        <View style={[styles.passageToday, {marginBottom:5}]}>
           <Text style={{fontSize: 17}}>Today's Passage</Text>
           <Text style={{fontSize: 17}}>{today.month + " " + today.day}</Text>
         </View>
@@ -293,7 +336,7 @@ export default function Home() {
 
 
       <View style={styles.navbar}>
-        <Pressable onPress={ ()=>handleAddButton() } style={styles.addEntry}>
+        <Pressable onPress={ ()=>handleVisibleAddModal() } style={styles.addEntry}>
         <Image style={{width: 30, height: 30,}} source={require("../assets/write.png")}/>
         </Pressable>
       </View>
@@ -304,12 +347,14 @@ export default function Home() {
     </View>
 
     {/*ADD ITEM MODAL*/}
-    <Entry visible={visible} handleButton={handleButton} handleChangeText={handleChangeText} date={date} title={title} scripture={scripture} observation={observation} application={application} prayer={prayer} status={status} type={type} itemId={key}
+    <Entry visible={visible} handleButton={handleButton} handleChangeText={handleChangeText} date={date} title={title} question={question} scripture={scripture} observation={observation} application={application} prayer={prayer} status={status} type={type} itemId={key}
     handleScripture={handleChangeScripture} currentStatus={currentStatus} handleChangeDate={handleChangeDate}/>
 
     {/*For displaying the component*/}
-    <Entry visible={visibleDisplay} handleButton={handleButton} handleChangeText={handleChangeText} date={date} title={title} scripture={scripture} observation={observation} application={application} prayer={prayer} status={status} type={type} handleDelete={handleDelete} itemId={key} handleScripture={handleChangeScripture}
+    <Entry visible={visibleDisplay} handleButton={handleButton} handleChangeText={handleChangeText} date={date} title={title} question={question} scripture={scripture} observation={observation} application={application} prayer={prayer} status={status} type={type} handleDelete={handleDelete} itemId={key} handleScripture={handleChangeScripture}
     statusColor={handleStatusColor} currentStatus={currentStatus} handleChangeDate={handleChangeDate}/>
+
+      <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal}/>
 
     </>
   )
@@ -332,12 +377,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row'
   },
   btn:{
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'black',
-    padding: 10,
+    borderBottomWidth:1,
+    borderBottomColor: 'black',
+    padding: 15,
     alignItems: 'center',
-    backgroundColor: 'cyan',
     margin: 5,
   },
   btn2:{
@@ -361,7 +404,7 @@ const styles = StyleSheet.create({
     height: "60%",
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 60,
+    marginTop: 90,
   },
   entry:{
     borderColor: "#0c0c0c",
@@ -387,8 +430,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     position: "absolute",
     marginBottom: 10,
-
-    alignItems: 'flex-end',
+    alignItems: 'center',
     justifyContent: 'center',
   },
 })
