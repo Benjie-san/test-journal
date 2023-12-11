@@ -1,23 +1,92 @@
-import { StyleSheet, Text, View, Modal, TextInput, Pressable, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, TouchableWithoutFeedback} from 'react-native';
+import { StyleSheet, Text, View, Modal, TextInput, Pressable, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Share} from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import data from '../constants/journal-data.json'
 import React, {useState, useEffect} from 'react';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
+const DeleteConfirmationModal = ({visible, deleteEntry, id, handleModal}) => {
+  return(
+    <>
+      <Modal animationType="fade" transparent={true} visible={visible}>
 
-const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor}) => {
-  const menuItems = ["Share", "Delete", "Details", "Mark as Done"];
+        <TouchableOpacity
+          style={[styles.flex,{flex: 1, backgroundColor: '#000000aa'}]}
+          onPress={handleModal}
+        >
+          <View style={{
+              backgroundColor: "#fff", 
+              width: "50%", 
+              height:"20%",
+              padding: 20,
+              borderRadius: 10,
+              alignItems:'center',
+              flexDirection:'column',
+              justifyContent:"center",
+          }}>
+
+            <Text style={{textAlign: 'center'}}>Are you sure want to delete this Enrty?</Text>
+            <View style={{
+              margin:5,
+              alignItems:'center',
+              flexDirection:'row'}}>
+              <Pressable style={[styles.deleteButtons, {borderColor: "#000", borderWidth: 1,}]} onPress={handleModal}>
+                <Text>Cancel</Text>
+              </Pressable>
+              <Pressable  style={[styles.deleteButtons, {backgroundColor: 'red',}]} onPress={() => deleteEntry(id)}>
+                <Text style={{color: 'white'}}>Delete</Text>
+              </Pressable>
+            </View>
+          </View>
+        
+        </TouchableOpacity>
+      </Modal>
+    </>
+  );
+}
+
+const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor, entry}) => {
+  const [deleteModal, setDeleteModal] = useState(false);
+  const menuItems = ["Share", "Delete", "Mark as Done"];
+
+  const handleDeleteModal = () => {
+    setDeleteModal(!deleteModal);
+  } 
+
+  const onShare = async () => {
+    try {
+      const result = await Share.share({
+        message:
+          `Date:\n ${entry.date}\n Scripture:\n ${entry.scripture}\n Title:\n ${entry.title}\n Observation:\n ${entry.observation}\n Application:\n ${entry.application}\n Prayer:\n ${entry.prayer}\n `,
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (error) {
+      Alert.alert(error.message);
+    }
+  };
+  
 
   const handlePressBtn = (item) =>{
-    console.log(item);
     if(item == "Delete"){
-      deleteEntry(id);
+      handleDeleteModal();
     }
     else if(item == "Mark as Done"){
       statusColor("#077E8C");
       alert("Marked as done")
     }
-    handleCloseModal();
+    else if(item == "Share"){
+      onShare();
+    }
   }
+
+
   return(
     <>
       <Modal animationType='fade' visible={visible} transparent={true}>
@@ -28,21 +97,21 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor}) =>
                 menuItems.map((item, index) => 
                   (
                   <TouchableOpacity 
-                  style={{
-                    fontSize: 50, 
-                    padding: 10, 
-                    alignItems:'flex-end', 
-                    borderBottomColor: '#ccc', 
-                    borderBottomWidth: 1,
-                  }}  
-                  key={index} 
-                  onPress={() => handlePressBtn(item)} > 
+                    style={{
+                      fontSize: 50, 
+                      padding: 10, 
+                      alignItems:'flex-end', 
+                      borderBottomColor: '#ccc', 
+                      borderBottomWidth: 1,
+                    }}  
+                    key={index} 
+                    onPress={() => handlePressBtn(item)} 
+                  > 
                     <View style={{borderBottomColor: '#ccc'}}>                   
                       <Text styles={{color: 'black', fontSize: 20,}}>
                         {item}
                       </Text>
                     </View>
- 
                   </TouchableOpacity>
                   )
                 )
@@ -50,30 +119,85 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor}) =>
           </View>
         </TouchableOpacity>
       </Modal>
+
+      <DeleteConfirmationModal visible={deleteModal} deleteEntry={deleteEntry} id={id} handleModal={handleDeleteModal} />
     </>
   );
 }
 
-export default function Entry({visible, handleButton, handleChangeText, date, scripture, observation, application, prayer, status, type, handleDelete, itemId, handleScripture, currentStatus, statusColor}) {
+export default function Entry({visible, handleButton, handleChangeText, date, title, scripture, observation, application, prayer, status, type, handleDelete, itemId, handleScripture, currentStatus, statusColor, handleChangeDate}) {
 
-  const [scriptureModalVisible, setScriptureModalVisible] = useState(false)
+  const [scriptureModalVisible, setScriptureModalVisible] = useState(false);
+  const [dateModalVisible, setDateModalVisible] = useState(false)
   const [month, setMonth] = useState("");
   const [day, setDay] = useState("");
+  const [errorColor, setErrorColor] = useState("#ffffffaa")
   const months = ["Select Month","January","February","March","April","May","June","July","August","September","October","November","December"];
   const [menuVisible, setMenuVisible] = useState(false);
-
-  const handleBack = () =>{
+  const [entryDate, setEntryDate] = useState(new Date());
+  const handleScriptureModal = () =>{
     setScriptureModalVisible(!scriptureModalVisible);
+  }
+
+  const handleDateModal = () => {
+    setDateModalVisible(!dateModalVisible)
   }
 
   const handleMenuVisible = ()=>{
     setMenuVisible(!menuVisible);
   }
 
+  const daysInMonth = (month, year) => {
+    return new Date(year, month, 0).getDate();
+  }
+  
+  const handleChangeDay = (day) =>{
+    let date = new Date();
+    let year = date.getFullYear();
+    let monthValue = months.indexOf(month);
+    let num = daysInMonth(monthValue, year);
+    if(month !== "" && month !== "Select Month"){
+      if(day > 0 && day <= num){
+        setDay(day - 1);
+        setErrorColor("#88ff4d");
+      }else{
+        setErrorColor("#ff3333");
+        handleScripture("");
+      }
+    }else{
+      setErrorColor("#ff3333");
+    }
+  }
+
+  const handleBackButton = () =>{
+    handleButton(date, title, scripture, observation, application, prayer, status, type, itemId, currentStatus);
+    setErrorColor("#fff");
+    handleScriptureModal();
+  }
+
+  const onChangeDate = ({type}, selectedDate) =>{
+    if(type == "set"){
+      
+      setDateModalVisible(false);
+      const currentDate = selectedDate;
+      setEntryDate(currentDate);
+      handleChangeDate(currentDate.toDateString());
+    } else{
+      handleDateModal();
+    }
+  }
+
+  const entryToBeShared = {
+    date: date,
+    scripture: scripture,
+    title: title,
+    observation: observation,
+    application: application,
+    prayer: prayer,
+  }
   useEffect(() => {
     
     const handleFetchVerse = () => {
-  
       const verse = data[month][day]["verse"];
       handleScripture(verse);
     }
@@ -91,91 +215,116 @@ export default function Entry({visible, handleButton, handleChangeText, date, sc
 
   return (
     <>
-    <Modal visible={visible}>
+    <Modal visible={visible} onRequestClose={()=> handleBackButton()}>
       {/*HEADER*/}
       <View style={styles.header}> 
 
-        <Pressable style={[styles.border, styles.btn]} onPress={ ()=>handleButton(date, scripture, observation, application, prayer, status, type, itemId, currentStatus) }>
+        <Pressable style={[styles.border, styles.btn]} onPress={()=> handleBackButton()}>
           <Image style={{width: 20, height: 20, transform:[{rotate: '180deg'}],}} source={require("../assets/arrow-right.png")}/>
         </Pressable>
 
         <Text style={{fontSize: 20}}>Journal Entry</Text>
 
-        <Pressable style={[styles.border, styles.btn]} onPress={handleMenuVisible}>
+        {
+        currentStatus != "add" ? 
+        (<Pressable style={[styles.border, styles.btn]} onPress={handleMenuVisible}>
           <Image style={{width:25, height: 25,}} source={require("../assets/three-dots-menu.png")}/>
-        </Pressable>
+        </Pressable>)
+        : (<View></View>)
+        }
 
       </View>
       
       {/*MODAL FOR HEADER MENU*/}
-      <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={itemId} statusColor={statusColor} />
+      <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={itemId} statusColor={statusColor} entry={entryToBeShared} />
 
       {/*FORMS*/}
       <KeyboardAvoidingView behavior='height' style={[styles.modal]}>
         <ScrollView>
           <View style={[styles.flex]}> 
         
-        <View style={styles.touchableContainer}>
-          <View style={styles.inputSubContainer}>
-            <Text>Date</Text>
-            {/* <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, 'date') } value={date} />        */}
-            <TouchableOpacity style={styles.touchable}>
-              <Text>{date}</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.inputSubContainer}>
-            <Text>Scripture</Text>
-            {/* <TextInput style={styles.input} editable  onPress={handlePress} onChangeText={ text => handleChangeText(text, "scripture") } value={scripture} /> */}
-            <TouchableOpacity style={styles.touchable} onPress={handleBack}> 
-              <Text>{scripture}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {scriptureModalVisible == true ?
-          (
-            <>
-            <View style={styles.scriptureSelector}>
-              <View style={styles.scripturePicker} >
-                <Picker style={{width: "100%"}} mode="dropdown" selectedValue={month} onValueChange={ item => setMonth(item)} >
-                  {
-                    months.map( (item, index) => {
-                      return <Picker.Item label={item} value={item} key={index}/>
-                    })
-                  }
-                </Picker>
+            <View style={styles.touchableContainer}>
+              
+              <View style={styles.inputSubContainer}>
+                <Text>Date:</Text>
+                <Pressable style={styles.touchable} onPress={handleDateModal}>
+                  <TextInput
+                    style={{color: 'black'}}
+                    value={date}
+                    onChangeText={handleChangeDate}
+                    editable={false}
+                  />
+                </Pressable>
               </View>
-            
-              <TextInput style={styles.scriptureDay} placeholder='Day' onChangeText={ text => setDay(text - 1)} />
+
+              {/*DATE MODAL?*/}
+              {
+                dateModalVisible &&
+                (
+                  <DateTimePicker 
+                    mode="date" 
+                    display="spinner" 
+                    value={entryDate}
+                    onChange={onChangeDate}
+                  />
+          
+                ) 
+              }
+
+              <View style={styles.inputSubContainer}>
+                <Text>Scripture:</Text>
+                <TouchableOpacity style={styles.touchable} onPress={handleScriptureModal}> 
+                  <Text>{scripture}</Text>
+                </TouchableOpacity>
+              </View>
+
             </View>
-            </>
-          )
-        : null}
 
-        
-            
-        <View style={styles.inputContainer}>
-          <Text>Observation</Text>
-          <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "observation") } value={observation}  multiline={true} />
-        </View>
+              {/*SCRIPTURE MODAL?*/}
+              {scriptureModalVisible == true ?
+                (
+                  <>
+                  <View style={styles.scriptureSelector}>
+                    <View style={styles.scripturePicker} >
+                      <Picker style={{width: "100%"}} mode="dropdown" selectedValue={month} onValueChange={ item => setMonth(item)} >
+                        {
+                          months.map( (item, index) => {
+                            return <Picker.Item label={item} value={item} key={index}/>
+                          })
+                        }
+                      </Picker>
+                    </View>
+                  
+                    <TextInput maxLength={2} style={[styles.scriptureDay,{borderColor: errorColor, borderWidth: 2}]} placeholder='Day' onChangeText={text => handleChangeDay(text)} />
+                  </View>
+                  </>
+                )
+                : null
+              }
 
-        <View style={styles.inputContainer}>
-          <Text>Application</Text>
-          <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
-        </View>
 
-        <KeyboardAvoidingView behavior='padding' style={styles.inputContainer} >
-          <Text>Prayer</Text>
-          <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
-        </KeyboardAvoidingView>
-{/* 
-        
-        { 
-          status == "ongoing" ? <Pressable style={[styles.border, styles.btn2]} onPress={ ()=> handleDelete(itemId) }><Text>Delete</Text></Pressable> : null
-        }
-       */}
+            <View style={styles.inputContainer}>
+              <Text>Title:</Text>
+              <TextInput style={[styles.input, {minHeight: 50, maxHeight: 100}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text>Observation:</Text>
+              <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "observation") } value={observation}  multiline={true} />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text>Application:</Text>
+              <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
+            </View>
+
+            <KeyboardAvoidingView behavior='padding' style={styles.inputContainer} >
+              <Text>Prayer:</Text>
+              <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
+            </KeyboardAvoidingView>
+
           </View>
+
         </ScrollView>
       </KeyboardAvoidingView>
         
@@ -303,5 +452,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 50,
     right: 10,
+  },
+  deleteButtons:{
+    padding: 15,
+    borderRadius: 10,
+    margin: 5,
   },
 })

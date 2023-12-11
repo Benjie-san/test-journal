@@ -750,11 +750,16 @@
     },
     {
       "date": 29,
-      "verse": "2 Kings 20:1-111 Peter 5:1-14",
+      "verse": "2 Kings 20:1-111",
       "completion": false
     },
     {
       "date": 30,
+      "verse": "Peter 5:1-14",
+      "completion": false
+    },
+    {
+      "date": 31,
       "verse": "Daniel 9:20-23",
       "completion": false
     }
@@ -903,6 +908,11 @@
     {
       "date": 29,
       "verse": "1 Peter 4:1-11",
+      "completion": false
+    }, 
+    {
+      "date": 30,
+      "verse": "Hebrews 13:1-19",
       "completion": false
     }
   ],
