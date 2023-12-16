@@ -151,11 +151,13 @@ export default function Home() {
     setKey(item.id); 
     setDate(item.date);
     setTitle(item.title);
+    setTitle(item.question);
     setScripture(item.scripture);
     setObservation(item.observation);
     setApplication(item.application);
     setPrayer(item.prayer);
     setStatus(item.status);
+    setType(item.type);
   };
 
   const handleAddButton = (type) => {
@@ -318,6 +320,7 @@ export default function Home() {
             <FlatList
               style={{width:"100%",}}
               data={notes}
+              inverted={true}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
               
