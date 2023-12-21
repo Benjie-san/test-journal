@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View, Modal, TextInput, Pressable, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Share} from 'react-native';
+import { StyleSheet, Text, View, TextInput, Pressable, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Share} from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import data from '../constants/journal-data.json'
 import React, {useState, useEffect} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Modal from "react-native-modal";
 
 const DeleteConfirmationModal = ({visible, deleteEntry, id, handleModal}) => {
   return(
@@ -44,19 +45,25 @@ const DeleteConfirmationModal = ({visible, deleteEntry, id, handleModal}) => {
   );
 }
 
-const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor, entry}) => {
+const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor, status, entry, type}) => {
   const [deleteModal, setDeleteModal] = useState(false);
-  const menuItems = ["Share", "Delete", "Mark as Done"];
 
   const handleDeleteModal = () => {
     setDeleteModal(!deleteModal);
   } 
 
   const onShare = async () => {
+    let message = "";
+    if(type == "journal"){
+      message =  `Date:\n${entry.date}\n\nScripture:\n${entry.scripture}\n\nTitle:\n${entry.title}\n\nObservation:\n${entry.observation}\n\nApplication:\n${entry.application}\n\nPrayer:\n${entry.prayer}\n`
+    }else if(type == "opm"){
+      message =  `Date:\n${entry.date}\n\nOPM Passage:\n${entry.scripture}\n\nTheme:\n${entry.title}\n\nQuestion:\n${entry.question}\n\nKey Points:\n${entry.observation}\n\nRecommendations:\n${entry.application}\n\nReflection/Realization:\n${entry.prayer}\n\n`
+    } else if(type == "sermon"){
+      message =  `Date:\n${entry.date}\n\nText:\n${entry.scripture}\n\nTheme:\n${entry.title}\n\nQuestion:\n${entry.question}\n\nSermon Points:\n${entry.observation}\n\nRecommendations:\n${entry.application}\n\nReflection:\n${entry.prayer}\n\n`
+    }
     try {
       const result = await Share.share({
-        message:
-          `Date:\n ${entry.date}\n Scripture:\n ${entry.scripture}\n Title:\n ${entry.title}\n Observation:\n ${entry.observation}\n Application:\n ${entry.application}\n Prayer:\n ${entry.prayer}\n `,
+        message: message,
       });
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
@@ -77,13 +84,18 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor, ent
     if(item == "Delete"){
       handleDeleteModal();
     }
-    else if(item == "Mark as Done"){
+    else if(item == "#F7CB73"){
       statusColor("#077E8C");
-      alert("Marked as done")
+      alert("Marked as done");
+    }
+    else if(item == "#077E8C"){
+      statusColor("#F7CB73");
+      alert("Unmarked as done");
     }
     else if(item == "Share"){
       onShare();
     }
+    handleCloseModal();
   }
 
 
@@ -92,30 +104,37 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor, ent
       <Modal animationType='fade' visible={visible} transparent={true}>
         <TouchableOpacity style={{flex: 1}} onPress={handleCloseModal}>
           <View style={styles.menuPopup} >
-            
-              {
-                menuItems.map((item, index) => 
-                  (
-                  <TouchableOpacity 
-                    style={{
-                      fontSize: 50, 
-                      padding: 10, 
-                      alignItems:'flex-end', 
-                      borderBottomColor: '#ccc', 
-                      borderBottomWidth: 1,
-                    }}  
-                    key={index} 
-                    onPress={() => handlePressBtn(item)} 
-                  > 
-                    <View style={{borderBottomColor: '#ccc'}}>                   
-                      <Text styles={{color: 'black', fontSize: 20,}}>
-                        {item}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                  )
-                )
-              }
+
+            <TouchableOpacity 
+              style={styles.menuItems}  
+              onPress={() => handlePressBtn("Share")} 
+            > 
+              <View style={{flexDirection: 'row', alignItems: "center"}}>
+                <Image style={{width: 20, height: 20, marginRight: 10}} source={require("../assets/share.png")}/>                   
+                <Text style={{fontSize: 18}}>Share</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.menuItems}  
+              onPress={() => handlePressBtn("Delete")} 
+            > 
+              <View  style={{flexDirection: 'row', alignItems: "center"}}>   
+                <Image style={{width: 25, height: 25, marginRight: 10}} source={require("../assets/trash.png")}/>                  
+                <Text style={{color: '#FA5252', fontSize: 18}}>Delete</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.menuItems}  
+              onPress={() => handlePressBtn(status)} 
+            > 
+              <View  style={{flexDirection: 'row', alignItems: "center"}}> 
+                <Image style={{width: 25, height: 25, marginRight: 10}} source={require("../assets/check.png")}/>                    
+                <Text style={{fontSize: 18}}>{status == "#077E8C" ? "Unmark as done" : "Mark as done"}</Text>
+              </View>
+            </TouchableOpacity>
+
           </View>
         </TouchableOpacity>
       </Modal>
@@ -125,19 +144,22 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor, ent
   );
 }
 
-export default function Entry({visible, handleButton, handleChangeText, date, title, question, scripture, observation, application, prayer, status, type, handleDelete, itemId, handleScripture, currentStatus, statusColor, handleChangeDate}) {
+export default function Entry({visible, handleButton, handleChangeText, date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, handleDelete, itemId, handleScripture, currentStatus, statusColor, handleChangeDate, modifyDate, currentEntry, update}) {
 
   const [scriptureModalVisible, setScriptureModalVisible] = useState(false);
   const [dateModalVisible, setDateModalVisible] = useState(false)
   const [month, setMonth] = useState("");
   const [day, setDay] = useState("");
-  const [errorColor, setErrorColor] = useState("#ffffffaa")
+  const [errorColor, setErrorColor] = useState("transparent")
   const months = ["Select Month","January","February","March","April","May","June","July","August","September","October","November","December"];
   const [menuVisible, setMenuVisible] = useState(false);
   const [entryDate, setEntryDate] = useState(new Date());
-  const handleScriptureModal = () =>{
-    setScriptureModalVisible(!scriptureModalVisible);
-  }
+
+  const currentDate = new Date(modifiedDate).toISOString();
+  const currentDay = new Date(currentDate).toLocaleDateString();
+  const currentTime = new Date(currentDate).toLocaleTimeString();
+
+  const [editMode, setEditMode] = useState(false)
 
   const handleDateModal = () => {
     setDateModalVisible(!dateModalVisible)
@@ -160,7 +182,8 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
       if(day > 0 && day <= num){
         setDay(day - 1);
         setErrorColor("#88ff4d");
-      }else{
+      }
+      else{
         setErrorColor("#ff3333");
         handleScripture("");
       }
@@ -170,9 +193,14 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
   }
 
   const handleBackButton = () =>{
-    handleButton(date, title, question, scripture, observation, application, prayer, status, type, itemId, currentStatus);
+    modifyDate()
+    handleButton();
     setErrorColor("#fff");
-    handleScriptureModal();
+    setScriptureModalVisible(false);
+  }
+
+  const handleEditMode = () => {
+    setEditMode(!editMode)
   }
 
   const onChangeDate = ({type}, selectedDate) =>{
@@ -191,10 +219,31 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
     date: date,
     scripture: scripture,
     title: title,
+    question: question,
     observation: observation,
     application: application,
     prayer: prayer,
   }
+
+  useEffect(() => {
+    if(editMode == true  && currentStatus == "ongoing"){
+      if(currentEntry.date !== date || currentEntry.scripture !== scripture || currentEntry.title !== title || currentEntry.question !== question || currentEntry.observation !== observation || currentEntry.application !== application || currentEntry.prayer !== prayer ){
+        modifyDate(new Date().toString());
+        update(date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, itemId, currentStatus);
+        currentEntry.date = date;
+        currentEntry.scripture = scripture;
+        currentEntry.title = title;
+        currentEntry.question = question;
+        currentEntry.observation = observation;
+        currentEntry.application = application;
+        currentEntry.prayer = prayer;
+        currentEntry.modifiedDate = modifiedDate;
+      }
+    }
+  
+  }, [date, title, question, scripture, observation, application, prayer, status, type, itemId, currentStatus, currentEntry, modifiedDate, editMode])
+  
+
   useEffect(() => {
     
     const handleFetchVerse = () => {
@@ -204,18 +253,32 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
     if(month !== '' && day !== ''){
       if(month != "Select Month"){
         if(day >= 0){
-          handleFetchVerse();
+          const interval = setInterval( ()=>{
+            handleFetchVerse();
+          }, 1000);
+          return () => clearInterval(interval);
+          
         }
       }else{
         handleScripture("");
       }
+      setScriptureModalVisible(false);
+      
     }
   }, [month, day])
   
 
   return (
     <>
-    <Modal visible={visible} onRequestClose={()=> handleBackButton()}>
+    <Modal 
+      coverScreen={true} 
+      isVisible={visible}
+      onBackButtonPress={ ()=> handleBackButton() }
+      animationIn="slideInRight"
+      animationOut="slideOutLeft"
+      
+      style={{flex:1, margin: 0}}
+    >
       {/*HEADER*/}
       <View style={styles.header}> 
 
@@ -223,24 +286,60 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
           <Image style={{width: 20, height: 20, transform:[{rotate: '180deg'}],}} source={require("../assets/arrow-right.png")}/>
         </Pressable>
 
-        <Text style={{fontSize: 20}}>{type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
+        <Text style={{fontSize: 20}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
 
-        {
-        currentStatus != "add" ? 
-        (<Pressable style={[styles.border, styles.btn]} onPress={handleMenuVisible}>
-          <Image style={{width:25, height: 25,}} source={require("../assets/three-dots-menu.png")}/>
-        </Pressable>)
+        {currentStatus != "add" ? 
+        (
+        <View style={{flexDirection: 'row', alignItems: "center"}}>
+          <Pressable style={[styles.btn]} onPress={handleEditMode}>
+            <Image style={{width:25, height: 25,}} source={require("../assets/edit.png")}/>
+          </Pressable>
+
+          <Pressable style={[styles.btn]} onPress={handleMenuVisible}>
+            <Image style={{width:25, height: 25,}} source={require("../assets/three-dots-menu.png")}/>
+          </Pressable>
+        </View>
+    
+        )
         : (<View></View>)
         }
 
       </View>
       
       {/*MODAL FOR HEADER MENU*/}
-      <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={itemId} statusColor={statusColor} entry={entryToBeShared} />
+      <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={itemId} statusColor={statusColor} status={status} entry={entryToBeShared} type={type}/>
 
       {/*FORMS*/}
       <KeyboardAvoidingView behavior='height' style={[styles.modal]}>
+      { currentStatus == "ongoing" ? !editMode ? (
+        <View 
+        style={{
+          flex:1,
+          width: '100%',
+          height: '100%',
+          zIndex: 2,
+          backgroundColor: 'transparent',
+          position: "absolute",
+        }}></View>
+
+      ): null :null}
+      
         <ScrollView>
+        {currentStatus == 'ongoing' ?
+        editMode 
+        ? 
+        (<View style={[styles.editModeContainer]}>
+        <Text>Editing</Text>
+        <Text></Text>
+        </View>) 
+        :
+        (<View style={[styles.editModeContainer]}>
+          <Text>{currentDay}</Text>
+          <Text>{currentTime}</Text>
+        </View>)
+        :
+        null}
+          
           <View style={[styles.flex]}> 
         
             <View style={styles.touchableContainer}>
@@ -272,10 +371,16 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
               }
 
               <View style={styles.inputSubContainer}>
-                <Text>{scripture === "Sermon Notes" ? "Text:": type == "opm" ? 'OPM Passage:' : 'Scripture:' }</Text>
-                <TouchableOpacity style={styles.touchable} onPress={handleScriptureModal}> 
-                  <Text>{scripture}</Text>
-                </TouchableOpacity>
+                <Text>{type === "sermon" ? "Text:": type == "opm" ? 'OPM Passage:' : 'Scripture:' }</Text>
+                { type === "sermon" ?
+                  <TextInput style={styles.touchable} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/> 
+                  : type == "opm" ?
+                  <TextInput style={styles.touchable} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
+                  :
+                  <TouchableOpacity style={styles.touchable} onPress={() => setScriptureModalVisible(true)}> 
+                    <Text>{scripture}</Text>
+                  </TouchableOpacity>
+                }
               </View>
 
             </View>
@@ -304,7 +409,7 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
 
 
             <View style={styles.inputContainer}>
-              <Text>{scripture === "Sermon Notes" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
+              <Text>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
               <TextInput style={[styles.input, {minHeight: 50, maxHeight: 100}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
             </View>
 
@@ -318,17 +423,17 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
             }
 
             <View style={styles.inputContainer}>
-              <Text>{scripture === "Sermon Notes" ? "Sermon Point:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
+              <Text>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
               <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "observation") } value={observation}  multiline={true} />
             </View>
 
             <View style={styles.inputContainer}>
-              <Text>{scripture === "Sermon Notes" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
+              <Text>{type === "sermon" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
               <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
             </View>
 
             <KeyboardAvoidingView behavior='padding' style={styles.inputContainer} >
-              <Text>{scripture === "Sermon Notes" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
+              <Text>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
               <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
             </KeyboardAvoidingView>
 
@@ -461,9 +566,27 @@ const styles = StyleSheet.create({
     top: 50,
     right: 10,
   },
+  menuItems:{
+    fontSize: 50, 
+    padding: 10, 
+    alignItems:'flex-end', 
+    borderBottomColor: '#ccc', 
+    borderBottomWidth: 1,
+  },
   deleteButtons:{
     padding: 15,
     borderRadius: 10,
     margin: 5,
+  },
+  editModeContainer:{
+    width: "100%", 
+    height: '5%', 
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    position: 'absolute',
+    paddingLeft: 10,
+    paddingRight: 10,
+    paddingBottom: 3,
   },
 })
