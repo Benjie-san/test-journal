@@ -4,15 +4,23 @@ import data from '../constants/journal-data.json'
 import React, {useState, useEffect} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
+import { AntDesign } from '@expo/vector-icons'; 
 
 const DeleteConfirmationModal = ({visible, deleteEntry, id, handleModal}) => {
   return(
     <>
-      <Modal animationType="fade" transparent={true} visible={visible}>
+      <Modal
+        isVisible={visible}
+        coverScreen={true} 
+        style={{flex:1, margin: 0}}
+        animationIn="fadeIn"
+        animationOut="fadeOut"
+        onBackdropPress={() => handleModal()}
+        onBackButtonPress={handleModal}
+      >
 
-        <TouchableOpacity
-          style={[styles.flex,{flex: 1, backgroundColor: '#000000aa'}]}
-          onPress={handleModal}
+        <View
+          style={[styles.flex]}
         >
           <View style={{
               backgroundColor: "#fff", 
@@ -38,8 +46,7 @@ const DeleteConfirmationModal = ({visible, deleteEntry, id, handleModal}) => {
               </Pressable>
             </View>
           </View>
-        
-        </TouchableOpacity>
+        </View>
       </Modal>
     </>
   );
@@ -84,12 +91,12 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor, sta
     if(item == "Delete"){
       handleDeleteModal();
     }
-    else if(item == "#F7CB73"){
-      statusColor("#077E8C");
+    else if(item == "#fff"){
+      statusColor("#8CFF31");
       alert("Marked as done");
     }
-    else if(item == "#077E8C"){
-      statusColor("#F7CB73");
+    else if(item == "#8CFF31"){
+      statusColor("#fff");
       alert("Unmarked as done");
     }
     else if(item == "Share"){
@@ -98,11 +105,18 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor, sta
     handleCloseModal();
   }
 
-
   return(
     <>
-      <Modal animationType='fade' visible={visible} transparent={true}>
-        <TouchableOpacity style={{flex: 1}} onPress={handleCloseModal}>
+      <Modal 
+      isVisible={visible}
+      style={{margin: 0}}
+      animationIn="fadeIn"
+      animationOut="fadeOut"
+      onBackButtonPress={handleCloseModal}
+      onBackdropPress={handleCloseModal}
+      backdropOpacity={0}
+      >
+        <View style={{flex: 1}} >
           <View style={styles.menuPopup} >
 
             <TouchableOpacity 
@@ -136,7 +150,7 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor, sta
             </TouchableOpacity>
 
           </View>
-        </TouchableOpacity>
+        </View>
       </Modal>
 
       <DeleteConfirmationModal visible={deleteModal} deleteEntry={deleteEntry} id={id} handleModal={handleDeleteModal} />
@@ -193,6 +207,7 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
   }
 
   const handleBackButton = () =>{
+    setEditMode(false);
     modifyDate()
     handleButton();
     setErrorColor("#fff");
@@ -227,7 +242,7 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
 
   useEffect(() => {
     if(editMode == true  && currentStatus == "ongoing"){
-      if(currentEntry.date !== date || currentEntry.scripture !== scripture || currentEntry.title !== title || currentEntry.question !== question || currentEntry.observation !== observation || currentEntry.application !== application || currentEntry.prayer !== prayer ){
+      if(currentEntry.date !== date || currentEntry.scripture !== scripture || currentEntry.title !== title || currentEntry.question !== question || currentEntry.observation !== observation || currentEntry.application !== application || currentEntry.prayer !== prayer || currentEntry.status !== status ){
         modifyDate(new Date().toString());
         update(date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, itemId, currentStatus);
         currentEntry.date = date;
@@ -237,6 +252,7 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
         currentEntry.observation = observation;
         currentEntry.application = application;
         currentEntry.prayer = prayer;
+        currentEntry.status = status;
         currentEntry.modifiedDate = modifiedDate;
       }
     }
@@ -266,7 +282,6 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
       
     }
   }, [month, day])
-  
 
   return (
     <>
@@ -275,15 +290,19 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
       isVisible={visible}
       onBackButtonPress={ ()=> handleBackButton() }
       animationIn="slideInRight"
-      animationOut="slideOutLeft"
-      
+      animationOut="slideOutRight"
+      transparent={true}
       style={{flex:1, margin: 0}}
+      hasBackdrop={false}
+      avoidKeyboard={false}
+      propagateSwipe
     >
       {/*HEADER*/}
       <View style={styles.header}> 
 
-        <Pressable style={[styles.border, styles.btn]} onPress={()=> handleBackButton()}>
-          <Image style={{width: 20, height: 20, transform:[{rotate: '180deg'}],}} source={require("../assets/arrow-right.png")}/>
+        <Pressable onPress={()=> handleBackButton()}>
+          {/* <Image style={{width: 20, height: 20, transform:[{rotate: '180deg'}],}} source={require("../assets/arrow-right.png")}/> */}
+          <AntDesign name="close" size={30} color="black" />
         </Pressable>
 
         <Text style={{fontSize: 20}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
@@ -292,7 +311,7 @@ export default function Entry({visible, handleButton, handleChangeText, date, ti
         (
         <View style={{flexDirection: 'row', alignItems: "center"}}>
           <Pressable style={[styles.btn]} onPress={handleEditMode}>
-            <Image style={{width:25, height: 25,}} source={require("../assets/edit.png")}/>
+            <Image style={{width:20, height: 20,}} source={require("../assets/edit.png")}/>
           </Pressable>
 
           <Pressable style={[styles.btn]} onPress={handleMenuVisible}>

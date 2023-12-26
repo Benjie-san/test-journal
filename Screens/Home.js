@@ -1,9 +1,16 @@
+//import for react stuffs
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, Pressable, Image, Modal, AppState } from 'react-native';
 import React, {useEffect, useState, useRef} from 'react';
 import * as SQLite from 'expo-sqlite';
+import * as Notifications from 'expo-notifications';
+
+// import for data
 import data from '../constants/journal-data.json'
 const db = SQLite.openDatabase('new_database_journal_2023.db');
+
+// import for components
 import Entry from './Entry';
+import Navbar from '../components/Navbar'
 
 const AddModal = ({visible, type, handleModal}) => {
   const handlePress = (item) =>{
@@ -46,8 +53,8 @@ const AddModal = ({visible, type, handleModal}) => {
   );
 }
 
-export default function Home() {
-
+export default function Home({navigation}) {
+  
   const [visible, setVisible] = useState(false);
   const [visibleDisplay, setVisibleDisplay] = useState(false);
   const [notes, setNotes] = useState([]);
@@ -64,10 +71,12 @@ export default function Home() {
   const [currentStatus, setCurrentStatus] = useState("");
   const appState = useRef(AppState.currentState)
   const [appCurrentState, setAppCurrentState] = useState(appState.current)
-
+  const [allCount, setAllCount] = useState(0);
+  const [journalCount, setJournalCount] = useState(0);
+  const [opmCount, setOpmCount] = useState(0);
+  const [sermonCount, setSermonCount] = useState(0);
   const lastModified = useRef(new Date());
   const [modifiedDate, setModifiedDate] = useState(lastModified.current.toString());
-
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const todayDate = new Date();
   const today ={
@@ -77,11 +86,23 @@ export default function Home() {
   const todayVerse = data[today.month][today.day-1]["verse"];
   const [visibleAddModal, setVisibleAddModal] = useState(false);
   const [currentEntry, setCurrentEntry] = useState([]);
+  const [isSelected, setIsSelected] = useState(false);
+  const sortButtons = ["All", "Journal", "OPM", "Sermon"];
+  const sortButtonCount = [allCount, journalCount, opmCount, sermonCount];
+  const [currentSortBtn, setCurrentSortBtn] = useState("");
+  const [navButtonSelected, setNavButtonSelected] = useState(false);
 
+  // NAVIGATION FUNCTIONS
+
+  const openBrp = () => {
+    navigation.navigate("BRP");
+  }
+
+  //HANDLE FUNCTIONS
 
   const handleButton = ()  => {
     if(currentStatus == "ongoing"){
-      if(currentEntry.date !== date || currentEntry.scripture !== scripture || currentEntry.title !== title || currentEntry.question !== question || currentEntry.observation !== observation || currentEntry.application !== application || currentEntry.prayer !== prayer){   
+      if(currentEntry.date !== date || currentEntry.scripture !== scripture || currentEntry.title !== title || currentEntry.question !== question || currentEntry.observation !== observation || currentEntry.application !== application || currentEntry.prayer !== prayer || currentEntry.status !== status){   
         updateEntry(date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, key, currentStatus);
         console.log(modifiedDate)
         setVisibleDisplay(false);
@@ -92,16 +113,24 @@ export default function Home() {
         cleanStates();
 
       }
+    } 
+    else if(currentStatus == "today"){
+      console.log('called?');
+        if(title !== '' || question !== '' || observation !== '' || application !== '' || prayer !== ''){
+          saveEntry(date, title, question, scripture, observation, application, prayer, status, type, modifiedDate);
+          
+        }
+        setVisible(false);
+        cleanStates();
     }
     else if(currentStatus == "add"){
+      console.log('called?2');
+
       saveEntry(date, title, question, scripture, observation, application, prayer, status, type, modifiedDate);
       setVisible(false);
       cleanStates();
     }
-    fetchData();
-
   }
-
   //handles the display per entry
   const handleChangeText = (text, valueFor) =>{
     switch(valueFor){
@@ -126,7 +155,7 @@ export default function Home() {
     setApplication("");
     setPrayer("");
     setStatus("");
-    setModifiedDate(new Date().toString())
+    setCurrentStatus("");
   }
 
   //for showing the SELECTED ENTRY
@@ -147,46 +176,28 @@ export default function Home() {
     setCurrentEntry(item);
   };
 
-  // when add/ write button is clicked
+  // when add write button is clicked
   const handleAddButton = (type) => {
     if(type == "today"){
       const currentDate = todayDate.toDateString();
       setDate(currentDate);
       setScripture(todayVerse);
       setType("journal");
-    } else if(type == "journal"){
-      setType("journal");
-    } else if(type == "opm"){
-      setType("opm");
-    } else if(type == "sermon"){
-      setType("sermon");
+      setCurrentStatus("today");
+
+    } else {  
+        if(type == "journal"){
+        setType("journal");
+      } else if(type == "opm"){
+        setType("opm");
+      } else if(type == "sermon"){
+        setType("sermon");
+      }
+      setCurrentStatus("add");
     }
-    setCurrentStatus("add");
-    setStatus("#F7CB73");
+    setStatus("#fff");
     setVisible(true);
   }
-
-  // for deleting the entry
-  const handleDelete = (id) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `DELETE FROM entries WHERE id = ?;`,
-        [id],
-        (_, result) => {
-          console.log('Data deleted successfully');
-        },
-        (_, error) => {
-          console.error('Error deleting data:', error);
-        }
-      );
-    });
-      setNotes((prevData) => prevData.filter((entry) => entry.id !== id));
-      cleanStates();
-      fetchData();
-      setVisibleDisplay(false);
-  }
-  // getting the data in the db
-
 
   const handleChangeScripture = (verse) =>{
     setScripture(verse);
@@ -208,11 +219,85 @@ export default function Home() {
     setModifiedDate(new Date().toString());
   }
 
-  const fetchData = () => {
+  const handleSortButtons = (item) =>{
+    
+    let type = item.toLowerCase();
+
+    if(currentSortBtn == ""){
+      setCurrentSortBtn(item);
+      setIsSelected(true);
+    } else if(type != currentSortBtn){
+      setCurrentSortBtn(item);
+      setIsSelected(true);
+    }
+
+    if(type=="all"){
+      fetchAllData();
+    }else{
+      fetchData(type);
+    }
+  }
+
+  const handleNavButtonSelected = () => {
+    setNavButtonSelected(!navButtonSelected);
+  }
+
+
+  // DB FUNCTION
+
+  const getJournalCount = (type = "journal") => {
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM entries;',
-        [],
+        "SELECT * FROM entries  WHERE type = ? ORDER BY modifiedDate DESC;",
+        [type],
+        (_, result) => {
+          const rows = result.rows;
+          setJournalCount(rows.length);
+        },
+        (_, error) => {
+          console.error('Error querying data:', error);
+        }
+      );
+    });
+  }
+
+  const getOpmCount = (type = "opm") => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM entries  WHERE type = ? ORDER BY modifiedDate DESC;",
+        [type],
+        (_, result) => {
+          const rows = result.rows;
+          setOpmCount(rows.length);
+        },
+        (_, error) => {
+          console.error('Error querying data:', error);
+        }
+      );
+    });
+  }
+
+  const getSermonCount = (type = "sermon") => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM entries  WHERE type = ? ORDER BY modifiedDate DESC;",
+        [type],
+        (_, result) => {
+          const rows = result.rows;
+          setSermonCount(rows.length);
+        },
+        (_, error) => {
+          console.error('Error querying data:', error);
+        }
+      );
+    });
+  }
+
+  const fetchData = (type) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM entries  WHERE type = ? ORDER BY modifiedDate DESC;",
+        [type],
         (_, result) => {
           const rows = result.rows;
           const dataArray = [];
@@ -228,6 +313,53 @@ export default function Home() {
       );
     });
   };
+  const fetchAllData = () => {
+    setCurrentSortBtn("All");
+    setIsSelected(true);
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM entries ORDER BY modifiedDate DESC;",
+        [],
+        (_, result) => {
+          const rows = result.rows;
+          const dataArray = [];
+          setAllCount(rows.length);
+          for (let i = 0; i < rows.length; i++) {
+            const item = rows.item(i);
+            dataArray.push(item);
+          }
+          setNotes(dataArray);
+        },
+        (_, error) => {
+          console.error('Error querying data:', error);
+        }
+      );
+    });
+  };
+
+  // for deleting the entry
+  const handleDelete = (id) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        `DELETE FROM entries WHERE id = ?;`,
+        [id],
+        (_, result) => {
+          console.log('Data deleted successfully');
+        },
+        (_, error) => {
+          console.error('Error deleting data:', error);
+        }
+      );
+    });
+      setNotes((prevData) => prevData.filter((entry) => entry.id !== id));
+      fetchAllData();
+      getJournalCount();
+      getOpmCount();
+      getSermonCount();
+      setVisibleDisplay(false);
+      cleanStates();
+  }
+  
   //creating the table
   const setupDatabase = () => {
     // Check if the table exists
@@ -268,7 +400,7 @@ export default function Home() {
         [],
         (_, result) => {
           console.log('All entries deleted successfully');
-          fetchData();
+          fetchAllData();
         },
         (_, error) => {
           console.error('Error deleting entries:', error);
@@ -287,7 +419,10 @@ export default function Home() {
           [date, title, question, scripture, observation, application, prayer, status, type, modifiedDate],
           (tx, results) => {
             console.log("Success!!!");
-            fetchData();
+            fetchAllData();
+            getJournalCount();
+            getOpmCount();
+            getSermonCount();
           },
           (error) => {
             // Handle error
@@ -300,8 +435,8 @@ export default function Home() {
 
   const updateEntry = (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, key, currentStatus) => {
 
-    if(currentStatus == "ongoing" && status == "#F7CB73"){
-      setStatus("#F7CB73");
+    if(currentStatus == "ongoing" && status == "#fff"){
+      setStatus("#fff");
     }
     //updating the entry
       db.transaction((tx) => {
@@ -319,12 +454,100 @@ export default function Home() {
     // }
   }
 
+
+
+  // PUSH NOTIFICATION FUNCTIONS
+
+  const scheduleNotifications = async () => {
+    const morningNotificationTime = setNotificationTime(6, 0);
+    const eveningNotificationTime = setNotificationTime(18, 0);
+
+    // Schedule morning notification
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Morning Notification',
+        body: 'Good morning! Time to check your tasks.',
+      },
+      trigger: { hour: morningNotificationTime.hours, minute: morningNotificationTime.minutes, repeats: true },
+    });
+
+    // Schedule evening notification
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Evening Notification',
+        body: 'Good evening! Have you completed your tasks today?',
+      },
+      trigger: { hour: eveningNotificationTime.hours, minute: eveningNotificationTime.minutes, repeats: true },
+    });
+  };
+
+  const setNotificationTime = (hours, minutes) => {
+    const now = new Date();
+    const notificationTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
+    const currentTime = now.getTime();
+    const notificationDateTime = notificationTime.getTime();
+
+    // If the notification time has already passed for today, schedule it for the same time tomorrow
+    const scheduledTime = notificationDateTime > currentTime ? notificationDateTime : notificationDateTime + 24 * 60 * 60 * 1000;
+
+    const scheduledDate = new Date(scheduledTime);
+
+    return {
+      hours: scheduledDate.getHours(),
+      minutes: scheduledDate.getMinutes(),
+    };
+  };
+
+
+  const registerForPushNotificationsAsync = async () => {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== 'granted') {
+      alert('Failed to get push token for push notification!');
+      return;
+    }
+
+    const token = (await Notifications.getExpoPushTokenAsync()).data;
+    console.log(token);
+  };
+
+  const handleNotification = (notification) => {
+    // Handle the received notification
+    console.log(notification);
+  };
+
+  // const sendNotificationImmediately = async () => {
+  // try{
+  //   const notificationId = await Notifications.scheduleNotificationAsync({
+  //     content: {
+  //       title: 'Immediate Notification',
+  //       body: 'This is an immediate notification!',
+  //     },
+  //     trigger: null, // null means send immediately
+  //   });
+
+  //   console.log('Notification ID:', notificationId);
+  // } catch (error) {
+  //   console.error('Error scheduling immediate notification:', error);
+  // }
+  // };
+
+
+
+  // USE EFFECTS
+
   //autosave
   useEffect(() => {
     if(visibleDisplay == true){
 
       const autosaveInterval = setInterval( () => {
-        if(currentEntry.date !== date || currentEntry.scripture !== scripture || currentEntry.title !== title || currentEntry.question !== question || currentEntry.observation !== observation || currentEntry.application !== application || currentEntry.prayer !== prayer ){
+        if(currentEntry.date !== date || currentEntry.scripture !== scripture || currentEntry.title !== title || currentEntry.question !== question || currentEntry.observation !== observation || currentEntry.application !== application || currentEntry.prayer !== prayer  || currentEntry.status !== status){
       
           updateEntry(date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, key, currentStatus);
           currentEntry.date = date;
@@ -334,6 +557,7 @@ export default function Home() {
           currentEntry.observation = observation;
           currentEntry.application = application;
           currentEntry.prayer = prayer;
+          currentEntry.status = status;
           currentEntry.modifiedDate = modifiedDate;
         }
       }, 10000);//timer for autosave to execute
@@ -368,20 +592,49 @@ export default function Home() {
   // for creating the db
   useEffect(() => {
     setupDatabase();
-    fetchData();
+    fetchAllData();
+    getJournalCount();
+    getOpmCount();
+    getSermonCount();
   }, []);
+
+  //for push notifications
+  useEffect(() => {
+    scheduleNotifications();
+
+    // Set up an interval to schedule notifications every day
+    const intervalId = setInterval(() => {
+      scheduleNotifications();
+    }, 24 * 60 * 60 * 1000); // Schedule notifications every 24 hours
+
+    // Clear the interval when the component is unmounted
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    registerForPushNotificationsAsync();
+
+    // Handle notifications when the app is open
+    Notifications.addNotificationReceivedListener(handleNotification);
+  }, []);
+
+
 
 
   return (
   <>
     {/*MAIN VIEW*/}
+    {/* <Pressable style={styles.btn}title="Send Notification" onPress={()=> sendNotificationImmediately()}>
+      <Text>Notification</Text>  
+    </Pressable> */}
     <View style={[styles.homeContainer]}>
 
-      {/*Todays passage*/}
-      <View style={[{width: "100%", height: 'auto', padding: 15, paddingTop: 10}]}>
+      {/*HEADERR - Todays passage*/}
+      <View style={[styles.passageToday,{width: "100%", height: 'auto', padding: 15, paddingTop: 10, flexDirection: 'column'}]}>
 
-        <Text style={{padding: 10, fontSize: 20, textAlign: "center"}}>Journal 2023</Text>
-        <View style={styles.passageToday}>
+        <Text style={{padding: 5, fontSize: 20, textAlign: "center", fontWeight: 'bold'}}>Journal 2023</Text>
+
+        <View style={[{flexDirection: 'row', gap: 60, alignItems: 'center'}]} >
           <View style={[{flexDirection: 'column'}]}>
             <Text style={{fontSize: 21, fontWeight: 'bold'}}>Today's Passage</Text>
             <Text style={{fontSize: 20, color: '#4d4d4d'}}>{todayVerse}</Text>
@@ -389,68 +642,53 @@ export default function Home() {
           </View>
 
           <Pressable onPress={ ()=>handleAddButton("today")} 
-          style={[{
-            width: "40%",
-            height: "auto", 
-            padding: 10, 
-            backgroundColor: "#00ff99", 
-            alignItems: 'center', 
-            flexDirection: 'row', 
-            justifyContent: 'space-evenly', 
-            borderRadius: 5}]}>
+          style={[styles.addEntryShortcut]}>
               <Text style={{fontSize: 20, color: "#fff"}}>Add Entry</Text>
               <Image style={{width: 17, height: 17,}} source={require("../assets/add.png")}/>
           </Pressable>
         </View>
       </View>
 
+      {/*Sorting Buttons*/}
+      <View style={styles.sortingButtons}>
+
+        { 
+          sortButtons.map( (item, index) => {
+
+          return  <Pressable key={index} onPress={ () => handleSortButtons(item) }  style={[styles.sortingBtn, 
+          {borderBottomColor: currentSortBtn == item ? isSelected ? "#1d9bf0" : '#transparent' : 'transparent',}]}>
+            
+                <Text 
+                  style={[styles.sortBtnText,
+                    {color: currentSortBtn == item ? isSelected ? "#1d9bf0" : '#808080' : '#808080',}]}>
+                    {item == "Sermon" ? "Sermon Notes" : item }
+                </Text>
+
+                <View style={[styles.itemCount, 
+                  {backgroundColor: currentSortBtn == item ? isSelected ? "#1d9bf0" : '#808080' : '#808080', }]}>
+                  <Text style={{textAlign: 'center', color:  currentSortBtn == item ?  isSelected ? "#fff" : '#f5f5f5' : '#f5f5f5'}}>
+                    {sortButtonCount[index]}
+                  </Text>
+                </View>
+              </Pressable>
+
+            })
+        }   
+      </View>
+
       {/*Showing Present items*/}
       <View style={styles.notelist}>
-
-          <View style={styles.sortingButtons}>
-            <Pressable style={styles.sortingBtn}>
-              <Text style={{fontSize: 12, color: '#00ff99',}}>All</Text>
-              <View style={styles.itemCount}>
-                <Text style={{color: '#fff'}}>0</Text>
-              </View>
-            </Pressable>
-
-            <Pressable style={styles.sortingBtn}>
-              <Text style={{fontSize: 12}}>Journal</Text>
-              <View style={styles.itemCount}>
-                <Text style={{color: '#fff'}}>0</Text>
-              </View>
-            </Pressable>
-
-            <Pressable  style={styles.sortingBtn}>
-              <Text style={{fontSize: 12}}>Opm</Text>
-              <View style={styles.itemCount}>
-                <Text style={{color: '#fff'}}>0</Text>
-              </View>
-            </Pressable>
-
-            <Pressable  style={styles.sortingBtn}>
-              <Text style={{fontSize: 12}}>Sermon Notes</Text>
-              <View style={styles.itemCount}>
-                <Text style={{fontSize: 12 ,color: '#fff'}}>0</Text>
-              </View>
-            </Pressable>
-
-          
-          </View>
-
         {notes.length === 0 ? (
-          <Text style={{fontSize: 30, paddingTop: 200}}>No Entry Yet</Text>
+          <Text style={{fontSize: 30, paddingBottom: 150}}>No Entry Yet</Text>
         ) : (
           <>
-
             <FlatList
-              style={{width:"100%",}}
+              style={{width: '100%'}}
               data={notes}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
               
-                <TouchableOpacity style={styles.entry} onPress={ ()=> handleVisibleModal(item) }>
+                <TouchableOpacity style={[styles.entry, styles.shadowProp]} onPress={ ()=> handleVisibleModal(item) }>
                   <Text>{`${item.title}`}</Text>
                   <Text>{`${item.date}`}</Text>
                   <View style={[styles.border, {width: 30, height: 30, backgroundColor: item.status}]}></View>
@@ -458,34 +696,12 @@ export default function Home() {
                 </TouchableOpacity>
               )}
             /> 
-        
           </>        
         )}
       </View>
 
       {/*Navbar*/}
-      <View style={[styles.navbar, styles.border]}>
-        <Pressable style={[ styles.navBarBtn,styles.border]}>
-          <Text>Home</Text>
-        </Pressable>
-
-        <Pressable style={[ styles.navBarBtn,styles.border]}>
-          <Text>BRP</Text>
-        </Pressable>
-
-        <Pressable onPress={ ()=>handleVisibleAddModal() } style={styles.addEntry}>
-        <Image style={{width: 30, height: 30,}} source={require("../assets/write.png")}/>
-        </Pressable>
-
-        <Pressable style={[ styles.navBarBtn,styles.border]}>
-          <Text>Search</Text>
-        </Pressable>
-        
-        <Pressable onPress={deleteAllEntries} style={[ styles.navBarBtn,styles.border]}>
-          <Text>Delete All</Text>
-        </Pressable>
-
-      </View>
+      <Navbar path={"path here for navigatiun"} onPress={handleNavButtonSelected} onPressAddEntry={handleVisibleAddModal} isSelected={navButtonSelected} openBrp={openBrp}/>
 
       {/* <Pressable onPress={ ()=>deleteAllEntries() } style={styles.btn}>
           <Text>Reset Table</Text>
@@ -502,13 +718,11 @@ export default function Home() {
     {handleChangeDate} modifyDate={handleModifiedDate} currentEntry={currentEntry} update={updateEntry}
     />
 
-      <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal}/>
+    <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal}/>
 
     </>
   )
 }
-
-
 
 const styles = StyleSheet.create({
   flex:{
@@ -516,17 +730,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  homeContainer:{
-    flex: 1,
-    alignItems: "center",
-    backgroundColor: '#f5f5f5',
-    flexDirection: 'column',
-    paddingTop: 20,
-  },
-  passageToday:{
-    justifyContent:"space-between", 
-    alignItems: "center", 
-    flexDirection: 'row'
+  border:{
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: 'black',
   },
   btn:{
     borderBottomWidth:1,
@@ -535,27 +742,62 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     margin: 5,
   },
-  btn2:{
-    backgroundColor: 'red',
-    width: 100,
-    height: 100,
+  homeContainer:{
+    flex: 1,
+    alignItems: "center",
+    backgroundColor: '#f2f2f2',
+    flexDirection: 'column',
+    paddingTop: 20,
   },
-  modal:{
-    flex:1,
+  passageToday:{
+    justifyContent:"space-between", 
+    alignItems: "center", 
+    flexDirection: 'row',
+    // borderBottomColor: '#737373',
+    // borderBottomWidth: 1,
+    padding: 5,
   },
-  input:{
-    backgroundColor: 'gray',
+  addEntryShortcut:{
+    width: "35%",
+    height: "70%", 
+    padding: 10, 
+    backgroundColor: "#1d9bf0", 
+    alignItems: 'center', 
+    flexDirection: 'row', 
+    justifyContent: 'space-evenly', 
+    borderRadius: 5
   },
-  border:{
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: 'black',
+  sortingButtons:{
+    width: '100%',
+    height: '8%',
+    flexDirection: 'row',
+    alignItems:'center',
+    justifyContent: 'space-evenly',
+  },
+  sortingBtn:{
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+    borderBottomWidth: 2,
+    width: "auto",
+    padding: 5,
+    gap: 5,
+  },
+  sortBtnText:{
+    fontSize: 12, 
+  },
+  itemCount:{
+    paddingRight: 12,
+    paddingLeft: 12,
+    borderRadius: 10,
   },
   notelist:{
-    width: "95%",
-    height: "auto",
+    flex: 1,
+    width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#cccccc',
+    padding:10,
   },
   entry:{
     marginBottom: 5,
@@ -566,51 +808,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
   },
-  addEntry:{
-    borderRadius: 50,
-    backgroundColor: '#1d9bf0',
-    width: 60,
-    height: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 70,
-  },
-  navbar:{
-    width: "100%", 
-    height: "10%",
-    bottom: 0,
-    position: "absolute",
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    zIndex:1,
-    backgroundColor: '#fff',
-  },
-  navBarBtn:{
-    padding: 10,
-    margin: 10,
-  },
-  sortingButtons:{
-    width: '100%',
-    height: '20%',
-    flexDirection: 'row',
-    alignItems:'center',
-    justifyContent: 'space-evenly'
-  },
-  sortingBtn:{
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-    width: "auto",
-    padding: 5,
-    gap: 5,
-  },
-  itemCount:{
-    backgroundColor: "#00ff99", 
-    paddingRight: 12,
-    paddingLeft: 12,
-    borderRadius: 10,
-  },
+
   shadowProp: {
     shadowColor: '#171717',
     shadowOffset: {width: -2, height: 4},
