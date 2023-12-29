@@ -6,7 +6,7 @@ import * as Notifications from 'expo-notifications';
 
 // import for data
 import data from '../constants/journal-data.json'
-const db = SQLite.openDatabase('new_database_journal_2023.db');
+const db = SQLite.openDatabase('_journal_2023.db');
 
 // import for components
 import Entry from './Entry';
@@ -92,6 +92,7 @@ export default function Home({navigation}) {
   const [currentSortBtn, setCurrentSortBtn] = useState("");
   const [navButtonSelected, setNavButtonSelected] = useState(false);
 
+
   // NAVIGATION FUNCTIONS
 
   const openBrp = () => {
@@ -104,7 +105,6 @@ export default function Home({navigation}) {
     if(currentStatus == "ongoing"){
       if(currentEntry.date !== date || currentEntry.scripture !== scripture || currentEntry.title !== title || currentEntry.question !== question || currentEntry.observation !== observation || currentEntry.application !== application || currentEntry.prayer !== prayer || currentEntry.status !== status){   
         updateEntry(date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, key, currentStatus);
-        console.log(modifiedDate)
         setVisibleDisplay(false);
         cleanStates();
 
@@ -374,7 +374,7 @@ export default function Home({navigation}) {
             // Table doesn't exist, create it
             db.transaction((tx) => {
               tx.executeSql(
-                'CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, title TEXT, question TEXT, scripture TEXT, observation TEXT, application TEXT, prayer TEXT, status TEXT, type TEXT, modifiedDate TEXT);',
+                'CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, title TEXT, question TEXT, scripture TEXT, observation TEXT, application TEXT, prayer TEXT, status TEXT, type TEXT, modifiedDate TEXT, month TEXT, day TEXT);',
                 [],
                 (_, result) => {
                   console.log('Table created successfully');
@@ -497,7 +497,6 @@ export default function Home({navigation}) {
       minutes: scheduledDate.getMinutes(),
     };
   };
-
 
   const registerForPushNotificationsAsync = async () => {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -627,14 +626,14 @@ export default function Home({navigation}) {
     {/* <Pressable style={styles.btn}title="Send Notification" onPress={()=> sendNotificationImmediately()}>
       <Text>Notification</Text>  
     </Pressable> */}
-    <View style={[styles.homeContainer]}>
 
+    <View style={[styles.homeContainer]}>
       {/*HEADERR - Todays passage*/}
       <View style={[styles.passageToday,{width: "100%", height: 'auto', padding: 15, paddingTop: 10, flexDirection: 'column'}]}>
 
         <Text style={{padding: 5, fontSize: 20, textAlign: "center", fontWeight: 'bold'}}>Journal 2023</Text>
 
-        <View style={[{flexDirection: 'row', gap: 60, alignItems: 'center'}]} >
+        <View style={[{flexDirection: 'row', gap: 60, alignItems: 'center', justifyContent:'space-between'}]} >
           <View style={[{flexDirection: 'column'}]}>
             <Text style={{fontSize: 21, fontWeight: 'bold'}}>Today's Passage</Text>
             <Text style={{fontSize: 20, color: '#4d4d4d'}}>{todayVerse}</Text>
@@ -689,8 +688,8 @@ export default function Home({navigation}) {
               renderItem={({ item }) => (
               
                 <TouchableOpacity style={[styles.entry, styles.shadowProp]} onPress={ ()=> handleVisibleModal(item) }>
-                  <Text>{`${item.title}`}</Text>
-                  <Text>{`${item.date}`}</Text>
+                  <Text>{`${item.month}`}</Text>
+                  <Text>{`${item.day}`}</Text>
                   <View style={[styles.border, {width: 30, height: 30, backgroundColor: item.status}]}></View>
 
                 </TouchableOpacity>
@@ -703,9 +702,6 @@ export default function Home({navigation}) {
       {/*Navbar*/}
       <Navbar path={"path here for navigatiun"} onPress={handleNavButtonSelected} onPressAddEntry={handleVisibleAddModal} isSelected={navButtonSelected} openBrp={openBrp}/>
 
-      {/* <Pressable onPress={ ()=>deleteAllEntries() } style={styles.btn}>
-          <Text>Reset Table</Text>
-      </Pressable> */}
     </View>
 
     {/*ADD ITEM MODAL*/}
