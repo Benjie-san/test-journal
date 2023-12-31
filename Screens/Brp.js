@@ -4,10 +4,12 @@ import Entypo from '@expo/vector-icons/Entypo';
 const db = SQLite.openDatabase('_journal_2023.db');
 import * as SQLite from 'expo-sqlite';
 
-import data from '../constants/journal-data.json'
+import data from '../constants/2023.json'
 import AddEntry from '../components/AddEntry';
 import DisplayEntry from '../components/DisplayEntry';
 import Ionicons from '@expo/vector-icons/Ionicons'; 
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 let content = Object.keys(data).map( (key, index) =>
    (
       {
@@ -19,7 +21,6 @@ let content = Object.keys(data).map( (key, index) =>
       }
    )
 );
-
 
 const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntry, handleDisplayEntryModal, handleScripture, handleType, handleCurrentEntry, handleItem, handleIndex, currentEntry, handleEntry, fetchData}) =>{
    
@@ -78,7 +79,7 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
             { show ? 
             (
             item.subcategory.map((item, key) => (
-             
+            
             <TouchableOpacity
                onPress={()=>handlePress(item)}
                style={styles.dailyEntry}
@@ -109,7 +110,7 @@ export default function Brp({navigation}){
    const [displayEntryVisible, setDisplayEntryVisible] = useState(false)
    const flatListRef = useRef(null);
    const [scripture, setScripture] = useState("");
-   const [type, setType] = useState("")
+   const [type, setType] = useState("");
    const [currentEntry, setCurrentEntry] = useState([]);
    const [item, setItem] = useState("");
    const [index, setIndex] = useState(0)
@@ -209,6 +210,7 @@ export default function Brp({navigation}){
 
    return (
    <>
+   
    <View style={styles.container}>
    
          <View style={{ flex:1, width: Dimensions.get("screen").width-20,}}>
@@ -248,9 +250,9 @@ export default function Brp({navigation}){
          </View>
    </View>
 
-   <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal}verse={scripture} type={type} status="#ffad33" index={index} item={item} handleType={handleType}/>
+   <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" index={index} item={item} handleType={handleType}/>
 
-   <DisplayEntry visible={displayEntryVisible} type={type} handleModal={handleDisplayEntryModal}  handleType={handleType} index={index} currentEntry={entry[0]} handleEntry={handleEntry}  handleCurrentEntry={handleCurrentEntry} fetchData={fetchData}/>
+   <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={entry[0]} handleEntry={handleEntry}/>
 
    </>
    )
@@ -262,6 +264,7 @@ const styles = StyleSheet.create({
       flex:1,
       backgroundColor: "#fff",
       gap: 10,
+      paddingTop: 30,
    },
    border:{
       borderWidth: 1,

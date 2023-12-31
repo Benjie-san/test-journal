@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, TextInput, Pressable, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Share} from 'react-native';
 import {Picker} from '@react-native-picker/picker';
-import data from '../constants/journal-data.json'
+import data from '../constants/2023.json'
 import React, {useState, useEffect} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";

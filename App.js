@@ -1,65 +1,109 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import React, {useEffect} from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+//RN Navigation Imports
 import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import {Home, Brp, Search, More} from './Screens/index'; // all of the screens
 
-
-import Brp from "./Screens/Brp";
-import Home from './Screens/Home';
+//icon imports
 import Ionicons from '@expo/vector-icons/Ionicons'; 
+import MaterialIcons from '@expo/vector-icons/MaterialIcons'; 
+
+const Tab = createMaterialBottomTabNavigator();
 
 
-const Stack = createNativeStackNavigator();
-
+const RenderHome = (props) => <Home {...props}  />
+const RenderBrp = (props) => <Brp {...props} />
+const RenderSearch = (props) => <Search {...props} />
+const RenderMore = (props) => <More {...props} />
 
 export default function App() {
-
-  const RenderHome = (props) => <Home {...props}  />
-  const RenderBrp = (props) => <Brp {...props} />
-//  const RenderEntry = (props) => <EntryScreen {...props} />
-
-
+  
   return (
     <>
       <StatusBar style="light" backgroundColor={"#1a1a1a"} />
 
       <NavigationContainer>
-        <Stack.Navigator >
-          <Stack.Screen 
-          options={{
-            headerTitle: '', 
-            headerTransparent: true,
-            animation:'slide_from_left',
-        
-          }} 
-          component={RenderHome} 
-          name="Home"
-       
+        <Tab.Navigator 
+        initialRouteName="Home"
+        activeColor='#1d9bf0'
+        barStyle={{ backgroundColor: '#fff',}}>
+          <Tab.Screen 
+            component={RenderHome}
+            name="Home"
+            options={{
+              tabBarLabel: "Home",
+
+              tabBarIcon: ({focused})=>{
+                return(
+                  <View style={{alignItems: 'center', justifyContent: 'center', }}>
+                    <Ionicons name={focused ? "md-home" : "md-home-outline"} size={24} color="#1d9bf0" />
+                  </View>
+                  // {color="#1d9bf0"}
+                )
+              },
+              tabBarHideOnKeyboard: true,
+            }} 
           />
 
-          <Stack.Screen 
-            component={RenderBrp} 
+          <Tab.Screen 
+            component={RenderBrp}
             name="BRP"
-            options={({ navigation, route }) => ({
+            options={() => ({
+              title: 'Bible Reading Plan',
+              tabBarLabel: "BRP",
               headerLeft: () => (
                 <Pressable title="BrpBackButton" onPress={ ()=>handleBRPBackButton() }>
-                    <Ionicons name="chevron-back-sharp" size={30} color="black" />
+                    <Ionicons name="chevron-back-sharp" size={30} color="1d9bf0" />
                 </Pressable>
               ),
-              animation:'slide_from_right',
-              headerTitle: "Bible Reading Plan",
-              headerTitleAlign: 'center',
-              headerBackTile: 'stuff',
+          
+              tabBarIcon: ({focused})=>{
+                return(
+                  <View style={{alignItems: 'center', justifyContent: 'center',}}>
+                    <Ionicons name={focused ? "md-book" : "md-book-outline"} size={24} color="#1d9bf0" />
+                  </View>
+                )
+              },
+              tabBarHideOnKeyboard: true,
             })}
-            screenOptions={{
-              headerBackTitleVisible: true,
-              headerTruncatedBackTitle: 'translated back label',
-              headerBackTitle: null,
+          />
+          <Tab.Screen
+            component={RenderSearch}
+            name="Search"
+            options={{
+              title: 'Search',
+              tabBarIcon: ({focused})=>{
+                return(
+                  <View style={{alignItems: 'center', justifyContent: 'center', }}>
+                    <Ionicons name={focused ? "md-search" : "md-search-outline"} size={24} color="#1d9bf0" />
+                  </View>
+                )
+              },
+              tabBarHideOnKeyboard: true,
             }}
-            />
+          />
 
-        </Stack.Navigator>
+          <Tab.Screen
+            component={RenderMore}
+            name="More"
+            options={{
+              title: 'More',
+              tabBarIcon: ({focused})=>{
+                return(
+                  <View style={{alignItems: 'center', justifyContent: 'center',}}>
+                    <MaterialIcons name={focused ? 'more' : "more-horiz"} size={24} color="#1d9bf0" />
+
+                  </View>
+                )
+              },
+              tabBarHideOnKeyboard: true,
+            }}
+          />
+        </Tab.Navigator>
       </NavigationContainer>
     
     </>

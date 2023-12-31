@@ -1,5 +1,4 @@
 import { StyleSheet, Text, View, TextInput, Pressable, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Share, AppState} from 'react-native';
-import data from '../constants/journal-data.json'
 import React, {useState, useEffect, useRef} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
@@ -60,7 +59,7 @@ const DeleteConfirmationModal = ({visible, deleteEntry, id, handleModal}) => {
 );
 }
 
-const MenuModal = ({visible, handleCloseModal, deleteEntry, id, statusColor, status, entry, type, handleStatus}) => {
+const MenuModal = ({visible, handleCloseModal, deleteEntry, id, status, entry, type, handleStatus}) => {
 const [deleteModal, setDeleteModal] = useState(false);
 
 const handleDeleteModal = () => {
@@ -166,7 +165,7 @@ return(
 );
 }
 
-export default function DisplayEntry({visible, index, handleModal, type, handleType, currentEntry, handleEntry, fetchData, handleCurrentEntry}) {
+export default function DisplayEntry({visible, handleModal, handleType, currentEntry, handleEntry }) {
 //for showing modals
 const [dateModalVisible, setDateModalVisible] = useState(false);
 const [menuVisible, setMenuVisible] = useState(false);
@@ -180,6 +179,7 @@ const [observation, setObservation] = useState("");
 const [application, setApplication] = useState("");
 const [prayer, setPrayer] = useState("");
 const [question, setQuestion] = useState("");
+const [type, setType] = useState("");
 const lastModified = useRef(new Date());
 const [modifiedDate, setModifiedDate] = useState(lastModified.current.toString());
 const [status, setStatus] = useState("");
@@ -226,7 +226,6 @@ const handleBackButton = () =>{
       setEditMode(false);
       cleanStates();
    }
-   fetchData(index);
 }
 
 const onChangeDate = ({type}, selectedDate) =>{
@@ -278,9 +277,8 @@ const cleanStates = () =>{
    setApplication("");
    setPrayer("");
    handleType("");
-   setEditMode(0);
+   setEditMode(false);
    handleEntry([]);
-   handleCurrentEntry([]);
 }
 
 const handleDelete = (id) => {
@@ -328,6 +326,7 @@ const getItems = () => {
    setObservation(currentEntry?.observation);
    setApplication(currentEntry?.application);
    setPrayer(currentEntry?.prayer);
+   setType(currentEntry?.type);
    setModifiedDate(currentEntry?.modifiedDate);
    setStatus(currentEntry?.status);
 }
@@ -356,7 +355,7 @@ useEffect(() => {
       }
    }
 
-}, [date, title, question, scripture, observation, application, prayer, status, type, id, currentEntry, modifiedDate, editMode])
+}, [date, title, question, scripture, observation, application, prayer, status, id, currentEntry, modifiedDate, editMode])
 
 //for autosave
 // useEffect(() => {
@@ -428,7 +427,7 @@ return (
       </Pressable>
       
       {/*HEADER TITLE*/}
-      <Text style={{fontSize: 20}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Update Entry" : "OPM Reflection"}</Text>
+      <Text style={{fontSize: 20}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
 
       <View style={{flexDirection: 'row', alignItems: "center"}}>
          <Pressable style={[styles.btn]} onPress={handleEditMode}>
@@ -446,17 +445,7 @@ return (
       <KeyboardAvoidingView behavior='height' style={[styles.modal]}>
    
       { 
-      !editMode ? (
-      <View 
-      style={{
-         flex:1,
-         width: '100%',
-         height: '100%',
-         zIndex: 2,
-         backgroundColor: 'transparent',
-         position: "absolute",
-      }}></View>
-
+      !editMode ? ( <View style={{flex:1, width: '100%', height: '100%', zIndex: 2, backgroundColor: 'transparent', position: "absolute",}}></View>
       ): null
       }
       
@@ -467,8 +456,8 @@ return (
          editMode 
          ? 
          (<View style={[styles.editModeContainer]}>
-         <Text>Editing</Text>
-         <Text></Text>
+            <Text>Editing</Text>
+            <Text></Text>
          </View>) 
          :
          (<View style={[styles.editModeContainer]}>
@@ -498,7 +487,7 @@ return (
 
                {/*SCRIPTURE*/}
                <View style={styles.inputSubContainer}>
-                  <Text>{type === "sermon" ? "Text:" : 'Scripture:' }</Text>
+                  <Text>{type === "sermon" ? "Text:": type == "opm" ? 'OPM Passage:' : 'Scripture:' }</Text>
 
                   <TextInput style={styles.touchable} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
 
@@ -508,7 +497,7 @@ return (
 
             {/*TITLE*/}
             <View style={styles.inputContainer}>
-            <Text>{type === "sermon" ? "Theme:": 'Title:'}</Text>
+            <Text>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
             <TextInput style={[styles.input, {minHeight: 50}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
             </View>
 

@@ -1,5 +1,4 @@
 import { StyleSheet, Text, View, TextInput, Pressable, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Share} from 'react-native';
-import data from '../constants/journal-data.json'
 import React, {useState, useEffect, useRef} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
@@ -8,7 +7,6 @@ import * as SQLite from 'expo-sqlite';
 const db = SQLite.openDatabase('_journal_2023.db');
 
 import styles from '../styles/entryStyle'
-const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 export default function AddEntry({visible, handleModal, verse, type, status, index, item, handleType}) {
 const [dateModalVisible, setDateModalVisible] = useState(false)
@@ -22,10 +20,6 @@ const [prayer, setPrayer] = useState("");
 const [question, setQuestion] = useState("");
 const lastModified = useRef(new Date());
 const [modifiedDate, setModifiedDate] = useState(lastModified.current.toString());
-
-console.log('item:' +item.date);
-console.log('index:' + index);
-
 
 const handleDateModal = () => {
    setDateModalVisible(!dateModalVisible)
@@ -160,7 +154,7 @@ return (
                }
 
                <View style={styles.inputSubContainer}>
-                  <Text>{type === "sermon" ? "Text:" : 'Scripture:' }</Text>
+                  <Text>{type === "sermon" ? "Text:": type == "opm" ? 'OPM Passage:' : 'Scripture:'}</Text>
 
                      <TextInput style={styles.touchable} editable onChangeText={ text => handleChangeText(text, "scripture") } value={verse}/>
          
@@ -169,7 +163,7 @@ return (
             </View>
 
             <View style={styles.inputContainer}>
-            <Text>{type === "sermon" ? "Theme:": 'Title:'}</Text>
+            <Text>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
             <TextInput style={[styles.input, {minHeight: 50}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
             </View>
 

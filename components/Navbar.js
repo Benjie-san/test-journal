@@ -13,27 +13,27 @@ const Navbar = ({path, onPress, onPressAddEntry, isSelected, openBrp}) => {
    return(
    <View style={[styles.navbar]}>
 
-      <Pressable style={[ styles.navBarBtn,]} onPress={() => onPress()}>
+      {/* <Pressable style={[ styles.navBarBtn,]} onPress={() => onPress()}>
          <Ionicons name={isSelected ? "md-home" : "md-home-outline"} size={24} color="#1d9bf0" />
       </Pressable>
 
       <Pressable style={[ styles.navBarBtn,]} onPress={() => handlePress()}>
          <Ionicons name={isSelected ? "md-book" : "md-book-outline"} size={24} color="#1d9bf0" />
 
-      </Pressable>
+      </Pressable> */}
 
       <Pressable onPress={ ()=>onPressAddEntry() } style={[styles.addEntry]}>
-      <Image style={{width: 30, height: 30,}} source={require("../assets/write.png")}/>
+         <Image style={{width: 30, height: 30,}} source={require("../assets/write.png")}/>
       </Pressable>
 
-      <Pressable style={[ styles.navBarBtn,]}>
+      {/* <Pressable style={[ styles.navBarBtn,]}>
          <Ionicons name="md-search-outline" size={24} color="#1d9bf0" />
       </Pressable>
       
       <Pressable style={[ styles.navBarBtn,]}>
-         <Feather name="more-horizontal" size={24} color="#1d9bf0" />
-
-      </Pressable>
+        <Feather name="more-horizontal" size={24} color="#1d9bf0" /> 
+      </Pressable>  */}
+   
 
    </View>
    )
@@ -45,11 +45,13 @@ const styles = StyleSheet.create({
       height: "10%",
       bottom: 0,
       position: "absolute",
-      alignItems: 'center',
-      justifyContent: 'space-evenly',
+      alignContent: 'flex-end',
+      justifyContent: 'flex-end',
       flexDirection: 'row',
       zIndex:1,
-      backgroundColor: '#fff',
+      backgroundColor: 'transparent',
+      margin: 10,
+      padding: 10,
    },
    navBarBtn:{
       flexDirection: 'column',
@@ -65,7 +67,6 @@ const styles = StyleSheet.create({
       height: 60,
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: 70,
    },
    shadowProp: {
       shadowColor: '#171717',

@@ -5,7 +5,7 @@ import * as SQLite from 'expo-sqlite';
 import * as Notifications from 'expo-notifications';
 
 // import for data
-import data from '../constants/journal-data.json'
+import data from '../constants/2023.json'
 const db = SQLite.openDatabase('_journal_2023.db');
 
 // import for components
@@ -195,9 +195,10 @@ export default function Home({navigation}) {
       }
       setCurrentStatus("add");
     }
+  
     setStatus("#fff");
-    setVisible(true);
-  }
+    openBrp()
+}
 
   const handleChangeScripture = (verse) =>{
     setScripture(verse);
@@ -688,8 +689,8 @@ export default function Home({navigation}) {
               renderItem={({ item }) => (
               
                 <TouchableOpacity style={[styles.entry, styles.shadowProp]} onPress={ ()=> handleVisibleModal(item) }>
-                  <Text>{`${item.month}`}</Text>
-                  <Text>{`${item.day}`}</Text>
+                  <Text>{`${item.title}`}</Text>
+                  <Text>{`${item.date}`}</Text>
                   <View style={[styles.border, {width: 30, height: 30, backgroundColor: item.status}]}></View>
 
                 </TouchableOpacity>
@@ -700,7 +701,7 @@ export default function Home({navigation}) {
       </View>
 
       {/*Navbar*/}
-      <Navbar path={"path here for navigatiun"} onPress={handleNavButtonSelected} onPressAddEntry={handleVisibleAddModal} isSelected={navButtonSelected} openBrp={openBrp}/>
+      <Navbar onPressAddEntry={handleVisibleAddModal} />
 
     </View>
 
@@ -741,7 +742,7 @@ const styles = StyleSheet.create({
   homeContainer:{
     flex: 1,
     alignItems: "center",
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#fff',
     flexDirection: 'column',
     paddingTop: 20,
   },
