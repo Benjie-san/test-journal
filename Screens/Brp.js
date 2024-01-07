@@ -1,54 +1,81 @@
 import { StyleSheet, Text, TouchableOpacity, View, LayoutAnimation, Image, Dimensions, UIManager, FlatList, Pressable} from 'react-native'
 import React, {useState, useEffect, useRef} from 'react';
 import Entypo from '@expo/vector-icons/Entypo'; 
-const db = SQLite.openDatabase('_journal_2023.db');
-import * as SQLite from 'expo-sqlite';
-
-import data from '../constants/2023.json'
+import data from '../constants/2023.json' 
 import AddEntry from '../components/AddEntry';
 import DisplayEntry from '../components/DisplayEntry';
-import Ionicons from '@expo/vector-icons/Ionicons'; 
-import { SafeAreaView } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
+
+import * as SQLite from 'expo-sqlite';
+
+const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const theme2024 =["SYSTEMS IMPROVEMENT", "SYSTEMS IMPROVEMENT", "MACRO-EVANGELISM","MACRO-EVANGELISM", 'ACCOUNT SETTLEMENT', 'ACCOUNT SETTLEMENT', "RELATIONAL DISCIPLESHIP", "RELATIONAL DISCIPLESHIP", "TRAINING-CENTERED", "TRAINING-CENTERED", "CHURCH", "CHURCH"];
 
 let content = Object.keys(data).map( (key, index) =>
    (
       {
       isExpanded: false,
       category_name: Object.keys(data)[index],
-      subcategory: [  
-         ...data[key]
-      ],
       }
    )
 );
 
-const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntry, handleDisplayEntryModal, handleScripture, handleType, handleCurrentEntry, handleItem, handleIndex, currentEntry, handleEntry, fetchData}) =>{
+const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntry, handleDisplayEntryModal, handleScripture, handleType, handleCurrentEntry, handleItem, handleIndex, currentEntry, handleEntry, handleItemId}) =>{
    
    const [layoutHeight, setlayoutHeight] = useState(0);
    const [show, setShow] = useState(false);
-   const handlePress = (item) => {
+   const [currentMonthEntries, setCurrentMonthEntries] = useState([])
 
+
+   const handlePress = (item) => {
+      handleItemId(item.id)
       handleItem(item);
       handleIndex(index);
-      let newArr = currentEntry.filter( (i) => i.day == item.date-1)
 
-      if(newArr.length == 1){
-    
-            handleType( item.verse !== 'Sermon Notes' ? 'journal':'sermon' );
-            handleEntry(newArr)
-            handleDisplayEntryModal(true);
-            
-         
-      } else {
+      if(item.completion == "none"){
          handleType( item.verse !== 'Sermon Notes' ? 'journal':'sermon' );
          handleScripture( item.verse !=='Sermon Notes' ? item.verse: '' );
          handleAddEntry(true)
- 
+         
+      } else {
+
+         handleType( item.verse !== 'Sermon Notes' ? 'journal':'sermon' );
+         handleEntry(newArr)
+         handleDisplayEntryModal(true)
       }
       handleCurrentEntry([]);
-      fetchData(index);
-   } 
+   }
+   
+   const fetchData = async (item) => {
+      const dbBrp =  SQLite.openDatabase('brpDatabase.db');
 
+      return new Promise((resolve, reject) => {
+         dbBrp.transaction((tx) => {
+            tx.executeSql('SELECT * FROM brp2024 WHERE month = ?', [item],
+            (_, result) => {
+               const rows = result.rows;
+               const dataArray = [];
+               for (let i = 0; i < rows.length; i++) {
+                  const item = rows.item(i);
+                  dataArray.push(item);
+               }
+               setCurrentMonthEntries([...dataArray]);
+            },
+            (_, error) => {
+                  alert("No Entry yet")
+                  console.error('Error querying data:', error);
+            }
+            );
+         })
+         
+      });
+   
+}
+
+   const handleMonthPress = () =>{
+      onClickFunction()
+      fetchData(item.category_name);
+   }
 
    useEffect(() => {
 
@@ -56,7 +83,6 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
       onRef.current.scrollToIndex({ index, animated: true });
       setlayoutHeight(null);
       setShow(true);
-
    } else{ 
       setlayoutHeight(0);
       setShow(false);
@@ -64,10 +90,11 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
 
    }, [item.isExpanded])
 
+
    return (
    <>
       <View style={{flex:1,  flexGrow:1}}>
-         <TouchableOpacity onPress={onClickFunction} style={[styles.months, {
+         <TouchableOpacity onPress={() => handleMonthPress()} style={[styles.months, {
       borderBottomWidth: show ? 0:1,}]}>
             <Text style={{fontSize: 20}}>{item.category_name}</Text> 
          
@@ -75,18 +102,22 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
          </TouchableOpacity>
 
          <View style={{ flex:1, height: layoutHeight}}>
-            <Text style={{fontSize: 17, paddingLeft: 10,}}>Theme:</Text>
+            <Text style={{fontSize: 17, paddingLeft: 10,}}>{theme2024[index]}</Text>
             { show ? 
             (
-            item.subcategory.map((item, key) => (
+            
+            currentMonthEntries.map((item, index) => (
             
             <TouchableOpacity
                onPress={()=>handlePress(item)}
                style={styles.dailyEntry}
-               key={key}>
+               key={index}>
                   <Text style={{fontSize: 17, paddingLeft: 10,}}>{item.verse}</Text>
+                  <Text style={{fontSize: 17, paddingLeft: 10,}}>{item.day}</Text>
+                  {/* <View style={[styles.check, styles.border,
+                     {backgroundColor: checker() ? statusColor :'#f5f5f5'}]}></View> */}
                   <View style={[styles.check, styles.border,
-                     {backgroundColor:currentEntry[key]?.status != "" ? currentEntry[key]?.status :'#f5f5f5'}]}></View>
+                     {backgroundColor: item.completion == "ongoing" ? '#ffad33' : item.completion == "completed" ? "#8CFF31":'#f5f5f5'}]}></View>
          
                </TouchableOpacity>
             ))
@@ -94,7 +125,6 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
             ): null
 
          }
-               {console.log(item.date-1)}
 
          </View>
       </View>
@@ -115,10 +145,10 @@ export default function Brp({navigation}){
    const [item, setItem] = useState("");
    const [index, setIndex] = useState(0)
    const [entry, setEntry] = useState([]);
+   const [itemId, setItemId] = useState(0);
 
    const updateLayout = async (index) => {
-   
-      fetchData(index);
+
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       const array = [...listData];
       array.map((value, placeIndex)=>{
@@ -146,10 +176,6 @@ export default function Brp({navigation}){
       setType(item)
    }
 
-   const handleDataId = (item) =>{
-      setDataId(item);
-   }
-
    const handleIndex = (item) =>{
       setIndex(item);
    }
@@ -166,46 +192,31 @@ export default function Brp({navigation}){
       setCurrentEntry(item);
    }
 
-   const fetchData = (index) => {
+   const handleItemId = (item) =>{
+      setItemId(item);
+   }
 
-      db.transaction((tx) => {
-      tx.executeSql(
-         "SELECT * FROM entries  WHERE month = ? ;",
-         [index],
-         (_, result) => {
-            const rows = result.rows;
-            const dataArray = [];
-            for (let i = 0; i < rows.length; i++) {
-            const item = rows.item(i);
-            dataArray.push(item);
-            }
-            setCurrentEntry(dataArray);
-         },
-         (_, error) => {
-            alert("No Entry yet")
-            console.error('Error querying data:', error);
-         }
-      );
-      });
-   };
 
    const handleBRPBackButton = () =>{
-      listData[index]['isExpanded'] = false;
       navigation.navigate("Home");
 
    }
-   
-   useEffect(() => {
-      // Use `setOptions` to update the button that we previously specified
-      // Now the button includes an `onPress` handler to update the count
-      navigation.setOptions({
-      headerLeft: () => (
-         <Pressable title="BrpBackButton" onPress={ ()=>handleBRPBackButton() }>
-            <Ionicons name="chevron-back-sharp" size={30} color="black" />
-         </Pressable>
-      ),
-      });
-   }, [navigation]);
+
+
+useEffect(() => {
+   // Use `setOptions` to update the button that we previously specified
+   // Now the button includes an `onPress` handler to update the count
+   navigation.setOptions({
+   headerLeft: () => (
+      <Pressable title="BrpBackButton" onPress={ ()=>handleBRPBackButton() }>
+         <Ionicons name="chevron-back-sharp" size={30} color="black" />
+      </Pressable>
+   ),
+   });
+}, [navigation]);
+
+useEffect(() => {
+}, [])
 
 
    return (
@@ -237,20 +248,20 @@ export default function Brp({navigation}){
                      handleDisplayEntryModal={handleDisplayEntryModal}
                      handleScripture={handleScripture}
                      handleType={handleType}
-                     handleDataId={handleDataId}
                      handleIndex={handleIndex}
                      handleItem={handleItem}
                      currentEntry={currentEntry}
                      handleEntry={handleEntry}
                      handleCurrentEntry={handleCurrentEntry}
-                     fetchData={fetchData}
+                     handleItemId={handleItemId}
+            
                   />
                }
             />
          </View>
    </View>
 
-   <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" index={index} item={item} handleType={handleType}/>
+   <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" index={index} item={item} handleType={handleType} itemId={itemId} />
 
    <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={entry[0]} handleEntry={handleEntry}/>
 

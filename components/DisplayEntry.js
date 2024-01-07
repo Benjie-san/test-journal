@@ -4,7 +4,9 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import * as SQLite from 'expo-sqlite';
-const db = SQLite.openDatabase('_journal_2023.db');
+const db = SQLite.openDatabase('___journal_2023.db');
+
+const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 
 import styles from '../styles/entryStyle'
@@ -59,7 +61,7 @@ const DeleteConfirmationModal = ({visible, deleteEntry, id, handleModal}) => {
 );
 }
 
-const MenuModal = ({visible, handleCloseModal, deleteEntry, id, status, entry, type, handleStatus}) => {
+const MenuModal = ({visible, handleCloseModal, deleteEntry, id, status, entry, type, handleStatus, }) => {
 const [deleteModal, setDeleteModal] = useState(false);
 
 const handleDeleteModal = () => {
@@ -93,23 +95,48 @@ const onShare = async () => {
    }
 };
 
-
 const handlePressBtn = (item) =>{
    if(item == "Delete"){
       handleDeleteModal();
    }
    else if(item == "#ffad33"){
       handleStatus("#8CFF31");
+      setCompletion("completed", id);
       alert("Marked as done");
    }
    else if(item == "#8CFF31"){
       handleStatus("#ffad33");
+      statusJson("Unmarked as done")
+      setCompletion("ongoing", id);
       alert("Unmarked as done");
    }
    else if(item == "Share"){
       onShare();
    }
+   const database = SQLite.openDatabase("brpDatabase.db");
+   database._db.closeAsync();
    handleCloseModal();
+}
+
+const setCompletion = async (item , id) => {
+
+   const dbBrp = SQLite.openDatabase("brpDatabase.db");
+
+   return new Promise((resolve, reject) => {
+      dbBrp.transaction((tx) => {
+         tx.executeSql('UPDATE brp2024 SET completion = ? WHERE id = ?', [item, id],
+         (_, result) => {
+            console.log(result)
+         },
+         (_, error) => {
+               alert("No Entry yet")
+               console.error('Error querying data:', error);
+         }
+         );
+      })
+      
+   });
+
 }
 
 return(
@@ -183,6 +210,8 @@ const [type, setType] = useState("");
 const lastModified = useRef(new Date());
 const [modifiedDate, setModifiedDate] = useState(lastModified.current.toString());
 const [status, setStatus] = useState("");
+const [month, setMonth] = useState("");
+const [day, setDay] = useState("");
 
 //showing and hiding of editmode
 const [editMode, setEditMode] = useState(false);
@@ -276,7 +305,6 @@ const cleanStates = () =>{
    setObservation("");
    setApplication("");
    setPrayer("");
-   handleType("");
    setEditMode(false);
    handleEntry([]);
 }
@@ -329,6 +357,8 @@ const getItems = () => {
    setType(currentEntry?.type);
    setModifiedDate(currentEntry?.modifiedDate);
    setStatus(currentEntry?.status);
+   setMonth(currentEntry?.month);
+   setDay(currentEntry?.day);
 }
 
 

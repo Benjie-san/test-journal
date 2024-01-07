@@ -3,12 +3,15 @@ import React, {useState, useEffect, useRef} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
 import { AntDesign } from '@expo/vector-icons';
-import * as SQLite from 'expo-sqlite';
-const db = SQLite.openDatabase('_journal_2023.db');
 
+import * as SQLite from 'expo-sqlite';
+const db = SQLite.openDatabase('___journal_2023.db');
+
+const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 import styles from '../styles/entryStyle'
 
-export default function AddEntry({visible, handleModal, verse, type, status, index, item, handleType}) {
+export default function AddEntry({visible, handleModal, verse, type, status, index, item, handleType, itemId,openBrpDatabase}) {
+
 const [dateModalVisible, setDateModalVisible] = useState(false)
 const [entryDate, setEntryDate] = useState(new Date());
 const [date, setDate] = useState("");
@@ -27,7 +30,16 @@ const handleDateModal = () => {
 
 const handleBackButton = () =>{
    setModifiedDate(new Date().toString());
+   
    saveEntry();
+   const database = SQLite.openDatabase("___journal_2023.db");
+   database._db.closeAsync();
+
+   setCompletion(itemId);
+   const database2 = SQLite.openDatabase("brpDatabase.db");
+   database2._db.closeAsync();
+
+
    handleModal(false);
    cleanStates();
 }
@@ -67,7 +79,6 @@ const cleanStates = () =>{
    setObservation("");
    setApplication("");
    setPrayer("");
-   handleType("");
 }
 
 const saveEntry = () => {
@@ -88,6 +99,30 @@ const saveEntry = () => {
          );
       });
    }
+}
+
+const setCompletion = async (id) => {
+
+   const dbBrp = SQLite.openDatabase("brpDatabase.db");
+
+   return new Promise((resolve, reject) => {
+      dbBrp.transaction((tx) => {
+         tx.executeSql('UPDATE brp2024 SET completion = ? WHERE id = ?', ["ongoing", id],
+         (_, result) => {
+            console.log(result)
+         },
+         (_, error) => {
+               alert("No Entry yet")
+               console.error('Error querying data:', error);
+         }
+         );
+      })
+      
+   });
+
+
+
+   
 }
 
 return (

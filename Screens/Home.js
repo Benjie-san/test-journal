@@ -4,13 +4,33 @@ import React, {useEffect, useState, useRef} from 'react';
 import * as SQLite from 'expo-sqlite';
 import * as Notifications from 'expo-notifications';
 
+import * as FileSystem from 'expo-file-system';
+import {Asset} from 'expo-asset';
+
 // import for data
-import data from '../constants/2023.json'
-const db = SQLite.openDatabase('_journal_2023.db');
+import data from '../constants/2023.json';
+const db = SQLite.openDatabase('___journal_2023.db');
 
 // import for components
-import Entry from './Entry';
 import Navbar from '../components/Navbar'
+
+import AddEntry from '../components/AddEntry';
+import DisplayEntry from '../components/DisplayEntry';
+
+
+async function openBrpDatabase() {
+  if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
+    await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
+  }
+  else{
+    await FileSystem.downloadAsync(
+        Asset.fromModule(require('../assets/brpDatabase.db')).uri,
+        FileSystem.documentDirectory + 'SQLite/brpDatabase.db'
+    );
+  }
+  console.log("called?")
+}
+
 
 const AddModal = ({visible, type, handleModal}) => {
   const handlePress = (item) =>{
@@ -34,12 +54,8 @@ const AddModal = ({visible, type, handleModal}) => {
               justifyContent:"center",
           }} >
             <Text style={{fontSize: 20}}>Add</Text>
-            <Pressable onPress={() => handlePress("journal")} style={[styles.btn, {alignItems: "left"}]}>
-              <Text style={{fontSize: 18}}>Journal Entry</Text>
-            </Pressable>
-
-            <Pressable onPress={() => handlePress("sermon")} style={[styles.btn, {alignItems: "left"}]}>
-              <Text style={{fontSize: 18}}>Sermon Notes</Text>
+            <Pressable onPress={() => handlePress()} style={[styles.btn, {alignItems: "left"}]}>
+              <Text style={{fontSize: 18}}>Journal Entry or Sermon Notes</Text>
             </Pressable>
 
             <Pressable onPress={() => handlePress("opm")} style={[styles.btn, {alignItems: "left"}]}>
@@ -55,43 +71,39 @@ const AddModal = ({visible, type, handleModal}) => {
 
 export default function Home({navigation}) {
   
-  const [visible, setVisible] = useState(false);
-  const [visibleDisplay, setVisibleDisplay] = useState(false);
-  const [notes, setNotes] = useState([]);
-  const [date, setDate] = useState("");
-  const [title, setTitle] = useState("");
-  const [scripture, setScripture] = useState("");
-  const [observation, setObservation] = useState("");
-  const [application, setApplication] = useState("");
-  const [prayer, setPrayer] = useState("");
-  const [status, setStatus] = useState("");
-  const [question, setQuestion] = useState("");
+  const [notes, setNotes] = useState([]);// showing all the data
+
+  //states for modal
+  const [addEntryVisible, setAddEntryVisible] = useState(false)
+  const [displayEntryVisible, setDisplayEntryVisible] = useState(false)
+
+  //states for passing props in the modals
   const [type, setType] = useState("");
-  const [key, setKey] = useState(0);
-  const [currentStatus, setCurrentStatus] = useState("");
-  const appState = useRef(AppState.currentState)
-  const [appCurrentState, setAppCurrentState] = useState(appState.current)
+  const [currentEntry, setCurrentEntry] = useState([]);
+  const [scripture, setScripture] = useState("");
+  const [item, setItem] = useState("");
+  const [index, setIndex] = useState(0)
+
+  //states for sorting
   const [allCount, setAllCount] = useState(0);
   const [journalCount, setJournalCount] = useState(0);
   const [opmCount, setOpmCount] = useState(0);
   const [sermonCount, setSermonCount] = useState(0);
-  const lastModified = useRef(new Date());
-  const [modifiedDate, setModifiedDate] = useState(lastModified.current.toString());
+  const sortButtons = ["All", "Journal", "OPM", "Sermon"];
+  const sortButtonCount = [allCount, journalCount, opmCount, sermonCount];
+  const [currentSortBtn, setCurrentSortBtn] = useState("");
+  const [isSelected, setIsSelected] = useState(false);
+
+  //for dates
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const todayDate = new Date();
   const today ={
     day:todayDate.getDate(),
     month: months[todayDate.getMonth()],
+    year: todayDate.getFullYear(),
   };
-  const todayVerse = data[today.month][today.day-1]["verse"];
-  const [visibleAddModal, setVisibleAddModal] = useState(false);
-  const [currentEntry, setCurrentEntry] = useState([]);
-  const [isSelected, setIsSelected] = useState(false);
-  const sortButtons = ["All", "Journal", "OPM", "Sermon"];
-  const sortButtonCount = [allCount, journalCount, opmCount, sermonCount];
-  const [currentSortBtn, setCurrentSortBtn] = useState("");
-  const [navButtonSelected, setNavButtonSelected] = useState(false);
-
+  const todayVerse = data[today.month][today.day-1]["verse"]; // for setting today's verse
+  const [visibleAddModal, setVisibleAddModal] = useState(false); // add modal
 
   // NAVIGATION FUNCTIONS
 
@@ -101,123 +113,85 @@ export default function Home({navigation}) {
 
   //HANDLE FUNCTIONS
 
-  const handleButton = ()  => {
-    if(currentStatus == "ongoing"){
-      if(currentEntry.date !== date || currentEntry.scripture !== scripture || currentEntry.title !== title || currentEntry.question !== question || currentEntry.observation !== observation || currentEntry.application !== application || currentEntry.prayer !== prayer || currentEntry.status !== status){   
-        updateEntry(date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, key, currentStatus);
-        setVisibleDisplay(false);
-        cleanStates();
+  //handles opening adding modal
+  const handleAddEntryModal =  (item) =>{
+    setAddEntryVisible(item);
+    if(item == false){
+      fetchAllData();
+    }
+  }
+  //handles opening display modal
+  const handleDisplayEntryModal =  (item) =>{
+    setDisplayEntryVisible(item);
+    if(item == false){
+      fetchAllData();
+    }
+  }
 
-      }else{
-        setVisibleDisplay(false);
-        cleanStates();
-
-      }
-    } 
-    else if(currentStatus == "today"){
-      console.log('called?');
-        if(title !== '' || question !== '' || observation !== '' || application !== '' || prayer !== ''){
-          saveEntry(date, title, question, scripture, observation, application, prayer, status, type, modifiedDate);
-          
+  const handleDisplayEntryFetch = (id) =>{
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM entries WHERE id = ? ;",
+        [id],
+        (_, result) => {
+            const rows = result.rows;
+            const dataArray = [];
+            for (let i = 0; i < rows.length; i++) {
+              const item = rows.item(i);
+              dataArray.push(item);
+            }
+            setCurrentEntry(...dataArray);
+        },
+        (_, error) => {
+            alert("No Entry yet")
+            console.error('Error querying data:', error);
         }
-        setVisible(false);
-        cleanStates();
-    }
-    else if(currentStatus == "add"){
-      console.log('called?2');
-
-      saveEntry(date, title, question, scripture, observation, application, prayer, status, type, modifiedDate);
-      setVisible(false);
-      cleanStates();
-    }
+      );
+    });
+    handleDisplayEntryModal(true);
   }
-  //handles the display per entry
-  const handleChangeText = (text, valueFor) =>{
-    switch(valueFor){
-      case 'date': setDate(text) ;break;
-      case 'title': setTitle(text) ;break;
-      case 'question': setQuestion(text) ;break;
-      case 'scripture': setScripture(text) ;break;
-      case 'observation': setObservation(text) ;break;
-      case 'application': setApplication(text) ;break;
-      case 'prayer': setPrayer(text) ;break;
-      
-    }
+  
+  const handleScripture = (item) => {
+      setScripture(item)
   }
 
-  //for cleaning states
-  const cleanStates = () =>{
-    setDate("");
-    setTitle("");
-    setQuestion("");
-    setScripture("");
-    setObservation("");
-    setApplication("");
-    setPrayer("");
-    setStatus("");
-    setCurrentStatus("");
+  const handleType = (item) => {
+      setType(item)
+  }
+  
+  const handleItem = (item) =>{
+    setItem(item)
   }
 
-  //for showing the SELECTED ENTRY
-  const handleVisibleModal = (item) => {
-    setCurrentStatus("ongoing");
-    setVisibleDisplay(true);
-    setKey(item.id); 
-    setDate(item.date);
-    setTitle(item.title);
-    setQuestion(item.question);
-    setScripture(item.scripture);
-    setObservation(item.observation);
-    setApplication(item.application);
-    setPrayer(item.prayer);
-    setStatus(item.status);
-    setType(item.type);
-    setModifiedDate(item.modifiedDate);
-    setCurrentEntry(item);
-  };
+  const handleEntry = (item) => {
+      setEntry(item)
+  }
+
+  const handleCurrentEntry = (item) =>{
+      setCurrentEntry(item);
+  }
 
   // when add write button is clicked
   const handleAddButton = (type) => {
     if(type == "today"){
-      const currentDate = todayDate.toDateString();
-      setDate(currentDate);
-      setScripture(todayVerse);
       setType("journal");
-      setCurrentStatus("today");
-
+      setIndex(today.month);
+      setItem(today.day-1);
+      setScripture(todayVerse);
+      handleAddEntryModal(true);
     } else {  
-        if(type == "journal"){
-        setType("journal");
-      } else if(type == "opm"){
+      if(type == "opm"){
         setType("opm");
-      } else if(type == "sermon"){
-        setType("sermon");
+        handleAddEntryModal(true);
+      }else{
+        openBrp()
       }
-      setCurrentStatus("add");
     }
   
-    setStatus("#fff");
-    openBrp()
 }
-
-  const handleChangeScripture = (verse) =>{
-    setScripture(verse);
-  }
-
-  const handleStatusColor = (color) =>{
-    setStatus(color);
-  }
-
-  const handleChangeDate = (item) =>{
-    setDate(item);
-  }
 
   const handleVisibleAddModal = () => {
     setVisibleAddModal(!visibleAddModal);
-  }
-
-  const handleModifiedDate = () => {
-    setModifiedDate(new Date().toString());
   }
 
   const handleSortButtons = (item) =>{
@@ -237,10 +211,6 @@ export default function Home({navigation}) {
     }else{
       fetchData(type);
     }
-  }
-
-  const handleNavButtonSelected = () => {
-    setNavButtonSelected(!navButtonSelected);
   }
 
 
@@ -338,29 +308,6 @@ export default function Home({navigation}) {
     });
   };
 
-  // for deleting the entry
-  const handleDelete = (id) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `DELETE FROM entries WHERE id = ?;`,
-        [id],
-        (_, result) => {
-          console.log('Data deleted successfully');
-        },
-        (_, error) => {
-          console.error('Error deleting data:', error);
-        }
-      );
-    });
-      setNotes((prevData) => prevData.filter((entry) => entry.id !== id));
-      fetchAllData();
-      getJournalCount();
-      getOpmCount();
-      getSermonCount();
-      setVisibleDisplay(false);
-      cleanStates();
-  }
-  
   //creating the table
   const setupDatabase = () => {
     // Check if the table exists
@@ -409,53 +356,6 @@ export default function Home({navigation}) {
       );
     });
   };
-
-  const saveEntry = (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate) => {
-    // adding entry to db
-    let isEmpty = [date, title, question, scripture, observation, application, prayer];
-    if(!isEmpty.every((item)=>item=="")){
-      db.transaction((tx) => {
-        tx.executeSql(
-          'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-          [date, title, question, scripture, observation, application, prayer, status, type, modifiedDate],
-          (tx, results) => {
-            console.log("Success!!!");
-            fetchAllData();
-            getJournalCount();
-            getOpmCount();
-            getSermonCount();
-          },
-          (error) => {
-            // Handle error
-            console.log(error);
-          }
-        );
-      });
-    }
-  }
-
-  const updateEntry = (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, key, currentStatus) => {
-
-    if(currentStatus == "ongoing" && status == "#fff"){
-      setStatus("#fff");
-    }
-    //updating the entry
-      db.transaction((tx) => {
-        tx.executeSql(
-          'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ? WHERE id = ?;',
-          [date, title, question, scripture, observation, application, prayer, status, modifiedDate, key ],
-          (_, result) => {
-            console.log('Data updated successfully');
-          },
-          (_, error) => {
-            console.error('Error updating data:', error);
-          }
-        );
-      });
-    // }
-  }
-
-
 
   // PUSH NOTIFICATION FUNCTIONS
 
@@ -522,75 +422,11 @@ export default function Home({navigation}) {
     console.log(notification);
   };
 
-  // const sendNotificationImmediately = async () => {
-  // try{
-  //   const notificationId = await Notifications.scheduleNotificationAsync({
-  //     content: {
-  //       title: 'Immediate Notification',
-  //       body: 'This is an immediate notification!',
-  //     },
-  //     trigger: null, // null means send immediately
-  //   });
-
-  //   console.log('Notification ID:', notificationId);
-  // } catch (error) {
-  //   console.error('Error scheduling immediate notification:', error);
-  // }
-  // };
-
-
-
   // USE EFFECTS
-
-  //autosave
-  useEffect(() => {
-    if(visibleDisplay == true){
-
-      const autosaveInterval = setInterval( () => {
-        if(currentEntry.date !== date || currentEntry.scripture !== scripture || currentEntry.title !== title || currentEntry.question !== question || currentEntry.observation !== observation || currentEntry.application !== application || currentEntry.prayer !== prayer  || currentEntry.status !== status){
-      
-          updateEntry(date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, key, currentStatus);
-          currentEntry.date = date;
-          currentEntry.scripture = scripture;
-          currentEntry.title = title;
-          currentEntry.question = question;
-          currentEntry.observation = observation;
-          currentEntry.application = application;
-          currentEntry.prayer = prayer;
-          currentEntry.status = status;
-          currentEntry.modifiedDate = modifiedDate;
-        }
-      }, 10000);//timer for autosave to execute
-
-      return () => clearInterval(autosaveInterval);
-    }
-  }, [date, title, question, scripture, observation, application, prayer, status, type, key, currentStatus, currentEntry, modifiedDate]);
-
-  //for drawer when pressed
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', nextAppState => {
-
-      if (appState.current.match(/inactive|background/) &&
-      nextAppState === 'active') {
-        return    
-      }else{
-        if(visibleDisplay === true){
-          updateEntry(date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, key, currentStatus);
-        }
-      }
-
-      appState.current = nextAppState;
-      setAppCurrentState(appState.current);
-      console.log('AppState', appState.current);
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, [visibleDisplay, date, title, question, scripture, observation, application, prayer, status, type, key, currentStatus, modifiedDate]);
 
   // for creating the db
   useEffect(() => {
+    openBrpDatabase()
     setupDatabase();
     fetchAllData();
     getJournalCount();
@@ -618,9 +454,6 @@ export default function Home({navigation}) {
     Notifications.addNotificationReceivedListener(handleNotification);
   }, []);
 
-
-
-
   return (
   <>
     {/*MAIN VIEW*/}
@@ -629,10 +462,10 @@ export default function Home({navigation}) {
     </Pressable> */}
 
     <View style={[styles.homeContainer]}>
-      {/*HEADERR - Todays passage*/}
+      {/*HEADER - Todays passage*/}
       <View style={[styles.passageToday,{width: "100%", height: 'auto', padding: 15, paddingTop: 10, flexDirection: 'column'}]}>
 
-        <Text style={{padding: 5, fontSize: 20, textAlign: "center", fontWeight: 'bold'}}>Journal 2023</Text>
+        <Text style={{padding: 5, fontSize: 20, textAlign: "center", fontWeight: 'bold'}}>Journal { today.year }</Text>
 
         <View style={[{flexDirection: 'row', gap: 60, alignItems: 'center', justifyContent:'space-between'}]} >
           <View style={[{flexDirection: 'column'}]}>
@@ -676,7 +509,7 @@ export default function Home({navigation}) {
         }   
       </View>
 
-      {/*Showing Present items*/}
+      {/*Displaying items*/}
       <View style={styles.notelist}>
         {notes.length === 0 ? (
           <Text style={{fontSize: 30, paddingBottom: 150}}>No Entry Yet</Text>
@@ -688,9 +521,9 @@ export default function Home({navigation}) {
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
               
-                <TouchableOpacity style={[styles.entry, styles.shadowProp]} onPress={ ()=> handleVisibleModal(item) }>
-                  <Text>{`${item.title}`}</Text>
+                <TouchableOpacity style={[styles.entry, styles.shadowProp]} onPress={ ()=> handleDisplayEntryFetch(item.id) }>
                   <Text>{`${item.date}`}</Text>
+                  <Text>{`${item.scripture}`}</Text>
                   <View style={[styles.border, {width: 30, height: 30, backgroundColor: item.status}]}></View>
 
                 </TouchableOpacity>
@@ -705,16 +538,15 @@ export default function Home({navigation}) {
 
     </View>
 
+    {/*MODALSS*/}
+
     {/*ADD ITEM MODAL*/}
-    <Entry visible={visible} handleButton={handleButton} handleChangeText={handleChangeText} date={date} title={title} question={question} scripture={scripture} observation={observation} application={application} prayer={prayer} status={status} type={type} modifiedDate={modifiedDate} itemId={key}
-    handleScripture={handleChangeScripture} currentStatus={currentStatus} handleChangeDate={handleChangeDate} modifyDate={handleModifiedDate} currentEntry={currentEntry} update={updateEntry}/>
+    <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" index={index} item={item} handleType={handleType}/>
 
     {/*For displaying the component*/}
-    <Entry visible={visibleDisplay} handleButton={handleButton} handleChangeText={handleChangeText} date={date} title={title} question={question} scripture={scripture} observation={observation} application={application} prayer={prayer} status={status} type={type} modifiedDate={modifiedDate} handleDelete={handleDelete} itemId={key} handleScripture={handleChangeScripture}
-    statusColor={handleStatusColor} currentStatus={currentStatus} handleChangeDate=
-    {handleChangeDate} modifyDate={handleModifiedDate} currentEntry={currentEntry} update={updateEntry}
-    />
+    <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType}/>
 
+    {/*modal for displaying add entry*/}
     <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal}/>
 
     </>

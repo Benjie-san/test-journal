@@ -12,6 +12,7 @@ import {Home, Brp, Search, More} from './Screens/index'; // all of the screens
 import Ionicons from '@expo/vector-icons/Ionicons'; 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'; 
 
+
 const Tab = createMaterialBottomTabNavigator();
 
 
