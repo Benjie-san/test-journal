@@ -9,7 +9,7 @@ import {Asset} from 'expo-asset';
 
 // import for data
 import data from '../constants/2023.json';
-const db = SQLite.openDatabase('___journal_2023.db');
+const db = SQLite.openDatabase('_journal_database.db');
 
 // import for components
 import Navbar from '../components/Navbar'
@@ -131,7 +131,7 @@ export default function Home({navigation}) {
   const handleDisplayEntryFetch = (id) =>{
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM entries WHERE id = ? ;",
+        "SELECT * FROM entries WHERE dataId = ? ;",
         [id],
         (_, result) => {
             const rows = result.rows;
@@ -267,7 +267,7 @@ export default function Home({navigation}) {
   const fetchData = (type) => {
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM entries  WHERE type = ? ORDER BY modifiedDate DESC;",
+        "SELECT * FROM entries WHERE type = ? ORDER BY modifiedDate DESC;",
         [type],
         (_, result) => {
           const rows = result.rows;
@@ -322,7 +322,7 @@ export default function Home({navigation}) {
             // Table doesn't exist, create it
             db.transaction((tx) => {
               tx.executeSql(
-                'CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, title TEXT, question TEXT, scripture TEXT, observation TEXT, application TEXT, prayer TEXT, status TEXT, type TEXT, modifiedDate TEXT, month TEXT, day TEXT);',
+                'CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, title TEXT, question TEXT, scripture TEXT, observation TEXT, application TEXT, prayer TEXT, status TEXT, type TEXT, modifiedDate TEXT, dataId INTEGER, month TEXT);',
                 [],
                 (_, result) => {
                   console.log('Table created successfully');
@@ -432,7 +432,7 @@ export default function Home({navigation}) {
     getJournalCount();
     getOpmCount();
     getSermonCount();
-  }, []);
+  }, [openBrpDatabase]);
 
   //for push notifications
   useEffect(() => {
@@ -457,9 +457,9 @@ export default function Home({navigation}) {
   return (
   <>
     {/*MAIN VIEW*/}
-    {/* <Pressable style={styles.btn}title="Send Notification" onPress={()=> sendNotificationImmediately()}>
-      <Text>Notification</Text>  
-    </Pressable> */}
+    <TouchableOpacity style={styles.btn}title="Send Notification" onPress={()=> deleteAllEntries()}>
+      <Text>DELETE ALL</Text>  
+    </TouchableOpacity>
 
     <View style={[styles.homeContainer]}>
       {/*HEADER - Todays passage*/}
@@ -521,9 +521,9 @@ export default function Home({navigation}) {
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
               
-                <TouchableOpacity style={[styles.entry, styles.shadowProp]} onPress={ ()=> handleDisplayEntryFetch(item.id) }>
+                <TouchableOpacity style={[styles.entry, styles.shadowProp]} onPress={ ()=> handleDisplayEntryFetch(item.dataId) }>
                   <Text>{`${item.date}`}</Text>
-                  <Text>{`${item.scripture}`}</Text>
+                  <Text>{`${item.dataId}`}</Text>
                   <View style={[styles.border, {width: 30, height: 30, backgroundColor: item.status}]}></View>
 
                 </TouchableOpacity>

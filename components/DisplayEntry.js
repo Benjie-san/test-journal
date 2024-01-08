@@ -4,7 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import * as SQLite from 'expo-sqlite';
-const db = SQLite.openDatabase('___journal_2023.db');
+const db = SQLite.openDatabase('_journal_database.db');
 
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
@@ -101,42 +101,17 @@ const handlePressBtn = (item) =>{
    }
    else if(item == "#ffad33"){
       handleStatus("#8CFF31");
-      setCompletion("completed", id);
       alert("Marked as done");
    }
    else if(item == "#8CFF31"){
       handleStatus("#ffad33");
-      statusJson("Unmarked as done")
-      setCompletion("ongoing", id);
       alert("Unmarked as done");
    }
    else if(item == "Share"){
       onShare();
    }
-   const database = SQLite.openDatabase("brpDatabase.db");
-   database._db.closeAsync();
+
    handleCloseModal();
-}
-
-const setCompletion = async (item , id) => {
-
-   const dbBrp = SQLite.openDatabase("brpDatabase.db");
-
-   return new Promise((resolve, reject) => {
-      dbBrp.transaction((tx) => {
-         tx.executeSql('UPDATE brp2024 SET completion = ? WHERE id = ?', [item, id],
-         (_, result) => {
-            console.log(result)
-         },
-         (_, error) => {
-               alert("No Entry yet")
-               console.error('Error querying data:', error);
-         }
-         );
-      })
-      
-   });
-
 }
 
 return(
@@ -312,7 +287,7 @@ const cleanStates = () =>{
 const handleDelete = (id) => {
    db.transaction((tx) => {
       tx.executeSql(
-         `DELETE FROM entries WHERE id = ?;`,
+         `DELETE FROM entries WHERE dataId = ?;`,
          [id],
          (_, result) => {
          console.log('Data deleted successfully');
@@ -330,7 +305,7 @@ const updateEntry = () => {
 
       db.transaction((tx) => {
          tx.executeSql(
-         'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ? WHERE id = ?;',
+         'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ? WHERE dataId = ?;',
          [date, title, question, scripture, observation, application, prayer, status, modifiedDate, id ],
          (_, result) => {
             console.log('Data updated successfully');
@@ -346,7 +321,7 @@ const updateEntry = () => {
 
 // gets the item from present data
 const getItems = () => {
-   setId(currentEntry?.id);
+   setId(currentEntry?.dataId);
    setDate(currentEntry?.date);
    setTitle(currentEntry?.title);
    setScripture(currentEntry?.scripture);
@@ -362,9 +337,11 @@ const getItems = () => {
 }
 
 
+
+
 useEffect(() => {
    getItems();
-}, [currentEntry])
+}, [])
 
 // EDIT MODE
 useEffect(() => {

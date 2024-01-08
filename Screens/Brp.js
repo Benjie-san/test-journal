@@ -5,8 +5,10 @@ import data from '../constants/2023.json'
 import AddEntry from '../components/AddEntry';
 import DisplayEntry from '../components/DisplayEntry';
 import Ionicons from '@expo/vector-icons/Ionicons';
-
+const dbJournal = SQLite.openDatabase("_journal_database.db");
 import * as SQLite from 'expo-sqlite';
+      
+const dbBrp = SQLite.openDatabase("brpDatabase.db");
 
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const theme2024 =["SYSTEMS IMPROVEMENT", "SYSTEMS IMPROVEMENT", "MACRO-EVANGELISM","MACRO-EVANGELISM", 'ACCOUNT SETTLEMENT', 'ACCOUNT SETTLEMENT', "RELATIONAL DISCIPLESHIP", "RELATIONAL DISCIPLESHIP", "TRAINING-CENTERED", "TRAINING-CENTERED", "CHURCH", "CHURCH"];
@@ -20,38 +22,97 @@ let content = Object.keys(data).map( (key, index) =>
    )
 );
 
-const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntry, handleDisplayEntryModal, handleScripture, handleType, handleCurrentEntry, handleItem, handleIndex, currentEntry, handleEntry, handleItemId}) =>{
+const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntry, handleDisplayEntryModal, handleScripture, handleType, handleIndex, handleEntry, handleItemId}) =>{
    
    const [layoutHeight, setlayoutHeight] = useState(0);
    const [show, setShow] = useState(false);
    const [currentMonthEntries, setCurrentMonthEntries] = useState([])
+   const [monthCompletion, setMonthCompletion] = useState([]);
+   const [idArray, setIdArray] = useState([]);
+   const [idPending, setIdpending] = useState([]);
+   const [idComplete, setIdcomplete] = useState([]);
 
 
-   const handlePress = (item) => {
+   const handleItemPress = (item) => {
       handleItemId(item.id)
-      handleItem(item);
-      handleIndex(index);
+      handleIndex(index)
 
-      if(item.completion == "none"){
+
+      if( idArray.includes(item.id) ){                  
+         fetchCurrentEntry(item.id)
+         handleDisplayEntryModal(true)
+      } else {
          handleType( item.verse !== 'Sermon Notes' ? 'journal':'sermon' );
          handleScripture( item.verse !=='Sermon Notes' ? item.verse: '' );
          handleAddEntry(true)
-         
-      } else {
-
-         handleType( item.verse !== 'Sermon Notes' ? 'journal':'sermon' );
-         handleEntry(newArr)
-         handleDisplayEntryModal(true)
       }
-      handleCurrentEntry([]);
+      setMonthCompletion([])
    }
    
-   const fetchData = async (item) => {
-      const dbBrp =  SQLite.openDatabase('brpDatabase.db');
+   const fetchCurrentMonth =   (item) => {
+      dbBrp.transaction((tx) => {
+         tx.executeSql('SELECT * FROM brp2024 WHERE month = ?', [item],
+         (_, result) => {
+            const rows = result.rows;
+            const dataArray = [];
+            for (let i = 0; i < rows.length; i++) {
+               const item = rows.item(i);
+               dataArray.push(item);
+            }
+            setCurrentMonthEntries([...dataArray]);
+         },
+         (_, error) => {
+               alert("No Entry yet")
+               console.error('Error querying data:', error);
+         }
+         );
+      })
 
-      return new Promise((resolve, reject) => {
-         dbBrp.transaction((tx) => {
-            tx.executeSql('SELECT * FROM brp2024 WHERE month = ?', [item],
+
+   }
+
+   const fetchMonthCompletion = (item) =>{
+
+      dbJournal.transaction((tx) => {
+         tx.executeSql(
+            "SELECT * FROM entries WHERE month = ? ;",
+            [item],
+            (_, result) => {
+               const rows = result.rows;
+               const dataArray = [];
+               const dataArray2 = [];
+               const dataArray3  = [];
+               const dataArray4  = [];
+
+               for (let i = 0; i < rows.length; i++) {
+                  const item = rows.item(i);
+                  dataArray.push(item);
+                  dataArray2.push(item.dataId);
+                  if(item.status == '#ffad33'){
+                     dataArray3.push(item.dataId);
+                  }else if(item.status == '#8CFF31'){
+                     dataArray4.push(item.dataId);
+                  }
+               }
+               setMonthCompletion(dataArray);
+               setIdArray(dataArray2);
+               setIdpending(dataArray3);
+               setIdcomplete(dataArray4);
+            },
+            (_, error) => {
+               alert("No Entry yet")
+               console.error('Error querying data:', error);
+            }
+         );
+      });
+   }
+
+   const fetchCurrentEntry = (id) =>{
+   
+      dbJournal.transaction((tx) => {
+         tx.executeSql(
+            "SELECT * FROM entries WHERE dataId = ? ;",
+            [id],
             (_, result) => {
                const rows = result.rows;
                const dataArray = [];
@@ -59,23 +120,22 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
                   const item = rows.item(i);
                   dataArray.push(item);
                }
-               setCurrentMonthEntries([...dataArray]);
+               handleEntry(...dataArray);
             },
             (_, error) => {
-                  alert("No Entry yet")
-                  console.error('Error querying data:', error);
+               alert("No Entry yet")
+               console.error('Error querying data:', error);
             }
-            );
-         })
-         
+         );
       });
-   
-}
+   }
 
    const handleMonthPress = () =>{
       onClickFunction()
-      fetchData(item.category_name);
+      fetchCurrentMonth(item.category_name);
+      fetchMonthCompletion(item.category_name);
    }
+
 
    useEffect(() => {
 
@@ -101,25 +161,29 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
             <Entypo name={show ? "chevron-thin-up" : "chevron-thin-down"} size={28} color="black" />
          </TouchableOpacity>
 
-         <View style={{ flex:1, height: layoutHeight}}>
-            <Text style={{fontSize: 17, paddingLeft: 10,}}>{theme2024[index]}</Text>
+         <View style={{ height: layoutHeight, overflow:'hidden'}}>
+         { show ?  (<Text style={{fontSize: 17, paddingLeft: 10,}}>{theme2024[index]}</Text>) : null }
             { show ? 
             (
             
             currentMonthEntries.map((item, index) => (
+   
+               <TouchableOpacity
+                  onPress={()=>handleItemPress(item, index)}
+                  style={styles.dailyEntry}
+                  key={index}>
+                     <View style={{flexDirection: 'row'}}> 
+                        <Text style={{fontSize: 17, paddingLeft: 10,}}>{item.day},</Text>
+                        <Text style={{fontSize: 17, paddingLeft: 10,}}>{item.verse}</Text>
+                     </View>
+
+                     <View style={[styles.check, styles.border,
+                        {backgroundColor: idArray.includes(item.id) ? idPending.includes(item.id) ?  "#ffad33" : idComplete.includes(item.id) ? "#8CFF31":'#f5f5f5' : '#fff'}]}>
+
+                     </View>
             
-            <TouchableOpacity
-               onPress={()=>handlePress(item)}
-               style={styles.dailyEntry}
-               key={index}>
-                  <Text style={{fontSize: 17, paddingLeft: 10,}}>{item.verse}</Text>
-                  <Text style={{fontSize: 17, paddingLeft: 10,}}>{item.day}</Text>
-                  {/* <View style={[styles.check, styles.border,
-                     {backgroundColor: checker() ? statusColor :'#f5f5f5'}]}></View> */}
-                  <View style={[styles.check, styles.border,
-                     {backgroundColor: item.completion == "ongoing" ? '#ffad33' : item.completion == "completed" ? "#8CFF31":'#f5f5f5'}]}></View>
-         
                </TouchableOpacity>
+         
             ))
 
             ): null
@@ -134,7 +198,7 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
 
 export default function Brp({navigation}){
 
-   UIManager.setLayoutAnimationEnabledExperimental(true);
+   UIManager.setLayoutAnimationEnabledExperimental;
    const [listData, setListData] = useState(content); // state that populates the items from data
    const [addEntryVisible, setAddEntryVisible] = useState(false)
    const [displayEntryVisible, setDisplayEntryVisible] = useState(false)
@@ -142,7 +206,6 @@ export default function Brp({navigation}){
    const [scripture, setScripture] = useState("");
    const [type, setType] = useState("");
    const [currentEntry, setCurrentEntry] = useState([]);
-   const [item, setItem] = useState("");
    const [index, setIndex] = useState(0)
    const [entry, setEntry] = useState([]);
    const [itemId, setItemId] = useState(0);
@@ -180,9 +243,6 @@ export default function Brp({navigation}){
       setIndex(item);
    }
 
-   const handleItem = (item) =>{
-      setItem(item)
-   }
 
    const handleEntry = (item) => {
       setEntry(item)
@@ -199,7 +259,6 @@ export default function Brp({navigation}){
 
    const handleBRPBackButton = () =>{
       navigation.navigate("Home");
-
    }
 
 
@@ -249,7 +308,6 @@ useEffect(() => {
                      handleScripture={handleScripture}
                      handleType={handleType}
                      handleIndex={handleIndex}
-                     handleItem={handleItem}
                      currentEntry={currentEntry}
                      handleEntry={handleEntry}
                      handleCurrentEntry={handleCurrentEntry}
@@ -261,9 +319,9 @@ useEffect(() => {
          </View>
    </View>
 
-   <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" index={index} item={item} handleType={handleType} itemId={itemId} />
+   <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} itemId={itemId} index={index}/>
 
-   <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={entry[0]} handleEntry={handleEntry}/>
+   <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={entry} handleEntry={handleEntry} itemId={itemId}  />
 
    </>
    )

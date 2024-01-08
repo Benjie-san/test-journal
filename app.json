@@ -4,7 +4,7 @@
     "slug": "test-journal",
     "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/cbc-icon.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -20,12 +20,12 @@
     "android": {
       "package": "com.journal.journal",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/cbc-icon.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
-      "favicon": "./assets/cbc-icon.png"
+      "favicon": "./assets/icon.png"
     },
     "extra": {
       "eas": {

@@ -5,12 +5,12 @@ import Modal from "react-native-modal";
 import { AntDesign } from '@expo/vector-icons';
 
 import * as SQLite from 'expo-sqlite';
-const db = SQLite.openDatabase('___journal_2023.db');
+const db = SQLite.openDatabase('_journal_database.db');
 
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 import styles from '../styles/entryStyle'
 
-export default function AddEntry({visible, handleModal, verse, type, status, index, item, handleType, itemId,openBrpDatabase}) {
+export default function AddEntry({visible, handleModal, verse, type, status, handleType, itemId, index}) {
 
 const [dateModalVisible, setDateModalVisible] = useState(false)
 const [entryDate, setEntryDate] = useState(new Date());
@@ -32,13 +32,6 @@ const handleBackButton = () =>{
    setModifiedDate(new Date().toString());
    
    saveEntry();
-   const database = SQLite.openDatabase("___journal_2023.db");
-   database._db.closeAsync();
-
-   setCompletion(itemId);
-   const database2 = SQLite.openDatabase("brpDatabase.db");
-   database2._db.closeAsync();
-
 
    handleModal(false);
    cleanStates();
@@ -87,8 +80,8 @@ const saveEntry = () => {
    if(!isEmpty.every((item)=>item=="")){
       db.transaction((tx) => {
          tx.executeSql(
-         'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, month, day) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-         [date, title, question, verse, observation, application, prayer, status, type, modifiedDate, index, item.date-1],
+         'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+         [date, title, question, verse, observation, application, prayer, status, type, modifiedDate, itemId, months[index]],
          (tx, results) => {
             console.log("Success!!!");
          },
@@ -101,29 +94,6 @@ const saveEntry = () => {
    }
 }
 
-const setCompletion = async (id) => {
-
-   const dbBrp = SQLite.openDatabase("brpDatabase.db");
-
-   return new Promise((resolve, reject) => {
-      dbBrp.transaction((tx) => {
-         tx.executeSql('UPDATE brp2024 SET completion = ? WHERE id = ?', ["ongoing", id],
-         (_, result) => {
-            console.log(result)
-         },
-         (_, error) => {
-               alert("No Entry yet")
-               console.error('Error querying data:', error);
-         }
-         );
-      })
-      
-   });
-
-
-
-   
-}
 
 return (
    <>
