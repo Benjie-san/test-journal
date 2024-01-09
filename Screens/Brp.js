@@ -37,7 +37,7 @@ async function openBrpDatabase() {
    }
    return SQLite.openDatabase("brpDatabase.db");
 }
-const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntry, handleDisplayEntryModal, handleScripture, handleType, handleIndex, handleEntry, handleItemId}) =>{
+const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntry, handleDisplayEntryModal, handleScripture, handleType, handleIndex, handleEntry, handleItemId, displayEntryVisible, addEntryVisible}) =>{
    
    const [layoutHeight, setlayoutHeight] = useState(0);
    const [show, setShow] = useState(false);
@@ -187,6 +187,16 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
 
    }, [item.isExpanded])
 
+   useEffect(() => {
+   
+      if(item !== null){
+         if(addEntryVisible == false || displayEntryVisible == false){
+            fetchMonthCompletion(item.category_name);
+         }
+      }
+
+   }, [handleAddEntry, handleDisplayEntryModal, item.category_name])
+   
 
    return (
    <>
@@ -311,9 +321,6 @@ useEffect(() => {
    });
 }, [navigation]);
 
-useEffect(() => {
-}, [])
-
 
    return (
    <>
@@ -349,6 +356,8 @@ useEffect(() => {
                      handleEntry={handleEntry}
                      handleCurrentEntry={handleCurrentEntry}
                      handleItemId={handleItemId}
+                     addEntryVisible={addEntryVisible}
+                     displayEntryVisible={displayEntryVisible}
             
                   />
                }

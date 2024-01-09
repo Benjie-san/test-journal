@@ -16,7 +16,7 @@ const [dateModalVisible, setDateModalVisible] = useState(false)
 const [entryDate, setEntryDate] = useState(new Date());
 const [date, setDate] = useState("");
 const [title, setTitle] = useState("");
-const [scripture, setScripture] = useState(verse);
+const [scripture, setScripture] = useState("");
 const [observation, setObservation] = useState("");
 const [application, setApplication] = useState("");
 const [prayer, setPrayer] = useState("");
@@ -53,6 +53,7 @@ const handleChangeDate = (item) =>{
 }
 
 const handleChangeText = (text, valueFor) =>{
+
    switch(valueFor){
       case 'title': setTitle(text) ;break;
       case 'question': setQuestion(text) ;break;
@@ -81,7 +82,7 @@ const saveEntry = () => {
       db.transaction((tx) => {
          tx.executeSql(
          'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-         [date, title, question, verse, observation, application, prayer, status, type, modifiedDate, itemId, months[index]],
+         [date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, itemId, months[index]],
          (tx, results) => {
             console.log("Success!!!");
          },
@@ -93,6 +94,12 @@ const saveEntry = () => {
       });
    }
 }
+
+useEffect(() => {
+   if(type == 'journal'){
+      setScripture(verse)
+   }
+}, [verse, scripture, setScripture])
 
 
 return (
@@ -161,7 +168,7 @@ return (
                <View style={styles.inputSubContainer}>
                   <Text>{type === "sermon" ? "Text:": type == "opm" ? 'OPM Passage:' : 'Scripture:'}</Text>
 
-                     <TextInput style={styles.touchable} editable onChangeText={ text => handleChangeText(text, "scripture") } value={verse}/>
+                     <TextInput style={styles.touchable} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
          
                </View>
 

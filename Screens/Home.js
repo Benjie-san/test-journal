@@ -113,22 +113,16 @@ export default function Home({navigation}) {
   const openBrp = () => {
     navigation.navigate("BRP");
   }
-  console.log(currentEntry);
   //HANDLE FUNCTIONS
 
   //handles opening adding modal
   const handleAddEntryModal =  (item) =>{
     setAddEntryVisible(item);
-    if(item == false){
-      fetchAllData();
-    }
   }
   //handles opening display modal
   const handleDisplayEntryModal =  (item) =>{
     setDisplayEntryVisible(item);
-    if(item == false){
-      fetchAllData();
-    }
+
   }
 
   const handleDisplayEntryFetch = (id) =>{
@@ -466,6 +460,16 @@ export default function Home({navigation}) {
   // USE EFFECTS
 
   // for creating the db
+  // useEffect(() => {
+
+  //       if(addEntryVisible == false || displayEntryVisible == false){
+  //           fetchAllData()
+  //       }
+      
+
+  // }, [])
+
+
   useEffect(() => {
     //openBrpDatabase()
     setupDatabase();

@@ -321,7 +321,7 @@ const updateEntry = () => {
 }
 
 // gets the item from present data
-const getItems = () => {
+const getItems = (currentEntry) => {
    setId(currentEntry?.dataId);
    setDate(currentEntry?.date);
    setTitle(currentEntry?.title);
@@ -337,12 +337,9 @@ const getItems = () => {
    setDay(currentEntry?.day);
 }
 
-
-
-
 useEffect(() => {
-   getItems();
-}, [getItems])
+   getItems(currentEntry);
+}, [currentEntry])
 
 // EDIT MODE
 useEffect(() => {
