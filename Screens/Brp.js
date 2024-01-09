@@ -7,8 +7,10 @@ import DisplayEntry from '../components/DisplayEntry';
 import Ionicons from '@expo/vector-icons/Ionicons';
 const dbJournal = SQLite.openDatabase("_journal_database.db");
 import * as SQLite from 'expo-sqlite';
-      
-const dbBrp = SQLite.openDatabase("brpDatabase.db");
+
+import * as FileSystem from 'expo-file-system';
+import {Asset} from 'expo-asset';
+//const dbBrp = SQLite.openDatabase("brpDatabase.db");
 
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const theme2024 =["SYSTEMS IMPROVEMENT", "SYSTEMS IMPROVEMENT", "MACRO-EVANGELISM","MACRO-EVANGELISM", 'ACCOUNT SETTLEMENT', 'ACCOUNT SETTLEMENT', "RELATIONAL DISCIPLESHIP", "RELATIONAL DISCIPLESHIP", "TRAINING-CENTERED", "TRAINING-CENTERED", "CHURCH", "CHURCH"];
@@ -22,6 +24,19 @@ let content = Object.keys(data).map( (key, index) =>
    )
 );
 
+
+async function openBrpDatabase() {
+   if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
+      await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
+      }
+   else{
+      await FileSystem.downloadAsync(
+            Asset.fromModule(require('../assets/brpDatabase.db')).uri,
+            FileSystem.documentDirectory + 'SQLite/brpDatabase.db'
+      );
+   }
+   return SQLite.openDatabase("brpDatabase.db");
+}
 const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntry, handleDisplayEntryModal, handleScripture, handleType, handleIndex, handleEntry, handleItemId}) =>{
    
    const [layoutHeight, setlayoutHeight] = useState(0);
@@ -49,27 +64,50 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
       setMonthCompletion([])
    }
    
-   const fetchCurrentMonth =   (item) => {
-      dbBrp.transaction((tx) => {
-         tx.executeSql('SELECT * FROM brp2024 WHERE month = ?', [item],
-         (_, result) => {
-            const rows = result.rows;
-            const dataArray = [];
-            for (let i = 0; i < rows.length; i++) {
-               const item = rows.item(i);
-               dataArray.push(item);
+   // const fetchCurrentMonth =   (item) => {
+   //    dbBrp.transaction((tx) => {
+   //       tx.executeSql('SELECT * FROM brp2024 WHERE month = ?', [item],
+   //       (_, result) => {
+   //          const rows = result.rows;
+   //          const dataArray = [];
+   //          for (let i = 0; i < rows.length; i++) {
+   //             const item = rows.item(i);
+   //             dataArray.push(item);
+   //          }
+   //          setCurrentMonthEntries([...dataArray]);
+   //       },
+   //       (_, error) => {
+   //             alert("No Entry yet")
+   //             console.error('Error querying data:', error);
+   //       }
+   //       );
+   //    })
+
+
+   // }
+   const fetchCurrentMonth = async (item) => {
+      const dbBrp = await openBrpDatabase();
+      return new Promise( () => {
+         dbBrp.transaction((tx) => {
+            tx.executeSql('SELECT * FROM brp2024 WHERE month = ?', [item],
+            (_, result) => {
+               const rows = result.rows;
+               const dataArray = [];
+               for (let i = 0; i < rows.length; i++) {
+                  const item = rows.item(i);
+                  dataArray.push(item);
+               }
+               setCurrentMonthEntries([...dataArray]);
+            },
+            (_, error) => {
+                  alert("No Entry yet")
+                  console.error('Error querying data:', error);
             }
-            setCurrentMonthEntries([...dataArray]);
-         },
-         (_, error) => {
-               alert("No Entry yet")
-               console.error('Error querying data:', error);
-         }
-         );
-      })
-
-
+            );
+         })
+      });
    }
+
 
    const fetchMonthCompletion = (item) =>{
 

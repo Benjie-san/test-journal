@@ -18,18 +18,18 @@ import AddEntry from '../components/AddEntry';
 import DisplayEntry from '../components/DisplayEntry';
 
 
-async function openBrpDatabase() {
-  if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
-    await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
-  }
-  else{
-    await FileSystem.downloadAsync(
-        Asset.fromModule(require('../assets/brpDatabase.db')).uri,
-        FileSystem.documentDirectory + 'SQLite/brpDatabase.db'
-    );
-  }
-  console.log("called?")
-}
+// async function openBrpDatabase() {
+//   if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
+//     await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
+//   }
+//   else{
+//     await FileSystem.downloadAsync(
+//         Asset.fromModule(require('../assets/brpDatabase.db')).uri,
+//         FileSystem.documentDirectory + 'SQLite/brpDatabase.db'
+//     );
+//   }
+//   console.log("called?")
+//}
 
 
 const AddModal = ({visible, type, handleModal}) => {
@@ -366,19 +366,19 @@ export default function Home({navigation}) {
     // Schedule morning notification
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Morning Notification',
-        body: 'Good morning! Time to check your tasks.',
+        title: 'Good Morning!',
+        body: `Today's Passage is ${todayVerse}`,
       },
-      trigger: { hour: morningNotificationTime.hours, minute: morningNotificationTime.minutes, repeats: true },
+      trigger: { seconds: (morningNotificationTime.hours*60) +  (morningNotificationTime.minutes*60) },
     });
 
     // Schedule evening notification
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Evening Notification',
-        body: 'Good evening! Have you completed your tasks today?',
+        title: 'Good Evening',
+        body: `Have you fisnished your Journal today? The passage is found in ${todayVerse}`,
       },
-      trigger: { hour: eveningNotificationTime.hours, minute: eveningNotificationTime.minutes, repeats: true },
+      trigger: { seconds: (eveningNotificationTime.hours*60) +  (eveningNotificationTime.minutes*60) },
     });
   };
 
@@ -426,13 +426,13 @@ export default function Home({navigation}) {
 
   // for creating the db
   useEffect(() => {
-    openBrpDatabase()
+    //openBrpDatabase()
     setupDatabase();
     fetchAllData();
     getJournalCount();
     getOpmCount();
     getSermonCount();
-  }, [openBrpDatabase]);
+  }, []);
 
   //for push notifications
   useEffect(() => {
@@ -456,14 +456,14 @@ export default function Home({navigation}) {
 
   return (
   <>
-    {/*MAIN VIEW*/}
+    {/* 
     <TouchableOpacity style={styles.btn}title="Send Notification" onPress={()=> deleteAllEntries()}>
       <Text>DELETE ALL</Text>  
-    </TouchableOpacity>
-
+    </TouchableOpacity> */}
+    {/*MAIN VIEW*/}
     <View style={[styles.homeContainer]}>
       {/*HEADER - Todays passage*/}
-      <View style={[styles.passageToday,{width: "100%", height: 'auto', padding: 15, paddingTop: 10, flexDirection: 'column'}]}>
+      <View style={[styles.passageToday,{width: "100%", height: 'auto', padding: 15, paddingTop: 20, flexDirection: 'column'}]}>
 
         <Text style={{padding: 5, fontSize: 20, textAlign: "center", fontWeight: 'bold'}}>Journal { today.year }</Text>
 
