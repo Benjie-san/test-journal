@@ -17,19 +17,22 @@ import Navbar from '../components/Navbar'
 import AddEntry from '../components/AddEntry';
 import DisplayEntry from '../components/DisplayEntry';
 
+import AntDesign from '@expo/vector-icons/AntDesign';
+import reactDom from 'react-dom';
 
-// async function openBrpDatabase() {
-//   if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
-//     await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
-//   }
-//   else{
-//     await FileSystem.downloadAsync(
-//         Asset.fromModule(require('../assets/brpDatabase.db')).uri,
-//         FileSystem.documentDirectory + 'SQLite/brpDatabase.db'
-//     );
-//   }
-//   console.log("called?")
-//}
+
+async function openBrpDatabase() {
+  if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
+    await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
+    }
+  else{
+    await FileSystem.downloadAsync(
+          Asset.fromModule(require('../assets/brpDatabase.db')).uri,
+          FileSystem.documentDirectory + 'SQLite/brpDatabase.db'
+    );
+}
+  return SQLite.openDatabase("brpDatabase.db");
+}
 
 
 const AddModal = ({visible, type, handleModal}) => {
@@ -72,7 +75,7 @@ const AddModal = ({visible, type, handleModal}) => {
 export default function Home({navigation}) {
   
   const [notes, setNotes] = useState([]);// showing all the data
-
+  const [notesId, setNotesId] = useState([]);
   //states for modal
   const [addEntryVisible, setAddEntryVisible] = useState(false)
   const [displayEntryVisible, setDisplayEntryVisible] = useState(false)
@@ -102,15 +105,15 @@ export default function Home({navigation}) {
     month: months[todayDate.getMonth()],
     year: todayDate.getFullYear(),
   };
-  const todayVerse = data[today.month][today.day-1]["verse"]; // for setting today's verse
+  //const todayVerse = data[today.month][today.day-1]["verse"]; // for setting today's verse
   const [visibleAddModal, setVisibleAddModal] = useState(false); // add modal
-
+  const [todayVerse, setTodayVerse] = useState("");
   // NAVIGATION FUNCTIONS
 
   const openBrp = () => {
     navigation.navigate("BRP");
   }
-
+  console.log(currentEntry);
   //HANDLE FUNCTIONS
 
   //handles opening adding modal
@@ -175,9 +178,7 @@ export default function Home({navigation}) {
   const handleAddButton = (type) => {
     if(type == "today"){
       setType("journal");
-      setIndex(today.month);
-      setItem(today.day-1);
-      setScripture(todayVerse);
+      setScripture(todayVerse.verse);
       handleAddEntryModal(true);
     } else {  
       if(type == "opm"){
@@ -284,6 +285,7 @@ export default function Home({navigation}) {
       );
     });
   };
+
   const fetchAllData = () => {
     setCurrentSortBtn("All");
     setIsSelected(true);
@@ -294,12 +296,18 @@ export default function Home({navigation}) {
         (_, result) => {
           const rows = result.rows;
           const dataArray = [];
+          const dataArray2 = [];
+
           setAllCount(rows.length);
           for (let i = 0; i < rows.length; i++) {
             const item = rows.item(i);
             dataArray.push(item);
+            dataArray2.push(item.dataId);
+
           }
           setNotes(dataArray);
+          setNotesId(dataArray2);
+
         },
         (_, error) => {
           console.error('Error querying data:', error);
@@ -307,6 +315,29 @@ export default function Home({navigation}) {
       );
     });
   };
+
+  const fetchTodayVerse = async () => {
+    const dbBrp = await openBrpDatabase();
+    return new Promise( () => {
+      dbBrp.transaction((tx) => {
+          tx.executeSql('SELECT * FROM brp2024 WHERE month = ? AND day = ?', [today.month, today.day],
+          (_, result) => {
+            const rows = result.rows;
+            const dataArray = [];
+            for (let i = 0; i < rows.length; i++) {
+              const item = rows.item(i);
+              dataArray.push(item);
+            }
+            setTodayVerse(...dataArray);
+          },
+          (_, error) => {
+                alert("No Entry yet")
+                console.error('Error querying data:', error);
+          }
+          );
+      })
+    });
+  }
 
   //creating the table
   const setupDatabase = () => {
@@ -326,6 +357,11 @@ export default function Home({navigation}) {
                 [],
                 (_, result) => {
                   console.log('Table created successfully');
+                  fetchAllData();
+                  getJournalCount();
+                  getOpmCount();
+                  getSermonCount();
+                  fetchTodayVerse();
                 },
                 (_, error) => {
                   console.error('Error creating table:', error);
@@ -334,6 +370,11 @@ export default function Home({navigation}) {
             });
           } else {
             console.log('Table already exists');
+            fetchAllData();
+            getJournalCount();
+            getOpmCount();
+            getSermonCount();
+            fetchTodayVerse();
           }
         },
 
@@ -367,18 +408,18 @@ export default function Home({navigation}) {
     await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Good Morning!',
-        body: `Today's Passage is ${todayVerse}`,
+        body: `Have you completed your journal passage for today?`,
       },
-      trigger: { seconds: (morningNotificationTime.hours*60) +  (morningNotificationTime.minutes*60) },
+      trigger: { seconds: 100, repeats: false },
     });
 
     // Schedule evening notification
     await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Good Evening',
-        body: `Have you fisnished your Journal today? The passage is found in ${todayVerse}`,
+        body: `Have you fisnished your Journal today?`,
       },
-      trigger: { seconds: (eveningNotificationTime.hours*60) +  (eveningNotificationTime.minutes*60) },
+      trigger: { seconds: 100, repeats: false },
     });
   };
 
@@ -428,10 +469,6 @@ export default function Home({navigation}) {
   useEffect(() => {
     //openBrpDatabase()
     setupDatabase();
-    fetchAllData();
-    getJournalCount();
-    getOpmCount();
-    getSermonCount();
   }, []);
 
   //for push notifications
@@ -451,7 +488,7 @@ export default function Home({navigation}) {
     registerForPushNotificationsAsync();
 
     // Handle notifications when the app is open
-    Notifications.addNotificationReceivedListener(handleNotification);
+    //Notifications.addNotificationReceivedListener(handleNotification);
   }, []);
 
   return (
@@ -470,15 +507,25 @@ export default function Home({navigation}) {
         <View style={[{flexDirection: 'row', gap: 60, alignItems: 'center', justifyContent:'space-between'}]} >
           <View style={[{flexDirection: 'column'}]}>
             <Text style={{fontSize: 21, fontWeight: 'bold'}}>Today's Passage</Text>
-            <Text style={{fontSize: 20, color: '#4d4d4d'}}>{todayVerse}</Text>
+            <Text style={{fontSize: 20, color: '#4d4d4d'}}>{todayVerse.verse}</Text>
             <Text style={{fontSize: 18 , color: '#808080'}}>{today.month + " " + today.day}</Text>
           </View>
 
-          <Pressable onPress={ ()=>handleAddButton("today")} 
+        
+
+          { notesId.includes(todayVerse?.id) ?
+            (<Pressable disabled style={[styles.addEntryShortcut]}>
+                <Text style={{fontSize: 20, color: "#fff"}}>Entry Added</Text>
+                <AntDesign name="check" size={24} color="white" />
+            </Pressable>) 
+            : 
+            (  <TouchableOpacity onPress={ ()=>handleAddButton("today")} 
           style={[styles.addEntryShortcut]}>
               <Text style={{fontSize: 20, color: "#fff"}}>Add Entry</Text>
-              <Image style={{width: 17, height: 17,}} source={require("../assets/add.png")}/>
-          </Pressable>
+              <AntDesign name="plus" size={24} color="white" />
+            </TouchableOpacity>) 
+          }
+
         </View>
       </View>
 
@@ -518,12 +565,12 @@ export default function Home({navigation}) {
             <FlatList
               style={{width: '100%'}}
               data={notes}
-              keyExtractor={(item) => item.id.toString()}
+              keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => (
               
                 <TouchableOpacity style={[styles.entry, styles.shadowProp]} onPress={ ()=> handleDisplayEntryFetch(item.dataId) }>
                   <Text>{`${item.date}`}</Text>
-                  <Text>{`${item.dataId}`}</Text>
+                  <Text>{`${item.scripture}`}</Text>
                   <View style={[styles.border, {width: 30, height: 30, backgroundColor: item.status}]}></View>
 
                 </TouchableOpacity>
@@ -541,7 +588,7 @@ export default function Home({navigation}) {
     {/*MODALSS*/}
 
     {/*ADD ITEM MODAL*/}
-    <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" index={index} item={item} handleType={handleType}/>
+    <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} index={months.indexOf(todayVerse?.month)} itemId={todayVerse?.id}/>
 
     {/*For displaying the component*/}
     <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType}/>
@@ -587,14 +634,13 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   addEntryShortcut:{
-    width: "35%",
-    height: "70%", 
     padding: 10, 
     backgroundColor: "#1d9bf0", 
     alignItems: 'center', 
     flexDirection: 'row', 
     justifyContent: 'space-evenly', 
-    borderRadius: 5
+    borderRadius: 5,
+    gap: 10,
   },
   sortingButtons:{
     width: '100%',

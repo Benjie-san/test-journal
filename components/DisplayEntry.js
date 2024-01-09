@@ -8,13 +8,14 @@ const db = SQLite.openDatabase('_journal_database.db');
 
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-
 import styles from '../styles/entryStyle'
 
-const DeleteConfirmationModal = ({visible, deleteEntry, id, handleModal}) => {
+const DeleteConfirmationModal = ({visible, deleteEntry, id, handleModal,handleMainModal}) => {
    const handleDelete = () =>{
       deleteEntry(id);
       handleModal();
+      handleMainModal()
+   
    }
    return(
    <>
@@ -61,7 +62,7 @@ const DeleteConfirmationModal = ({visible, deleteEntry, id, handleModal}) => {
 );
 }
 
-const MenuModal = ({visible, handleCloseModal, deleteEntry, id, status, entry, type, handleStatus, }) => {
+const MenuModal = ({visible, handleCloseModal, deleteEntry, id, status, entry, type, handleStatus, handleMainModal }) => {
 const [deleteModal, setDeleteModal] = useState(false);
 
 const handleDeleteModal = () => {
@@ -162,7 +163,7 @@ return(
       </View>
       </Modal>
 
-      <DeleteConfirmationModal visible={deleteModal} deleteEntry={deleteEntry} id={id} handleModal={handleDeleteModal} />
+      <DeleteConfirmationModal visible={deleteModal} deleteEntry={deleteEntry} id={id} handleModal={handleDeleteModal} handleMainModal={handleMainModal} />
    </>
 );
 }
@@ -219,16 +220,16 @@ const handleDateModal = () => {
 }
 // when closed is pressed
 const handleBackButton = () =>{
-   if(currentEntry?.date !== date || currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
+   if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
       setEditMode(false);
       updateEntry();
       handleModal(false);
-      cleanStates();
+      
 
    }else{
       handleModal(false);
       setEditMode(false);
-      cleanStates();
+   
    }
 }
 
@@ -341,7 +342,7 @@ const getItems = () => {
 
 useEffect(() => {
    getItems();
-}, [])
+}, [getItems])
 
 // EDIT MODE
 useEffect(() => {
@@ -545,7 +546,7 @@ return (
    </Modal>
 
    
-      <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={type}/>
+      <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={type} handleMainModal={handleModal}/>
       
 </>
 )

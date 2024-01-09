@@ -1,4 +1,4 @@
-import { StyleSheet, View, Pressable, Image } from 'react-native';
+import { StyleSheet, View, Pressable, Image, TouchableOpacity } from 'react-native';
 import React, {useState, useEffect} from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather'; 
@@ -22,9 +22,9 @@ const Navbar = ({path, onPress, onPressAddEntry, isSelected, openBrp}) => {
 
       </Pressable> */}
 
-      <Pressable onPress={ ()=>onPressAddEntry() } style={[styles.addEntry]}>
+      <TouchableOpacity onPress={ ()=>onPressAddEntry() } style={[styles.addEntry]}>
          <Image style={{width: 30, height: 30,}} source={require("../assets/write.png")}/>
-      </Pressable>
+      </TouchableOpacity>
 
       {/* <Pressable style={[ styles.navBarBtn,]}>
          <Ionicons name="md-search-outline" size={24} color="#1d9bf0" />
@@ -41,8 +41,7 @@ const Navbar = ({path, onPress, onPressAddEntry, isSelected, openBrp}) => {
 
 const styles = StyleSheet.create({
    navbar:{
-      width: "100%", 
-      height: "10%",
+      right: 0,
       bottom: 0,
       position: "absolute",
       alignContent: 'flex-end',
@@ -51,7 +50,6 @@ const styles = StyleSheet.create({
       zIndex:1,
       backgroundColor: 'transparent',
       margin: 10,
-      padding: 10,
    },
    navBarBtn:{
       flexDirection: 'column',

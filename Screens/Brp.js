@@ -108,7 +108,6 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
       });
    }
 
-
    const fetchMonthCompletion = (item) =>{
 
       dbJournal.transaction((tx) => {
@@ -199,7 +198,7 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
             <Entypo name={show ? "chevron-thin-up" : "chevron-thin-down"} size={28} color="black" />
          </TouchableOpacity>
 
-         <View style={{ height: layoutHeight, overflow:'hidden'}}>
+         <View style={{ height: layoutHeight, overflow:'hidden' }}>
          { show ?  (<Text style={{fontSize: 17, paddingLeft: 10,}}>{theme2024[index]}</Text>) : null }
             { show ? 
             (
