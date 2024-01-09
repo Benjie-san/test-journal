@@ -12,6 +12,9 @@ import * as FileSystem from 'expo-file-system';
 import {Asset} from 'expo-asset';
 //const dbBrp = SQLite.openDatabase("brpDatabase.db");
 
+import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
+
+
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const theme2024 =["SYSTEMS IMPROVEMENT", "SYSTEMS IMPROVEMENT", "MACRO-EVANGELISM","MACRO-EVANGELISM", 'ACCOUNT SETTLEMENT', 'ACCOUNT SETTLEMENT', "RELATIONAL DISCIPLESHIP", "RELATIONAL DISCIPLESHIP", "TRAINING-CENTERED", "TRAINING-CENTERED", "CHURCH", "CHURCH"];
 
@@ -39,7 +42,7 @@ async function openBrpDatabase() {
 }
 const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntry, handleDisplayEntryModal, handleScripture, handleType, handleIndex, handleEntry, handleItemId, displayEntryVisible, addEntryVisible}) =>{
    
-   const [layoutHeight, setlayoutHeight] = useState(0);
+   const [height, setHeight] = useState(0);
    const [show, setShow] = useState(false);
    const [currentMonthEntries, setCurrentMonthEntries] = useState([])
    const [monthCompletion, setMonthCompletion] = useState([]);
@@ -171,18 +174,36 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
       onClickFunction()
       fetchCurrentMonth(item.category_name);
       fetchMonthCompletion(item.category_name);
+      setShow(!show);
    }
+
+   const onLayout = (event) => {
+      const layoutHeight = event.nativeEvent.layout.height;
+
+      if(layoutHeight > 0 && layoutHeight !== height){
+         setHeight(layoutHeight);
+      }
+   }
+
+      
+   const animatedStyle = useAnimatedStyle( ()=>{
+      const animatedHeight = show ? withTiming(height) : withTiming(0);
+      return{
+         height: animatedHeight,
+         overflow: 'hidden'
+      }
+   });
 
 
    useEffect(() => {
 
-   if(item.isExpanded){
+   if(show){
       onRef.current.scrollToIndex({ index, animated: true });
-      setlayoutHeight(null);
-      setShow(true);
+      //setlayoutHeight(null);
+    
    } else{ 
-      setlayoutHeight(0);
-      setShow(false);
+     // setlayoutHeight(0);
+   
    }
 
    }, [item.isExpanded])
@@ -196,7 +217,7 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
       }
 
    }, [handleAddEntry, handleDisplayEntryModal, item.category_name])
-   
+
 
    return (
    <>
@@ -207,37 +228,35 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
          
             <Entypo name={show ? "chevron-thin-up" : "chevron-thin-down"} size={28} color="black" />
          </TouchableOpacity>
-
-         <View style={{ height: layoutHeight, overflow:'hidden' }}>
-         { show ?  (<Text style={{fontSize: 17, paddingLeft: 10,}}>{theme2024[index]}</Text>) : null }
-            { show ? 
-            (
-            
-            currentMonthEntries.map((item, index) => (
-   
-               <TouchableOpacity
-                  onPress={()=>handleItemPress(item, index)}
-                  style={styles.dailyEntry}
-                  key={index}>
-                     <View style={{flexDirection: 'row'}}> 
-                        <Text style={{fontSize: 17, paddingLeft: 10,}}>{item.day},</Text>
-                        <Text style={{fontSize: 17, paddingLeft: 10,}}>{item.verse}</Text>
-                     </View>
-
-                     <View style={[styles.check, styles.border,
-                        {backgroundColor: idArray.includes(item.id) ? idPending.includes(item.id) ?  "#ffad33" : idComplete.includes(item.id) ? "#8CFF31":'#f5f5f5' : '#fff'}]}>
-
-                     </View>
-            
-               </TouchableOpacity>
          
-            ))
+         <Animated.View style={animatedStyle}>
+            <View onLayout={onLayout} style={{position: 'absolute', width: '100%'}}>
+               <Text style={{fontSize: 17, paddingLeft: 10,}}>{theme2024[index]}</Text>
+            
+               {
+                  currentMonthEntries.map((item, index) => (
+      
+                  <TouchableOpacity
+                     onPress={()=>handleItemPress(item, index)}
+                     style={styles.dailyEntry}
+                     key={index}>
+                        <View style={{flexDirection: 'row'}}> 
+                           <Text style={{fontSize: 17, paddingLeft: 10,}}>{item.day},</Text>
+                           <Text style={{fontSize: 17, paddingLeft: 10,}}>{item.verse}</Text>
+                        </View>
 
-            ): null
+                        <View style={[styles.check, styles.border,
+                           {backgroundColor: idArray.includes(item.id) ? idPending.includes(item.id) ?  "#ffad33" : idComplete.includes(item.id) ? "#8CFF31":'#f5f5f5' : '#fff'}]}>
 
-         }
+                        </View>
+               
+                  </TouchableOpacity>
+            
+                  ))
+               }
+            </View>
+         </Animated.View>
 
-         </View>
       </View>
    </>
    );
