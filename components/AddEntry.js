@@ -1,16 +1,19 @@
 import { StyleSheet, Text, View, TextInput, Pressable, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Share} from 'react-native';
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useMemo} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
 import { AntDesign } from '@expo/vector-icons';
-
+import { Entypo } from '@expo/vector-icons';
 import * as SQLite from 'expo-sqlite';
+import styles from '../styles/entryStyle';
+import PassageBottomSheet from './PassageBottomSheet';
+
+
 const db = SQLite.openDatabase('_journal_database.db');
-
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-import styles from '../styles/entryStyle'
 
-export default function AddEntry({visible, handleModal, verse, type, status, handleType, itemId, index}) {
+
+export default function AddEntry({visible, handleModal, verse, type, status, handleType, itemId, index, globalStyle}) {
 
 const [dateModalVisible, setDateModalVisible] = useState(false)
 const [entryDate, setEntryDate] = useState(new Date());
@@ -23,6 +26,12 @@ const [prayer, setPrayer] = useState("");
 const [question, setQuestion] = useState("");
 const lastModified = useRef(new Date());
 const [modifiedDate, setModifiedDate] = useState(lastModified.current.toString());
+
+const [passageModalVisble, setPassageModalVisible] = useState(false);
+
+const handlePassageVisible = (item) => {
+   setPassageModalVisible(item);
+}
 
 const handleDateModal = () => {
    setDateModalVisible(!dateModalVisible)
@@ -60,7 +69,7 @@ const handleChangeText = (text, valueFor) =>{
       case 'scripture': setScripture(text) ;break;
       case 'observation': setObservation(text) ;break;
       case 'application': setApplication(text) ;break;
-      case 'prayer': setPrayer(prayer = text) ;break;
+      case 'prayer': setPrayer(text) ;break;
       
    }
 }
@@ -77,7 +86,7 @@ const cleanStates = () =>{
 
 const saveEntry = () => {
    // adding entry to db
-   let isEmpty = [date, title, question, scripture, observation, application, prayer];
+   let isEmpty = [date, title, question, observation, application, prayer];
    if(!isEmpty.every((item)=>item=="")){
       db.transaction((tx) => {
          tx.executeSql(
@@ -99,117 +108,134 @@ useEffect(() => {
    if(type == 'journal'){
       setScripture(verse)
    }
-}, [verse, scripture, setScripture])
+}, [verse, scripture])
 
 
-return (
-   <>
-   <Modal 
-      coverScreen={true} 
-      isVisible={visible}
-      onBackButtonPress={ ()=> handleBackButton() }
-      animationIn="slideInRight"
-      animationOut="slideOutRight"
-      transparent={true}
-      style={{flex:1, margin: 0}}
-      hasBackdrop={false}
-      avoidKeyboard={false}
-      propagateSwipe
-   >
-      {/*HEADER*/}
-      <View style={styles.header}> 
+   return (
+         <Modal 
+            coverScreen={true} 
+            isVisible={visible}
+            onBackButtonPress={ ()=> handleBackButton() }
+            animationIn="slideInRight"
+            animationOut="slideOutRight"
+            transparent={true}
+            style={{flex:1, margin: 0, height: '100%'}}
+            hasBackdrop={false}
+            avoidKeyboard={false}
+            propagateSwipe
+         >
+            {/*HEADER*/}
+            <View style={[styles.header, {backgroundColor: globalStyle?.bgHeader, borderBottomColor: globalStyle?.borderColor ,}]}> 
 
-      <Pressable onPress={()=> handleBackButton()}>
-         <AntDesign name="close" size={30} color="black" />
-      </Pressable>
+               <TouchableOpacity onPress={()=> handleBackButton()}>
+                  <AntDesign name="close" size={30} color={globalStyle?.color}/>
+               </TouchableOpacity>
 
-      <Text style={{fontSize: 20}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
+               <Text style={{fontSize: 20, color:globalStyle?.color}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
 
-      <View></View>
+               <View></View>
 
-      </View>
+            </View>
 
-      {/*FORMS*/}
-      <KeyboardAvoidingView behavior='height' style={[styles.modal]}>
-   
-      
-      <ScrollView>
-   
-         <View style={[styles.flex]}> 
-      
-            <View style={styles.touchableContainer}>
-            
-               <View style={styles.inputSubContainer}>
-                  <Text>Date:</Text>
-                  <Pressable style={styles.touchable} onPress={handleDateModal}>
-                     <TextInput
-                     style={{color: 'black'}}
-                     value={date}
-                     onChangeText={handleChangeDate}
-                     editable={false}
-                     />
-                  </Pressable>
-               </View>
-
-               {/*DATE MODAL?*/}
-               {
-                  dateModalVisible &&
-                  (
-                     <DateTimePicker 
-                     mode="date" 
-                     display="spinner" 
-                     value={entryDate}
-                     onChange={onChangeDate}
-                     />
-            
-                  ) 
-               }
-
-               <View style={styles.inputSubContainer}>
-                  <Text>{type === "sermon" ? "Text:": type == "opm" ? 'OPM Passage:' : 'Scripture:'}</Text>
-
-                     <TextInput style={styles.touchable} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
+            {/*FORMS*/}
+            <KeyboardAvoidingView behavior='height' style={[styles.modal, {backgroundColor: globalStyle?.bgBody, }]}>
          
-               </View>
+            
+            <ScrollView style={{height: '100%', overflow: 'hidden'}}>
+         
+               <View style={[styles.flex, {height: 'auto', }]}> 
+            
+                  <View style={styles.touchableContainer}>
+                  
+                     <View style={styles.inputSubContainer}>
+                        <Text style={{color:globalStyle?.color}}>Date:</Text>
+                        <Pressable style={styles.touchable} onPress={handleDateModal}>
+                           <TextInput
+                           style={{color: 'black'}}
+                           value={date}
+                           onChangeText={handleChangeDate}
+                           editable={false}
+                           />
+                        </Pressable>
+                     </View>
 
-            </View>
+                     {/*DATE MODAL?*/}
+                     {
+                        dateModalVisible &&
+                        (
+                           <DateTimePicker 
+                           mode="date" 
+                           display="spinner" 
+                           value={entryDate}
+                           onChange={onChangeDate}
+                           />
+                  
+                        ) 
+                     }
 
-            <View style={styles.inputContainer}>
-            <Text>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
-            <TextInput style={[styles.input, {minHeight: 50}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
-            </View>
+                     <View style={styles.inputSubContainer}>
+                        <Text  style={{color:globalStyle?.color}}>{type === "sermon" ? "Text:": type == "opm" ? 'OPM Passage:' : 'Scripture:'}</Text>
 
-            { type != "journal" ?
-               (
-                  <View style={styles.inputContainer}>
-                  <Text>Question:</Text>
-                  <TextInput style={[styles.input, {minHeight: 50}]} editable onChangeText={ text => handleChangeText(text, "question") } value={question} multiline={true} />
+                           <TextInput style={styles.touchable} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
+               
+                     </View>
+
                   </View>
-               ) : null
-            }
 
-            <View style={styles.inputContainer}>
-            <Text>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
-            <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "observation") } value={observation}  multiline={true} />
+                  <View style={styles.inputContainer}>
+                  <Text  style={{color:globalStyle?.color}}>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
+                  <TextInput style={[styles.input, {minHeight: 50}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
+                  </View>
+
+                  { type != "journal" ?
+                     (
+                        <View style={styles.inputContainer}>
+                        <Text  style={{color:globalStyle?.color}}>Question:</Text>
+                        <TextInput style={[styles.input, {minHeight: 50}]} editable onChangeText={ text => handleChangeText(text, "question") } value={question} multiline={true} />
+                        </View>
+                     ) : null
+                  }
+
+                  <View style={styles.inputContainer}>
+                  <Text  style={{color:globalStyle?.color}}>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
+                  <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "observation") } value={observation}  multiline={true} />
+                  </View>
+
+                  <View style={styles.inputContainer}>
+                  <Text  style={{color:globalStyle?.color}}>{type === "sermon" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
+                  <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
+                  </View>
+
+                  <KeyboardAvoidingView behavior='padding' style={styles.inputContainer} >
+                  <Text  style={{color:globalStyle?.color}}>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
+                  <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
+
+                  <View style={[styles.flex,{paddingTop: 20,}]}>
+                     <TouchableOpacity 
+                        style={[styles.border, {  backgroundColor: globalStyle?.bgHeader, borderColor: globalStyle?.borderColor ,alignItems: 'center', justifyContent: 'space-evenly', flexDirection: 'column', padding: 10, gap: 5, width: 200 }]} 
+                        onPress={ () => handlePassageVisible(true) }
+                     >
+                        <Entypo name="chevron-thin-up" size={24} color={globalStyle?.color} />
+                        {/* <Text style={{ fontSize: 20 ,color: globalStyle?.color }}>View Verse</Text> */}
+                     </TouchableOpacity>
+                  </View>
+   
+               
+                  </KeyboardAvoidingView>
+
+               </View>
+               <View>
+               
+         
             </View>
 
-            <View style={styles.inputContainer}>
-            <Text>{type === "sermon" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
-            <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
-            </View>
+         
+            </ScrollView>
 
-            <KeyboardAvoidingView behavior='padding' style={styles.inputContainer} >
-            <Text>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
-            <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
             </KeyboardAvoidingView>
 
-         </View>
-
-      </ScrollView>
-      </KeyboardAvoidingView>
-      
-
-   </Modal>
-</>
-)
+            <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} globalStyle={globalStyle} scripture={scripture} type={type}/>
+         
+         </Modal>
+   )
 }

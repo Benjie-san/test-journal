@@ -12,29 +12,12 @@ const Navbar = ({path, onPress, onPressAddEntry, isSelected, openBrp}) => {
 
    return(
    <View style={[styles.navbar]}>
-
-      {/* <Pressable style={[ styles.navBarBtn,]} onPress={() => onPress()}>
-         <Ionicons name={isSelected ? "md-home" : "md-home-outline"} size={24} color="#1d9bf0" />
-      </Pressable>
-
-      <Pressable style={[ styles.navBarBtn,]} onPress={() => handlePress()}>
-         <Ionicons name={isSelected ? "md-book" : "md-book-outline"} size={24} color="#1d9bf0" />
-
-      </Pressable> */}
-
+      <View style={{elevation: 50, borderRadius: 50, width: 60, height: 60, padding: 10,
+      margin: 10, alignItems: 'center', justifyContent: 'center'}}>
       <TouchableOpacity onPress={ ()=>onPressAddEntry() } style={[styles.addEntry]}>
          <Image style={{width: 30, height: 30,}} source={require("../assets/write.png")}/>
       </TouchableOpacity>
-
-      {/* <Pressable style={[ styles.navBarBtn,]}>
-         <Ionicons name="md-search-outline" size={24} color="#1d9bf0" />
-      </Pressable>
-      
-      <Pressable style={[ styles.navBarBtn,]}>
-        <Feather name="more-horizontal" size={24} color="#1d9bf0" /> 
-      </Pressable>  */}
-   
-
+      </View>
    </View>
    )
 }
@@ -46,17 +29,7 @@ const styles = StyleSheet.create({
       position: "absolute",
       alignContent: 'flex-end',
       justifyContent: 'flex-end',
-      flexDirection: 'row',
-      zIndex:1,
-      backgroundColor: 'transparent',
-      margin: 10,
-   },
-   navBarBtn:{
-      flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      padding: 10,
-      margin: 10,
    },
    addEntry:{
       borderRadius: 50,
@@ -65,12 +38,7 @@ const styles = StyleSheet.create({
       height: 60,
       alignItems: 'center',
       justifyContent: 'center',
-   },
-   shadowProp: {
-      shadowColor: '#171717',
-      shadowOffset: {width: -2, height: 4},
-      shadowOpacity: 0.2,
-      shadowRadius: 3,
+
    },
 });
 

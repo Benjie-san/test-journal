@@ -36,15 +36,16 @@ const verseMonths = [month_0, month_1, month_2, month_3, month_4, month_5, month
 //    let newVerseMonth = verseMonths[i].split(",");
 //    for(let j=0; j<newVerseMonth.length ;j++){
 //       let obj = {
+//          id: i,
 //          date: j+1,
+//          month: months[i],
 //          verse: newVerseMonth[j],
-//          completion: "",
 //       }
 //       newArrMonth.push(obj);
 //       obj = {};
 //    }
-
-// // }
+//    newData2024.push()
+// }
 
 // const newData = JSON.stringify(newData2024);
 // fs.writeFile("_2024.json", newData, function(err, result) {
@@ -65,30 +66,52 @@ const verseMonths = [month_0, month_1, month_2, month_3, month_4, month_5, month
 //let data = JSON.parse(fs.readFileSync("./constants/2024.json"));
 
 //let monthLength = Object.keys(data).length;
-let query = "";
-console.log(verseMonths.length);
-for(let i = 0; i<verseMonths.length; i++){
-   let month = months[i];
-   let newVerse = verseMonths[i].split(",");
-   for(let j = 0; j<newVerse.length; j++){
-      let day = j+1;
-      let verse = newVerse[j];
+// let query = "";
+// console.log(verseMonths.length);
+// for(let i = 0; i<verseMonths.length; i++){
+//    let month = months[i];
+//    let newVerse = verseMonths[i].split(",");
+//    for(let j = 0; j<newVerse.length; j++){
+//       let day = j+1;
+//       let verse = newVerse[j];
 
-      query += `INSERT INTO brp2024 (month, day, verse, completion) VALUES ("${month}", ${day}, "${verse}", "none");\n`
-      }
-}
+//       query += `INSERT INTO brp2024 (month, day, verse, completion) VALUES ("${month}", ${day}, "${verse}", "none");\n`
+//       }
+// }
 
-console.log(query);
+// console.log(query);
 //====================================================================================
 
-// let bibleVerses = [];
-// const data = JSON.parse(fs.readFileSync("./constants/asv.json"));
+let bibleVerses = [];
 
-// data.verses.forEach(function (item) {
-//    bibleVerses.push(`${item.book_name} ${item.chapter}:${item.verse}`);
-// });
 
-// //console.log(bibleVerses);
+const data = JSON.parse(fs.readFileSync("./constants/asv.json"));
+
+let verse = "Psalm 95:1-11"
+let newArr = verse.split(":");
+let range = newArr[1].split("-")
+let book = newArr[0].slice(0, newArr[0].length-2).trim();
+let chapter = newArr[0].slice(newArr[0].length-2, newArr[0].length).trim();
+let start = range[0];
+let end = range[1];
+
+console.log(typeof chapter);
+
+const getVerse = (bookName, chapter, start, end)=>{
+   let verseResult = [];
+   data.verses.forEach(function (item) {
+      if(item.book_name === bookName && item.chapter === parseInt(chapter) ){
+         if(item.verse >= start && item.verse <= end){
+            verseResult.push(`${item.verse} ${item.text}`)
+         }   
+      }
+   });
+   return verseResult;
+}
+
+console.log( getVerse(book, chapter, start, end) )
+
+
 // let range = [];
 // verseMonths.forEach(function (item, index) {
 //       verseMonths[index].split(",");

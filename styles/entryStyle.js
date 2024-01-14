@@ -8,9 +8,7 @@ header:{
    alignItems: "center",
    alignContent: "center",
    flexDirection: 'row',
-   borderBottomColor: "grey",
    borderBottomWidth: 1,
-   backgroundColor: '#f2f2f2',
    zIndex: 1,
 },
 flex:{
@@ -136,11 +134,19 @@ editModeContainer:{
    alignItems: 'center',
    justifyContent: 'space-between',
    flexDirection: 'row',
-   position: 'absolute',
    paddingLeft: 10,
    paddingRight: 10,
-   paddingBottom: 3,
+   paddingBottom: 10,
 },
-})
+contentContainer: {
+   flex: 1,
+   alignItems: 'center',
+},
+containerHeadline: {
+   fontSize: 24,
+   fontWeight: '600',
+   padding: 20,
+},
+});
 
 export default styles;

@@ -1,25 +1,27 @@
 //import for react stuffs
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Pressable, Image, Modal, AppState } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Pressable, ActivityIndicator } from 'react-native';
 import React, {useEffect, useState, useRef} from 'react';
 import * as SQLite from 'expo-sqlite';
 import * as Notifications from 'expo-notifications';
-
+import Modal from "react-native-modal";
 import * as FileSystem from 'expo-file-system';
 import {Asset} from 'expo-asset';
 
 // import for data
-import data from '../constants/2023.json';
 const db = SQLite.openDatabase('_journal_database.db');
 
 // import for components
-import Navbar from '../components/Navbar'
+import Navbar from '../components/Navbar';
 
 import AddEntry from '../components/AddEntry';
 import DisplayEntry from '../components/DisplayEntry';
+import Search from './Search';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
-import reactDom from 'react-dom';
-
+import Fontisto from '@expo/vector-icons/Fontisto';
+import { Ionicons } from '@expo/vector-icons';
+import { Entypo } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 
 async function openBrpDatabase() {
   if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
@@ -34,8 +36,7 @@ async function openBrpDatabase() {
   return SQLite.openDatabase("brpDatabase.db");
 }
 
-
-const AddModal = ({visible, type, handleModal}) => {
+const AddModal = ({visible, type, handleModal, globalStyle}) => {
   const handlePress = (item) =>{
     type(item);
     handleModal();
@@ -43,42 +44,61 @@ const AddModal = ({visible, type, handleModal}) => {
 
   return(
     <>
-      <Modal animationType="fade" transparent={true} visible={visible}>
-        <TouchableOpacity style={[styles.flex,{backgroundColor: '#000000aa'}]} 
-        onPress={handleModal}>
-          <View style={{
-              backgroundColor: "#fff", 
-              width: "80%", 
-              height:"40%",
-              padding: 30,
-              borderRadius: 10,
-              alignItems:'left',
-              flexDirection:'column',
-              justifyContent:"center",
-          }} >
-            <Text style={{fontSize: 20}}>Add</Text>
-            <Pressable onPress={() => handlePress()} style={[styles.btn, {alignItems: "left"}]}>
-              <Text style={{fontSize: 18}}>Journal Entry or Sermon Notes</Text>
-            </Pressable>
-
-            <Pressable onPress={() => handlePress("opm")} style={[styles.btn, {alignItems: "left"}]}>
-              <Text style={{fontSize: 18}}>OPM Reflection</Text>
-            </Pressable>
-
+      <Modal
+        isVisible={visible}
+        style={[styles.flex, {margin: 0, flex:1,}]}
+        animationIn="fadeIn"
+        animationOut="fadeOut"
+        onBackButtonPress={handleModal}
+        onBackdropPress={handleModal}
+        backdropOpacity={0.5}
+      >
+      
+        <View style={{
+            backgroundColor: globalStyle.bgBody,
+            borderWidth: 1,
+            borderColor: globalStyle.borderColor,
+            padding: 20,
+            borderRadius: 10,
+            alignItems:'left',
+            flexDirection:'column',
+            justifyContent:"center",
+        }} >
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <MaterialIcons name="post-add" size={28} color={globalStyle.color} />            
+            <Text style={{fontSize: 25,  color: globalStyle.color,}}>Add</Text>
           </View>
-        </TouchableOpacity>
+          
+          <TouchableOpacity 
+            onPress={() => handlePress()} 
+            style={[styles.btn, {alignItems: "left", borderBottomColor:  globalStyle.color, flexDirection: 'row', gap: 5}]}
+          >
+            <Entypo name="book" size={26} color={globalStyle.color} />
+            <Text style={{fontSize: 18, color: globalStyle.color, textAlign:'right'}}>Journal Entry/Sermon Notes</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={() => handlePress("opm")} 
+            style={[styles.btn, {alignItems: "left", flexDirection: 'row', gap: 10}]}
+          >
+            <Entypo name="open-book" size={26} color={globalStyle.color} />
+            <Text style={{fontSize: 18,  color: globalStyle.color,}}>OPM Reflection</Text>
+          </TouchableOpacity>
+
+        </View>
       </Modal>
     </>
   );
 }
 
-export default function Home({navigation}) {
-  
+export default function Home({navigation, route, darkMode, handleDarkMode, globalStyle}) {
+
   const [notes, setNotes] = useState([]);// showing all the data
   const [notesId, setNotesId] = useState([]);
   //states for modal
   const [addEntryVisible, setAddEntryVisible] = useState(false)
   const [displayEntryVisible, setDisplayEntryVisible] = useState(false)
+  const [searchVisible, setSearchVisible] = useState(false)
 
   //states for passing props in the modals
   const [type, setType] = useState("");
@@ -108,6 +128,13 @@ export default function Home({navigation}) {
   //const todayVerse = data[today.month][today.day-1]["verse"]; // for setting today's verse
   const [visibleAddModal, setVisibleAddModal] = useState(false); // add modal
   const [todayVerse, setTodayVerse] = useState("");
+
+  //states for loading indicators
+  const [noteListLoading, setNoteListLoading] = useState(true);
+  const [verseLoading, setVerseLoading] = useState(true);
+
+  const [refresh, setRefresh] = useState(false);
+
   // NAVIGATION FUNCTIONS
 
   const openBrp = () => {
@@ -125,29 +152,6 @@ export default function Home({navigation}) {
 
   }
 
-  const handleDisplayEntryFetch = (id) =>{
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM entries WHERE dataId = ? ;",
-        [id],
-        (_, result) => {
-            const rows = result.rows;
-            const dataArray = [];
-            for (let i = 0; i < rows.length; i++) {
-              const item = rows.item(i);
-              dataArray.push(item);
-            }
-            setCurrentEntry(...dataArray);
-        },
-        (_, error) => {
-            alert("No Entry yet")
-            console.error('Error querying data:', error);
-        }
-      );
-    });
-    handleDisplayEntryModal(true);
-  }
-  
   const handleScripture = (item) => {
       setScripture(item)
   }
@@ -155,7 +159,7 @@ export default function Home({navigation}) {
   const handleType = (item) => {
       setType(item)
   }
-  
+
   const handleItem = (item) =>{
     setItem(item)
   }
@@ -171,10 +175,14 @@ export default function Home({navigation}) {
   // when add write button is clicked
   const handleAddButton = (type) => {
     if(type == "today"){
-      setType("journal");
       setScripture(todayVerse.verse);
+      if(todayVerse.verse == "Sermon Notes"){
+        setType("sermon");
+      }else{
+        setType("journal")
+      }
       handleAddEntryModal(true);
-    } else {  
+    } else {
       if(type == "opm"){
         setType("opm");
         handleAddEntryModal(true);
@@ -182,7 +190,7 @@ export default function Home({navigation}) {
         openBrp()
       }
     }
-  
+
 }
 
   const handleVisibleAddModal = () => {
@@ -190,7 +198,7 @@ export default function Home({navigation}) {
   }
 
   const handleSortButtons = (item) =>{
-    
+
     let type = item.toLowerCase();
 
     if(currentSortBtn == ""){
@@ -202,14 +210,78 @@ export default function Home({navigation}) {
     }
 
     if(type=="all"){
+      setCurrentSortBtn("All");
+      setIsSelected(true);
       fetchAllData();
     }else{
       fetchData(type);
     }
   }
 
+  const handleSearchModal = (item) =>{
+    setSearchVisible(item);
+  }
 
-  // DB FUNCTION
+  const handleRefresh = (item) => {
+    let type = item.toLowerCase();
+    setRefresh(true)
+    if(type == "all"){
+   
+      fetchAllData();
+    }else{
+      fetchData(type);
+    }
+    setRefresh(false)
+  }
+
+
+  // DB and FETCH FUNCTION
+
+  const handleDisplayEntryFetch = (item) =>{
+    if(item.type == "opm"){
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM entries WHERE id = ? ;",
+          [item.id],
+          (_, result) => {
+              const rows = result.rows;
+              const dataArray = [];
+              for (let i = 0; i < rows.length; i++) {
+                const item = rows.item(i);
+                dataArray.push(item);
+              }
+              setCurrentEntry(...dataArray);
+          },
+          (_, error) => {
+              alert("No Entry yet")
+              console.error('Error querying data:', error);
+          }
+        );
+      });
+    }else{
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM entries WHERE dataId = ? ;",
+          [item.dataId],
+          (_, result) => {
+              const rows = result.rows;
+              const dataArray = [];
+              for (let i = 0; i < rows.length; i++) {
+                const item = rows.item(i);
+                dataArray.push(item);
+              }
+              setCurrentEntry(...dataArray);
+          },
+          (_, error) => {
+              alert("No Entry yet")
+              console.error('Error querying data:', error);
+          }
+        );
+      });
+    }
+
+    handleDisplayEntryModal(true);
+  }
 
   const getJournalCount = (type = "journal") => {
     db.transaction((tx) => {
@@ -281,8 +353,7 @@ export default function Home({navigation}) {
   };
 
   const fetchAllData = () => {
-    setCurrentSortBtn("All");
-    setIsSelected(true);
+
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT * FROM entries ORDER BY modifiedDate DESC;",
@@ -301,7 +372,7 @@ export default function Home({navigation}) {
           }
           setNotes(dataArray);
           setNotesId(dataArray2);
-
+          setNoteListLoading(false);
         },
         (_, error) => {
           console.error('Error querying data:', error);
@@ -323,6 +394,7 @@ export default function Home({navigation}) {
               dataArray.push(item);
             }
             setTodayVerse(...dataArray);
+            setVerseLoading(false);
           },
           (_, error) => {
                 alert("No Entry yet")
@@ -342,7 +414,7 @@ export default function Home({navigation}) {
         [],
         (_, result) => {
           const tableExists = result.rows.length > 0;
-  
+
           if (!tableExists) {
             // Table doesn't exist, create it
             db.transaction((tx) => {
@@ -395,8 +467,8 @@ export default function Home({navigation}) {
   // PUSH NOTIFICATION FUNCTIONS
 
   const scheduleNotifications = async () => {
-    const morningNotificationTime = setNotificationTime(6, 0);
-    const eveningNotificationTime = setNotificationTime(18, 0);
+    const morningNotificationTime = setNotificationTime(8, 0);
+    const eveningNotificationTime = setNotificationTime(21, 0);
 
     // Schedule morning notification
     await Notifications.scheduleNotificationAsync({
@@ -404,7 +476,7 @@ export default function Home({navigation}) {
         title: 'Good Morning!',
         body: `Have you completed your journal passage for today?`,
       },
-      trigger: { seconds: 100, repeats: false },
+      trigger: { hour: morningNotificationTime.hours, minute: morningNotificationTime.minutes, repeats: false},
     });
 
     // Schedule evening notification
@@ -413,7 +485,7 @@ export default function Home({navigation}) {
         title: 'Good Evening',
         body: `Have you fisnished your Journal today?`,
       },
-      trigger: { seconds: 100, repeats: false },
+      trigger: { hour: eveningNotificationTime.hours, minute: eveningNotificationTime.minutes, repeats: false },
     });
   };
 
@@ -460,14 +532,17 @@ export default function Home({navigation}) {
   // USE EFFECTS
 
   // for creating the db
-  // useEffect(() => {
+  useEffect(() => {
+    fetchAllData();
+    setCurrentSortBtn("All");
+    setIsSelected(true);
+  }, [])
 
-  //       if(addEntryVisible == false || displayEntryVisible == false){
-  //           fetchAllData()
-  //       }
-      
-
-  // }, [])
+  useEffect(() => {
+    getJournalCount();
+    getOpmCount();
+    getSermonCount();
+  }, [allCount, journalCount, opmCount, sermonCount, currentSortBtn])
 
 
   useEffect(() => {
@@ -497,92 +572,129 @@ export default function Home({navigation}) {
 
   return (
   <>
-    {/* 
+    {/*
     <TouchableOpacity style={styles.btn}title="Send Notification" onPress={()=> deleteAllEntries()}>
-      <Text>DELETE ALL</Text>  
+      <Text>DELETE ALL</Text>
     </TouchableOpacity> */}
+
     {/*MAIN VIEW*/}
     <View style={[styles.homeContainer]}>
-      {/*HEADER - Todays passage*/}
-      <View style={[styles.passageToday,{width: "100%", height: 'auto', padding: 15, paddingTop: 20, flexDirection: 'column'}]}>
 
-        <Text style={{padding: 5, fontSize: 20, textAlign: "center", fontWeight: 'bold'}}>Journal { today.year }</Text>
+      {/*Home header*/}
+      <View style={[ {width: '100%', padding: 12, flexDirection:'row', alignItems: 'center', justifyContent: 'space-between', borderBottomColor: '#cccccc', borderBottomWidth: 1, backgroundColor: globalStyle.bgHeader}]}>
 
-        <View style={[{flexDirection: 'row', gap: 60, alignItems: 'center', justifyContent:'space-between'}]} >
-          <View style={[{flexDirection: 'column'}]}>
-            <Text style={{fontSize: 21, fontWeight: 'bold'}}>Today's Passage</Text>
-            <Text style={{fontSize: 20, color: '#4d4d4d'}}>{todayVerse.verse}</Text>
-            <Text style={{fontSize: 18 , color: '#808080'}}>{today.month + " " + today.day}</Text>
-          </View>
+        {darkMode ?
+          (
+            <TouchableOpacity onPress={ () => handleDarkMode() } styles={[{width: 30, height: 30}]}>
+              <Fontisto name="day-sunny" size={24} color={globalStyle.color} />
+            </TouchableOpacity>
+          )
+          :
+          (
+            <TouchableOpacity  onPress={ () => handleDarkMode() } styles={[{width: 30, height: 30}]}>
+                <Fontisto name="night-clear" size={24} color={globalStyle.color} />
+            </TouchableOpacity>
+          )
+        }
 
-        
+        <Text style={{padding: 5, fontSize: 20, textAlign: "center", fontWeight: 'bold', color : globalStyle.color }}>Journal { today.year }</Text>
+
+        <TouchableOpacity onPress={ () => handleSearchModal(true) } >
+          <AntDesign name="search1" size={24} color={globalStyle.color} />
+        </TouchableOpacity>
+      </View>
+
+      {/*Todays passage*/}
+      <View style={[styles.passageToday, 
+        {width: "100%", 
+        height: 'auto', 
+        padding: 15,
+        backgroundColor:globalStyle.bgHeader, 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        justifyContent:'space-between'}
+        ]}>
+
+          { verseLoading ? <ActivityIndicator style={{width: '40%'}} /> : (
+            <View style={[{flexDirection: 'column'}]}>
+              <Text style={{fontSize: 20, fontWeight: 'bold', color: globalStyle.color,}}>Today's Passage</Text>
+              <Text style={{fontSize: 19, color:  globalStyle.color}}>{todayVerse.verse}</Text>
+              <Text style={{fontSize: 18 , color: globalStyle.color}}>{today.month + " " + today.day}</Text>
+            </View>
+
+          ) }
 
           { notesId.includes(todayVerse?.id) ?
-            (<Pressable disabled style={[styles.addEntryShortcut]}>
-                <Text style={{fontSize: 20, color: "#fff"}}>Entry Added</Text>
-                <AntDesign name="check" size={24} color="white" />
-            </Pressable>) 
-            : 
-            (  <TouchableOpacity onPress={ ()=>handleAddButton("today")} 
-          style={[styles.addEntryShortcut]}>
-              <Text style={{fontSize: 20, color: "#fff"}}>Add Entry</Text>
-              <AntDesign name="plus" size={24} color="white" />
-            </TouchableOpacity>) 
+            (<Pressable disabled style={[styles.addEntryShortcut,]}>
+                <AntDesign name="check" size={20} color="white" />
+                <Text style={{fontSize: 18, color: "#fff",  paddingRight: 5}}>Entry Added</Text>
+            </Pressable>)
+            :
+            (  <TouchableOpacity onPress={ ()=>handleAddButton("today")}
+          style={[styles.addEntryShortcut, { paddingRight: 10}]}>
+              <AntDesign name="plus" size={20} color="white" />
+              <Text style={{fontSize: 18, color: "#fff", paddingRight: 5}}>Add Entry</Text>
+
+            </TouchableOpacity>)
           }
 
-        </View>
       </View>
 
       {/*Sorting Buttons*/}
-      <View style={styles.sortingButtons}>
+      <View style={[styles.sortingButtons, {backgroundColor: globalStyle.bgHeader, borderBottomColor: globalStyle.borderColor, borderBottomWidth:1}]}>
 
-        { 
+        {
           sortButtons.map( (item, index) => {
 
-          return  <Pressable key={index} onPress={ () => handleSortButtons(item) }  style={[styles.sortingBtn, 
+          return  <TouchableOpacity key={index} onPress={ () => handleSortButtons(item) }  style={[styles.sortingBtn,
           {borderBottomColor: currentSortBtn == item ? isSelected ? "#1d9bf0" : '#transparent' : 'transparent',}]}>
-            
-                <Text 
+
+                <Text
                   style={[styles.sortBtnText,
-                    {color: currentSortBtn == item ? isSelected ? "#1d9bf0" : '#808080' : '#808080',}]}>
+                    {color: currentSortBtn == item ? isSelected ? "#1d9bf0" : globalStyle.color :  globalStyle.color,}]}>
                     {item == "Sermon" ? "Sermon Notes" : item }
                 </Text>
 
-                <View style={[styles.itemCount, 
+                <View style={[styles.itemCount,
                   {backgroundColor: currentSortBtn == item ? isSelected ? "#1d9bf0" : '#808080' : '#808080', }]}>
-                  <Text style={{textAlign: 'center', color:  currentSortBtn == item ?  isSelected ? "#fff" : '#f5f5f5' : '#f5f5f5'}}>
+                  <Text style={{textAlign: 'center', color:  currentSortBtn == item ?  isSelected ?  '#fff' : '#f5f5f5' : '#f5f5f5'}}>
                     {sortButtonCount[index]}
                   </Text>
                 </View>
-              </Pressable>
+              </TouchableOpacity>
 
             })
-        }   
+        }
       </View>
 
       {/*Displaying items*/}
-      <View style={styles.notelist}>
-        {notes.length === 0 ? (
-          <Text style={{fontSize: 30, paddingBottom: 150}}>No Entry Yet</Text>
-        ) : (
-          <>
-            <FlatList
+      {noteListLoading ? <ActivityIndicator style={styles.flex} size={'large'}/> :
+      (<View style={[ styles.notelist, {backgroundColor: globalStyle.bgBody}]}>
+        {notes.length === 0 ?
+          (<Text style={{fontSize: 30, paddingBottom: 150, color: globalStyle.color}}>No Entries Found</Text>)
+          :
+          ( <FlatList
               style={{width: '100%'}}
               data={notes}
+              refreshing={refresh}
+              onRefresh={()=>handleRefresh(currentSortBtn)}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => (
-              
-                <TouchableOpacity style={[styles.entry, styles.shadowProp]} onPress={ ()=> handleDisplayEntryFetch(item.dataId) }>
-                  <Text>{`${item.date}`}</Text>
-                  <Text>{`${item.scripture}`}</Text>
-                  <View style={[styles.border, {width: 30, height: 30, backgroundColor: item.status}]}></View>
+                <TouchableOpacity
+                  style={ [styles.entry, {backgroundColor: globalStyle.noteList, borderColor: globalStyle.borderColor, borderWidth:1}] }
+                  onPress={ ()=> handleDisplayEntryFetch(item) }
+                >
+                  <Text style={{color: globalStyle.color}}>{`${item.date}`}</Text>
+                  <Text style={{color: globalStyle.color}}>{`${item.scripture}`}</Text>
+                  <View style={[styles.border, {width: 30, height: 30, backgroundColor: item.status,}]}></View>
 
                 </TouchableOpacity>
               )}
-            /> 
-          </>        
-        )}
-      </View>
+            />)
+        }
+      </View>)
+      }
+
 
       {/*Navbar*/}
       <Navbar onPressAddEntry={handleVisibleAddModal} />
@@ -592,13 +704,17 @@ export default function Home({navigation}) {
     {/*MODALSS*/}
 
     {/*ADD ITEM MODAL*/}
-    <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} index={months.indexOf(todayVerse?.month)} itemId={todayVerse?.id}/>
+    <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} index={months.indexOf(todayVerse?.month)} itemId={todayVerse?.id} globalStyle={globalStyle}/>
 
     {/*For displaying the component*/}
-    <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType}/>
+    <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType}  globalStyle={globalStyle}/>
+
+    {/*Search modal*/}
+    <Search visible={searchVisible} handleModal={handleSearchModal}  globalStyle={globalStyle} />
 
     {/*modal for displaying add entry*/}
-    <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal}/>
+    <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal}  globalStyle={globalStyle}/>
+
 
     </>
   )
@@ -628,21 +744,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     flexDirection: 'column',
     paddingTop: 20,
+    width: '100%',
+    height: '100%',
   },
   passageToday:{
-    justifyContent:"space-between", 
-    alignItems: "center", 
+    justifyContent:"space-between",
+    alignItems: "center",
     flexDirection: 'row',
-    // borderBottomColor: '#737373',
-    // borderBottomWidth: 1,
     padding: 5,
   },
   addEntryShortcut:{
-    padding: 10, 
-    backgroundColor: "#1d9bf0", 
-    alignItems: 'center', 
-    flexDirection: 'row', 
-    justifyContent: 'space-evenly', 
+    padding: 10,
+    backgroundColor: "#1d9bf0",
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
     borderRadius: 5,
     gap: 10,
   },
@@ -663,7 +779,7 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   sortBtnText:{
-    fontSize: 12, 
+    fontSize: 12,
   },
   itemCount:{
     paddingRight: 12,
@@ -675,7 +791,6 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#cccccc',
     padding:10,
   },
   entry:{

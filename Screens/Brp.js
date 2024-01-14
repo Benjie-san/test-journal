@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View, LayoutAnimation, Image, Dimensions, UIManager, FlatList, Pressable} from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View, LayoutAnimation, Dimensions, UIManager, FlatList, } from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import Entypo from '@expo/vector-icons/Entypo'; 
 import data from '../constants/2023.json' 
@@ -40,21 +40,26 @@ async function openBrpDatabase() {
    }
    return SQLite.openDatabase("brpDatabase.db");
 }
-const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntry, handleDisplayEntryModal, handleScripture, handleType, handleIndex, handleEntry, handleItemId, displayEntryVisible, addEntryVisible}) =>{
+const ExpandableComponent = ({onRef, item, index, handleAddEntry, handleDisplayEntryModal, handleScripture, handleType, handleIndex, handleEntry, handleItemId, displayEntryVisible, addEntryVisible, globalStyle}) =>{
    
+   //states for showing it
    const [height, setHeight] = useState(0);
    const [show, setShow] = useState(false);
+
+   //states for ancordion
    const [currentMonthEntries, setCurrentMonthEntries] = useState([])
    const [monthCompletion, setMonthCompletion] = useState([]);
+
+    // for item completion states
    const [idArray, setIdArray] = useState([]);
    const [idPending, setIdpending] = useState([]);
    const [idComplete, setIdcomplete] = useState([]);
-
+   
+   //state for loading
 
    const handleItemPress = (item) => {
       handleItemId(item.id)
       handleIndex(index)
-
 
       if( idArray.includes(item.id) ){                  
          fetchCurrentEntry(item.id)
@@ -171,7 +176,6 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
    }
 
    const handleMonthPress = () =>{
-      onClickFunction()
       fetchCurrentMonth(item.category_name);
       fetchMonthCompletion(item.category_name);
       setShow(!show);
@@ -184,7 +188,6 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
          setHeight(layoutHeight);
       }
    }
-
       
    const animatedStyle = useAnimatedStyle( ()=>{
       const animatedHeight = show ? withTiming(height) : withTiming(0);
@@ -196,17 +199,12 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
 
 
    useEffect(() => {
+      if(show){
+         onRef.current.scrollToIndex({ index, animated: true });
+         
+      } 
 
-   if(show){
-      onRef.current.scrollToIndex({ index, animated: true });
-      //setlayoutHeight(null);
-    
-   } else{ 
-     // setlayoutHeight(0);
-   
-   }
-
-   }, [item.isExpanded])
+   }, [show])
 
    useEffect(() => {
    
@@ -221,28 +219,30 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
 
    return (
    <>
-      <View style={{flex:1,  flexGrow:1}}>
-         <TouchableOpacity onPress={() => handleMonthPress()} style={[styles.months, {
-      borderBottomWidth: show ? 0:1,}]}>
-            <Text style={{fontSize: 20}}>{item.category_name}</Text> 
-         
-            <Entypo name={show ? "chevron-thin-up" : "chevron-thin-down"} size={28} color="black" />
+      <View style={[{flex:1,  flexGrow:1}]}>
+         <TouchableOpacity 
+            onPress={() => handleMonthPress()} 
+            style={[styles.months, { borderBottomWidth: show ? 0:1, borderColor: globalStyle.color, }]}
+         >
+            <Text style={{fontSize: 20, color: globalStyle.color}}>{item.category_name}</Text> 
+            <Entypo name={show ? "chevron-thin-up" : "chevron-thin-down"} size={28} color={globalStyle.color}/>
          </TouchableOpacity>
-         
+   
          <Animated.View style={animatedStyle}>
-            <View onLayout={onLayout} style={{position: 'absolute', width: '100%'}}>
-               <Text style={{fontSize: 17, paddingLeft: 10,}}>{theme2024[index]}</Text>
+      
+            <View onLayout={onLayout} style={{position: 'absolute', width: '100%', backgroundColor: globalStyle.bgBody,}}>
+               <Text style={{fontSize: 17, paddingLeft: 10,  color: globalStyle.color, }}>{theme2024[index]}</Text>
             
                {
                   currentMonthEntries.map((item, index) => (
       
                   <TouchableOpacity
                      onPress={()=>handleItemPress(item, index)}
-                     style={styles.dailyEntry}
+                     style={[styles.dailyEntry, {backgroundColor: globalStyle.bgBody, borderBottomColor: globalStyle.color, borderBottomWidth: 1}]}
                      key={index}>
                         <View style={{flexDirection: 'row'}}> 
-                           <Text style={{fontSize: 17, paddingLeft: 10,}}>{item.day},</Text>
-                           <Text style={{fontSize: 17, paddingLeft: 10,}}>{item.verse}</Text>
+                           <Text style={{fontSize: 17, paddingLeft: 10,  color: globalStyle.color}}>{item.day},</Text>
+                           <Text style={{fontSize: 17, paddingLeft: 10,  color: globalStyle.color}}>{item.verse}</Text>
                         </View>
 
                         <View style={[styles.check, styles.border,
@@ -255,16 +255,16 @@ const ExpandableComponent = ({onRef, item, index, onClickFunction, handleAddEntr
                   ))
                }
             </View>
+         
          </Animated.View>
-
+               
       </View>
    </>
    );
 }
 
-export default function Brp({navigation}){
+export default function Brp({navigation, globalStyle}){
 
-   UIManager.setLayoutAnimationEnabledExperimental;
    const [listData, setListData] = useState(content); // state that populates the items from data
    const [addEntryVisible, setAddEntryVisible] = useState(false)
    const [displayEntryVisible, setDisplayEntryVisible] = useState(false)
@@ -276,19 +276,19 @@ export default function Brp({navigation}){
    const [entry, setEntry] = useState([]);
    const [itemId, setItemId] = useState(0);
 
-   const updateLayout = async (index) => {
+   // const updateLayout = async (index) => {
 
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      const array = [...listData];
-      array.map((value, placeIndex)=>{
-         if(placeIndex === index){
-            (array[placeIndex]['isExpanded']) = !array[placeIndex]['isExpanded']
-         }else{
-            (array[placeIndex]['isExpanded']) = false
-         }
-      });
-      setListData(array);
-   }
+   //    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+   //    const array = [...listData];
+   //    array.map((value, placeIndex)=>{
+   //       if(placeIndex === index){
+   //          (array[placeIndex]['isExpanded']) = !array[placeIndex]['isExpanded']
+   //       }else{
+   //          (array[placeIndex]['isExpanded']) = false
+   //       }
+   //    });
+   //    setListData(array);
+   // }
 
    const handleAddEntryModal =  (item) =>{
       setAddEntryVisible(item);
@@ -327,26 +327,12 @@ export default function Brp({navigation}){
       navigation.navigate("Home");
    }
 
-
-useEffect(() => {
-   // Use `setOptions` to update the button that we previously specified
-   // Now the button includes an `onPress` handler to update the count
-   navigation.setOptions({
-   headerLeft: () => (
-      <Pressable title="BrpBackButton" onPress={ ()=>handleBRPBackButton() }>
-         <Ionicons name="chevron-back-sharp" size={30} color="black" />
-      </Pressable>
-   ),
-   });
-}, [navigation]);
-
-
    return (
    <>
    
-   <View style={styles.container}>
+   <View style={[styles.container, { backgroundColor: globalStyle.bgHeader, borderTopColor: globalStyle.borderColor, borderTopWidth: 1 }]}>
    
-         <View style={{ flex:1, width: Dimensions.get("screen").width-20,}}>
+         <View style={{ flex:1,}}>
 
             <FlatList
                ref={flatListRef}
@@ -365,7 +351,6 @@ useEffect(() => {
                      key={item.category_name}
                      item={item}
                      index={index}
-                     onClickFunction={()=>{ updateLayout(index)}}
                      handleAddEntry={handleAddEntryModal}
                      handleDisplayEntryModal={handleDisplayEntryModal}
                      handleScripture={handleScripture}
@@ -377,16 +362,16 @@ useEffect(() => {
                      handleItemId={handleItemId}
                      addEntryVisible={addEntryVisible}
                      displayEntryVisible={displayEntryVisible}
-            
+                     globalStyle={globalStyle}
                   />
                }
             />
          </View>
    </View>
 
-   <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} itemId={itemId} index={index}/>
+   <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} itemId={itemId} index={index} globalStyle={globalStyle}/>
 
-   <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={entry} handleEntry={handleEntry} itemId={itemId}  />
+   <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={entry} handleEntry={handleEntry} itemId={itemId} globalStyle={globalStyle} />
 
    </>
    )
@@ -394,11 +379,9 @@ useEffect(() => {
 
 const styles = StyleSheet.create({
    container:{
-      padding: 10,
+      width: '100%',
       flex:1,
-      backgroundColor: "#fff",
       gap: 10,
-      paddingTop: 30,
    },
    border:{
       borderWidth: 1,
@@ -406,21 +389,22 @@ const styles = StyleSheet.create({
       borderRadius: 5,
    },
    months:{
+      width: '100%',
       padding: 12,
       justifyContent: "space-between",
       flexDirection: "row",
       alignItems: "center",
-      borderColor: "gray",
-   },
+      boderBottomWidth: 1,
 
+   },
    dailyEntry:{
+      width: '100%',
       padding: 14,
       height: 50,
       justifyContent: "space-between",
       flexDirection: "row",
       alignItems: "center",
-      borderColor: "gray",
-      borderBottomWidth: 1,
+      boderBottomWidth: 1,
 
    },
    check:{
