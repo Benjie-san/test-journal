@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
       justifyContent: 'space-evenly',
       width: "auto",
       padding: 5,
-   gap: 5,
+      gap: 5,
    },
    itemCount:{
       backgroundColor: twtColor, 

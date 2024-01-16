@@ -15,7 +15,6 @@ import {Home, Brp} from './Screens/index'; // all of the screens
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-
   
   const [darkMode, setDarkMode] = useState(false);
   const [globalStyle, setGlobalStyle] = useState({});

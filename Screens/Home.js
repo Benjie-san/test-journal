@@ -79,7 +79,7 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
 
           <TouchableOpacity 
             onPress={() => handlePress("opm")} 
-            style={[styles.btn, {alignItems: "left", flexDirection: 'row', gap: 10}]}
+            style={[styles.btn, {alignItems: "left", flexDirection: 'row', gap: 10, borderBottomWidth: 0}]}
           >
             <Entypo name="open-book" size={26} color={globalStyle.color} />
             <Text style={{fontSize: 18,  color: globalStyle.color,}}>OPM Reflection</Text>
@@ -370,6 +370,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
             dataArray2.push(item.dataId);
 
           }
+          dataArray.sort( (a,b)=>b.modifiedDate - a.modifiedDate );
           setNotes(dataArray);
           setNotesId(dataArray2);
           setNoteListLoading(false);
@@ -551,24 +552,24 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   }, []);
 
   //for push notifications
-  useEffect(() => {
-    scheduleNotifications();
+  // useEffect(() => {
+  //   scheduleNotifications();
 
-    // Set up an interval to schedule notifications every day
-    const intervalId = setInterval(() => {
-      scheduleNotifications();
-    }, 24 * 60 * 60 * 1000); // Schedule notifications every 24 hours
+  //   // Set up an interval to schedule notifications every day
+  //   const intervalId = setInterval(() => {
+  //     scheduleNotifications();
+  //   }, 24 * 60 * 60 * 1000); // Schedule notifications every 24 hours
 
-    // Clear the interval when the component is unmounted
-    return () => clearInterval(intervalId);
-  }, []);
+  //   // Clear the interval when the component is unmounted
+  //   return () => clearInterval(intervalId);
+  // }, []);
 
-  useEffect(() => {
-    registerForPushNotificationsAsync();
+  // useEffect(() => {
+  //   registerForPushNotificationsAsync();
 
-    // Handle notifications when the app is open
-    //Notifications.addNotificationReceivedListener(handleNotification);
-  }, []);
+  //   // Handle notifications when the app is open
+  //   //Notifications.addNotificationReceivedListener(handleNotification);
+  // }, []);
 
   return (
   <>
@@ -733,7 +734,6 @@ const styles = StyleSheet.create({
   },
   btn:{
     borderBottomWidth:1,
-    borderBottomColor: 'black',
     padding: 15,
     alignItems: 'center',
     margin: 5,

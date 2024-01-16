@@ -176,13 +176,15 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id, status, entry, t
    );
 }
 
-export default function DisplayEntry({visible, handleModal, handleType, currentEntry, handleEntry, globalStyle }){
+export default function DisplayEntry({visible, handleModal, currentEntry, globalStyle }){
 //for showing modals
    const [dateModalVisible, setDateModalVisible] = useState(false);
    const [menuVisible, setMenuVisible] = useState(false);
 
    //data fields
    const [id, setId] = useState(0);
+   const [dataId, setDataId] = useState(0);
+
    const [date, setDate] = useState("");
    const [title, setTitle] = useState("");
    const [scripture, setScripture] = useState("");
@@ -191,15 +193,15 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
    const [prayer, setPrayer] = useState("");
    const [question, setQuestion] = useState("");
    const [type, setType] = useState("");
-   const lastModified = useRef(new Date());
-   const [modifiedDate, setModifiedDate] = useState(lastModified.current.toString());
+   // const lastModified = useRef(new Date());
+   // const [modifiedDate, setModifiedDate] = useState();
    const [status, setStatus] = useState("");
    const [month, setMonth] = useState("");
    const [day, setDay] = useState("");
 
-   //showing and hiding of editmode
-   const [editMode, setEditMode] = useState(false);
-   const [editModeCount, setEditModeCount] = useState(0);
+   // //showing and hiding of editmode
+   // const [editMode, setEditMode] = useState(false);
+   // const [editModeCount, setEditModeCount] = useState(0);
 
    //for system buttons
    const appState = useRef(AppState.currentState);
@@ -207,9 +209,9 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
 
    //for dates
    const [entryDate, setEntryDate] = useState(new Date());
-   const currentDate = new Date(currentEntry?.modifiedDate).toString();
-   const currentDay = new Date(currentDate).toLocaleDateString();
-   const currentTime = new Date(currentDate).toLocaleTimeString();
+   // const currentDate = new Date(currentEntry?.modifiedDate).toString();
+   // const currentDay = new Date(currentDate).toLocaleDateString();
+   // const currentTime = new Date(currentDate).toLocaleTimeString();
 
    const entryToBeShared = {
       date: date,
@@ -235,12 +237,12 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
    // when closed is pressed
    const handleBackButton = () =>{
       if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
-         setEditMode(false);
+
          updateEntry();
          handleModal(false);
       }else{
          handleModal(false);
-         setEditMode(false);
+
       }
    }
 
@@ -271,10 +273,10 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
       }
    }
 
-   const handleEditMode = () => {
-      setEditModeCount(editModeCount+1);
-      setEditMode(!editMode)
-   }
+   // const handleEditMode = () => {
+   //    setEditModeCount(editModeCount+1);
+   //    setEditMode(!editMode)
+   // }
 
    const handleMenuVisible = ()=>{
       setMenuVisible(!menuVisible);
@@ -295,7 +297,7 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
       setEditMode(false);
    }
 
-   const handleDelete = (id) => {
+   const handleDelete = (id, dataId) => {
 
       if(type == "opm"){
          db.transaction((tx) => {
@@ -314,7 +316,7 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
          db.transaction((tx) => {
             tx.executeSql(
                `DELETE FROM entries WHERE dataId = ?;`,
-               [id],
+               [dataId],
                (_, result) => {
                console.log('Data deleted successfully');
                },
@@ -332,7 +334,7 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
          db.transaction((tx) => {
             tx.executeSql(
             'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ? WHERE dataId = ?;',
-            [date, title, question, scripture, observation, application, prayer, status, modifiedDate, id ],
+            [date, title, question, scripture, observation, application, prayer, status, Date.now(), id ],
             (_, result) => {
                console.log('Data updated successfully');
                getItems(currentEntry);
@@ -347,7 +349,8 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
 
    // gets the item from present data
    const getItems = (currentEntry) => {
-      setId(currentEntry?.dataId);
+      setId(currentEntry?.id);
+      setDataId(currentEntry?.dataId);
       setDate(currentEntry?.date);
       setTitle(currentEntry?.title);
       setScripture(currentEntry?.scripture);
@@ -356,7 +359,6 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
       setApplication(currentEntry?.application);
       setPrayer(currentEntry?.prayer);
       setType(currentEntry?.type);
-      setModifiedDate(currentEntry?.modifiedDate);
       setStatus(currentEntry?.status);
       setMonth(currentEntry?.month);
       setDay(currentEntry?.day);
@@ -405,7 +407,6 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
             currentEntry.application = application;
             currentEntry.prayer = prayer;
             currentEntry.status = status;
-            currentEntry.modifiedDate = modifiedDate;
          }
       }
 
@@ -416,7 +417,7 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
       return () => {
       subscription.remove();
       };
-   }, [visible, date, title, question, scripture, observation, application, prayer, status, modifiedDate, currentEntry]);
+   }, [visible, date, title, question, scripture, observation, application, prayer, status, currentEntry]);
 
    return (
       <>
@@ -464,14 +465,14 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
             !editMode ? ( <View style={{flex:1, width: '100%', height: '100%', zIndex: 2, backgroundColor: 'transparent', position: "absolute",}}></View>
             ) : null
             } */}
-
+{/* 
                <View style={[styles.editModeContainer,]}>
                   <Text  style={{color:globalStyle?.color}}>Last Modified: </Text>
                   <View style={{   alignItems: 'center', justifyContent: 'space-evenly', flexDirection: 'row', gap: 10}}>
                      <Text style={{color:globalStyle?.color}}>{ currentDay ?? ''}</Text>
                      <Text style={{color:globalStyle?.color}}>{currentTime ?? ''}</Text>
                   </View>
-               </View>
+               </View> */}
 
             <ScrollView style={{flex: 1}} >
 
@@ -495,11 +496,11 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
                      </View>
 
                      {/*DATE MODAL?*/}
-                     { dateModalVisible && (<DateTimePicker mode="date" display="spinner" value={entryDate} onChange={onChangeDate}/>) }
+                     { dateModalVisible ? (<DateTimePicker mode="date" display="spinner" value={entryDate} onChange={onChangeDate}/>) : null }
 
                      {/*SCRIPTURE*/}
                      <View style={styles.inputSubContainer}>
-                        <Text  style={{color:globalStyle?.color}}>{type === "sermon" ? "Text:": type == "opm" ? 'OPM Passage:' : 'Scripture:' }</Text>
+                        <Text  style={{color:globalStyle?.color}}>{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }</Text>
 
                         <TextInput style={styles.touchable} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
 
@@ -554,11 +555,9 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
 
                   </KeyboardAvoidingView>
 
-               
-
-
+            
                </View>
-     
+   
             </ScrollView>
 
             </View>
@@ -568,8 +567,9 @@ export default function DisplayEntry({visible, handleModal, handleType, currentE
 
          </Modal>
       
-         <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={type} handleMainModal={handleModal} globalStyle={globalStyle}/>
+         <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={type} handleMainModal={handleModal} globalStyle={globalStyle} />
          
       </>
    )
+
 }

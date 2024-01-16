@@ -27,9 +27,7 @@ btn2:{
 },
 modal:{
    flex:1,
-   backgroundColor: '#f2f2f2',
    textAlign: 'left',
-   padding: "10",
    height: '100%',
 },
 inputContainer:{

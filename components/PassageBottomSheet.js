@@ -3,15 +3,12 @@ import React,{ useState, useEffect } from 'react';
 import Modal from "react-native-modal";
 import { RadioButton } from 'react-native-paper'; 
 import asv from '../constants/asv.json';
-import geneva from '../constants/geneva.json';
-import kjv from '../constants/kjv.json';
-import tyndale from '../constants/tyndale.json';
 import tagalog from '../constants/tagab.json';
 import { Entypo } from '@expo/vector-icons';
 import styles from '../styles/passageStyle';
 
 
-const translationsName = ["ASV", "KJV", "Geneva","Tyndale", "Tagalog"]
+const translationsName = ["ASV", "Tagalog"];
 
 
 const TranslationModal = ({visible, handleModal, handleTranslation, globalStyle}) => {
@@ -32,6 +29,7 @@ const TranslationModal = ({visible, handleModal, handleTranslation, globalStyle}
 				onBackdropPress={() => handleModal(false)}
 				onBackButtonPress={() => handleModal(false)}
 				isVisible={visible}
+			
 			>
             <View style={[styles.picker, {backgroundColor: globalStyle.verseModal}]}>
 					{
@@ -69,7 +67,7 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, v
 	const [verseNumber, setVerseNumber] = useState([]);
 
 	const [currentTranslation, setCurrentTranslation] = useState("ASV");
-	const translations = [asv, geneva, kjv, tyndale, tagalog];
+	const translations = [asv, tagalog];
 	const [translationPickerModalVisible, settranslationPickerModalVisible] = useState(false);
 
 
@@ -159,6 +157,7 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, v
 			animationOutTiming={500}
 			backdropTransitionInTiming={1000}
 			backdropTransitionOutTiming={500}
+			swipeDirection="down"
 			style={styles.modal}
 		>
 			<View style={[styles.modalContent, {backgroundColor: globalStyle?.verseModal}]}>

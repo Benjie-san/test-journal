@@ -4,6 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
 import { AntDesign } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as SQLite from 'expo-sqlite';
 import styles from '../styles/entryStyle';
 import PassageBottomSheet from './PassageBottomSheet';
@@ -13,20 +14,17 @@ const db = SQLite.openDatabase('_journal_database.db');
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 
-export default function AddEntry({visible, handleModal, verse, type, status, handleType, itemId, index, globalStyle}) {
+export default function AddEntry({visible, handleModal, verse, type, status, itemId, index, globalStyle}) {
 
-const [dateModalVisible, setDateModalVisible] = useState(false)
+const [dateModalVisible, setDateModalVisible] = useState(false);
 const [entryDate, setEntryDate] = useState(new Date());
-const [date, setDate] = useState("");
+const [date, setDate] = useState(new Date().toDateString());
 const [title, setTitle] = useState("");
 const [scripture, setScripture] = useState("");
 const [observation, setObservation] = useState("");
 const [application, setApplication] = useState("");
 const [prayer, setPrayer] = useState("");
 const [question, setQuestion] = useState("");
-const lastModified = useRef(new Date());
-const [modifiedDate, setModifiedDate] = useState(lastModified.current.toString());
-
 const [passageModalVisble, setPassageModalVisible] = useState(false);
 
 const handlePassageVisible = (item) => {
@@ -38,10 +36,6 @@ const handleDateModal = () => {
 }
 
 const handleBackButton = () =>{
-   setModifiedDate(new Date().toString());
-   
-   saveEntry();
-
    handleModal(false);
    cleanStates();
 }
@@ -75,7 +69,7 @@ const handleChangeText = (text, valueFor) =>{
 }
 
 const cleanStates = () =>{
-   setDate("");
+   setDate(new Date().toDateString());
    setTitle("");
    setQuestion("");
    setScripture("");
@@ -84,23 +78,44 @@ const cleanStates = () =>{
    setPrayer("");
 }
 
+const handleSave = () =>{
+   saveEntry();
+}
+
 const saveEntry = () => {
    // adding entry to db
    let isEmpty = [date, title, question, observation, application, prayer];
    if(!isEmpty.every((item)=>item=="")){
-      db.transaction((tx) => {
-         tx.executeSql(
-         'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-         [date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, itemId, months[index]],
-         (tx, results) => {
-            console.log("Success!!!");
-         },
-         (error) => {
-            // Handle error
-            console.log(error);
-         }
-         );
-      });
+
+      if(type=="journal"){
+         db.transaction((tx) => {
+            tx.executeSql(
+            'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+            [date, title, question, scripture, observation, application, prayer, status, type, Date.now(), itemId, months[index]],
+            (tx, results) => {
+               console.log("Success!!!");
+            },
+            (error) => {
+               // Handle error
+               console.log(error);
+            }
+            );
+         });
+      }else{
+         db.transaction((tx) => {
+            tx.executeSql(
+            'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+            [date, title, question, scripture, observation, application, prayer, status, type, Date.now(), null, months[index]],
+            (tx, results) => {
+               console.log("Success!!!");
+            },
+            (error) => {
+               // Handle error
+               console.log(error);
+            }
+            );
+         });
+      }
    }
 }
 
@@ -133,17 +148,19 @@ useEffect(() => {
 
                <Text style={{fontSize: 20, color:globalStyle?.color}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
 
-               <View></View>
+               <TouchableOpacity onPress={ ()=>handleSave() }>
+                  <MaterialCommunityIcons name="content-save-check-outline" size={30} color={globalStyle?.color} />
+               </TouchableOpacity>
 
             </View>
 
             {/*FORMS*/}
-            <KeyboardAvoidingView behavior='height' style={[styles.modal, {backgroundColor: globalStyle?.bgBody, }]}>
+            <View style={[styles.modal, {backgroundColor: globalStyle?.bgBody, }]}>
          
             
-            <ScrollView style={{height: '100%', overflow: 'hidden'}}>
+            <ScrollView style={{flex:1}}>
          
-               <View style={[styles.flex, {height: 'auto', }]}> 
+               <View style={[styles.flex]}> 
             
                   <View style={styles.touchableContainer}>
                   
@@ -232,7 +249,7 @@ useEffect(() => {
          
             </ScrollView>
 
-            </KeyboardAvoidingView>
+            </View>
 
             <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} globalStyle={globalStyle} scripture={scripture} type={type}/>
          
