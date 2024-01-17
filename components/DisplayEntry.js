@@ -8,9 +8,9 @@ import * as SQLite from 'expo-sqlite';
 const db = SQLite.openDatabase('_journal_database.db');
 import PassageBottomSheet from './PassageBottomSheet';
 import { Entypo } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AlertModal from './AlertModal';
 
-
-const windowHeight = Dimensions.get('window').height;
 
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
@@ -209,9 +209,6 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
 
    //for dates
    const [entryDate, setEntryDate] = useState(new Date());
-   // const currentDate = new Date(currentEntry?.modifiedDate).toString();
-   // const currentDay = new Date(currentDate).toLocaleDateString();
-   // const currentTime = new Date(currentDate).toLocaleTimeString();
 
    const entryToBeShared = {
       date: date,
@@ -228,6 +225,18 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
    const handlePassageVisible = (item) => {
       setPassageModalVisible(item);
    }
+
+   const [alertModalVisible, setAlertModalVisible] = useState(false);
+
+   const [message, setMessage] = useState("");
+
+   const handleAlertModalVisible = (item) =>{
+   
+      if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
+         setMessage("Entry Updated");
+         setAlertModalVisible(item);
+      }
+   }
    
 
 // HANDLE FUNCTIONS
@@ -236,14 +245,15 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
    }
    // when closed is pressed
    const handleBackButton = () =>{
-      if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
+      // if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
 
-         updateEntry();
-         handleModal(false);
-      }else{
-         handleModal(false);
+      //    updateEntry();
+      //    handleModal(false);
+      // }else{
+      //    handleModal(false);
 
-      }
+      // }
+      handleModal(false);
    }
 
    const onChangeDate = ({type}, selectedDate) =>{
@@ -331,20 +341,38 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
    //updating the entry
    const updateEntry = () => {
 
+      if(type=='opm'){
          db.transaction((tx) => {
             tx.executeSql(
-            'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ? WHERE dataId = ?;',
+            'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ? WHERE id = ?;',
             [date, title, question, scripture, observation, application, prayer, status, Date.now(), id ],
             (_, result) => {
                console.log('Data updated successfully');
-               getItems(currentEntry);
             },
             (_, error) => {
                console.error('Error updating data:', error);
             }
             );
          });
-      // }
+      }else{
+         db.transaction((tx) => {
+            tx.executeSql(
+            'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ? WHERE dataId = ?;',
+            [date, title, question, scripture, observation, application, prayer, status, Date.now(), dataId ],
+            (_, result) => {
+               console.log('Data updated successfully');
+            },
+            (_, error) => {
+               console.error('Error updating data:', error);
+            }
+            );
+         });
+      }
+   }
+
+   const handleUpdateEntry = () => {
+      updateEntry();
+      handleAlertModalVisible(true)
    }
 
    // gets the item from present data
@@ -368,26 +396,29 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
       getItems(currentEntry);
    }, [currentEntry])
 
-   // EDIT MODE
-   // useEffect(() => {
-   //    if(editMode == true && editModeCount > 1){
-   //       if(currentEntry?.date !== date || currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){
-   //          setModifiedDate(new Date().toString());
-   //          updateEntry();
-   //          currentEntry.date = date;
-   //          currentEntry.scripture = scripture;
-   //          currentEntry.title = title;
-   //          currentEntry.question = question;
-   //          currentEntry.observation = observation;
-   //          currentEntry.application = application;
-   //          currentEntry.prayer = prayer;
-   //          currentEntry.status = status;
-   //          currentEntry.modifiedDate = modifiedDate;
-            
-   //       }
-   //    }
-
-   // }, [date, title, question, scripture, observation, application, prayer, status, currentEntry, modifiedDate, editMode])
+   useEffect(() => {
+      if(alertModalVisible == true){
+   
+         const interval = setTimeout(() => {
+            // After 3 seconds set the show value to false
+            handleAlertModalVisible(false);
+            currentEntry.date = date;
+            currentEntry.scripture = scripture;
+            currentEntry.title = title;
+            currentEntry.question = question;
+            currentEntry.observation = observation;
+            currentEntry.application = application;
+            currentEntry.prayer = prayer;
+            currentEntry.status = status;
+         }, 1000)
+   
+         return () => {
+         clearTimeout(interval)
+         }
+      }
+   
+   }, [alertModalVisible, date, title, question, scripture, observation, application, prayer, status, currentEntry ])
+   
 
    //for drawer when pressed
    useEffect(() => {
@@ -446,12 +477,12 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
                <Text style={{fontSize: 20, color: globalStyle?.color}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
 
                <View style={{flexDirection: 'row', alignItems: "center"}}>
-                  {/* <TouchableOpacity style={[styles.btn]} onPress={handleEditMode}>
-                     <AntDesign name="edit" size={24} color={globalStyle?.color} />
-                  </TouchableOpacity> */}
+                  <TouchableOpacity onPress={handleUpdateEntry}>
+                     <MaterialCommunityIcons name="content-save-edit-outline" size={30} color={globalStyle?.color}/>
+                  </TouchableOpacity>
 
-                  <TouchableOpacity style={[styles.btn]} onPress={handleMenuVisible}>
-                     <Feather name="more-vertical" size={20} color={globalStyle?.color} />
+                  <TouchableOpacity onPress={handleMenuVisible}>
+                     <Feather name="more-vertical" size={25} color={globalStyle?.color} />
                   </TouchableOpacity>
                </View>
 
@@ -477,11 +508,9 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
             <ScrollView style={{flex: 1}} >
 
                <View style={[styles.flex]}> 
-
          
                   <View style={styles.touchableContainer}>
                
-                  
                      {/*DATE*/}
                      <View style={styles.inputSubContainer}>
                         <Text  style={{color:globalStyle?.color}}>Date:</Text>
@@ -561,6 +590,8 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
             </ScrollView>
 
             </View>
+
+            <AlertModal message={message} visible={alertModalVisible} globalStyle={globalStyle} />
             
             <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} globalStyle={globalStyle} scripture={scripture} type={type} />
          

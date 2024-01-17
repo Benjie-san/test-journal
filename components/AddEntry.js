@@ -8,15 +8,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as SQLite from 'expo-sqlite';
 import styles from '../styles/entryStyle';
 import PassageBottomSheet from './PassageBottomSheet';
-
+import AlertModal from './AlertModal';
 
 const db = SQLite.openDatabase('_journal_database.db');
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-
 export default function AddEntry({visible, handleModal, verse, type, status, itemId, index, globalStyle}) {
 
-const [dateModalVisible, setDateModalVisible] = useState(false);
 const [entryDate, setEntryDate] = useState(new Date());
 const [date, setDate] = useState(new Date().toDateString());
 const [title, setTitle] = useState("");
@@ -25,11 +23,23 @@ const [observation, setObservation] = useState("");
 const [application, setApplication] = useState("");
 const [prayer, setPrayer] = useState("");
 const [question, setQuestion] = useState("");
+
+const [dateModalVisible, setDateModalVisible] = useState(false);
 const [passageModalVisble, setPassageModalVisible] = useState(false);
+const [alertModalVisible, setAlertModalVisible] = useState(false);
+
+const [message, setMessage] = useState("");
+
+const handleAlertModalVisible = (item) =>{
+   setMessage("Entry Saved");
+   setAlertModalVisible(item);
+}
 
 const handlePassageVisible = (item) => {
    setPassageModalVisible(item);
 }
+
+
 
 const handleDateModal = () => {
    setDateModalVisible(!dateModalVisible)
@@ -79,6 +89,7 @@ const cleanStates = () =>{
 }
 
 const handleSave = () =>{
+   handleAlertModalVisible(true)
    saveEntry();
 }
 
@@ -124,6 +135,23 @@ useEffect(() => {
       setScripture(verse)
    }
 }, [verse, scripture])
+
+useEffect(() => {
+   if(alertModalVisible == true){
+
+      const interval = setTimeout(() => {
+         // After 3 seconds set the show value to false
+         handleAlertModalVisible(false);
+         handleModal(false)
+      }, 1000)
+  
+
+      return () => {
+      clearTimeout(interval)
+      }
+   }
+
+}, [alertModalVisible])
 
 
    return (
@@ -250,6 +278,8 @@ useEffect(() => {
             </ScrollView>
 
             </View>
+
+            <AlertModal message={message} visible={alertModalVisible} globalStyle={globalStyle} />
 
             <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} globalStyle={globalStyle} scripture={scripture} type={type}/>
          
