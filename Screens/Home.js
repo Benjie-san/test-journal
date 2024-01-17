@@ -1,11 +1,11 @@
 //import for react stuffs
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, Pressable, ActivityIndicator } from 'react-native';
 import React, {useEffect, useState, useRef} from 'react';
-import * as SQLite from 'expo-sqlite';
 import * as Notifications from 'expo-notifications';
 import Modal from "react-native-modal";
 import * as FileSystem from 'expo-file-system';
 import {Asset} from 'expo-asset';
+import * as SQLite from 'expo-sqlite';
 
 // import for data
 const db = SQLite.openDatabase('_journal_database.db');
@@ -140,6 +140,8 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   const openBrp = () => {
     navigation.navigate("BRP");
   }
+
+
   //HANDLE FUNCTIONS
 
   //handles opening adding modal
@@ -545,7 +547,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     getSermonCount();
   }, [allCount, journalCount, opmCount, sermonCount, currentSortBtn])
 
-
   useEffect(() => {
     //openBrpDatabase()
     setupDatabase();
@@ -573,10 +574,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
 
   return (
   <>
-    {/*
-    <TouchableOpacity style={styles.btn}title="Send Notification" onPress={()=> deleteAllEntries()}>
-      <Text>DELETE ALL</Text>
-    </TouchableOpacity> */}
 
     {/*MAIN VIEW*/}
     <View style={[styles.homeContainer]}>

@@ -10,7 +10,6 @@ import * as SQLite from 'expo-sqlite';
 
 import * as FileSystem from 'expo-file-system';
 import {Asset} from 'expo-asset';
-//const dbBrp = SQLite.openDatabase("brpDatabase.db");
 
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 
@@ -27,7 +26,6 @@ let content = Object.keys(data).map( (key, index) =>
    )
 );
 
-
 async function openBrpDatabase() {
    if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
       await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
@@ -40,6 +38,8 @@ async function openBrpDatabase() {
    }
    return SQLite.openDatabase("brpDatabase.db");
 }
+
+
 const ExpandableComponent = ({onRef, item, index, handleAddEntry, handleDisplayEntryModal, handleScripture, handleType, handleIndex, handleEntry, handleItemId, displayEntryVisible, addEntryVisible, globalStyle}) =>{
    
    //states for showing it
@@ -72,27 +72,6 @@ const ExpandableComponent = ({onRef, item, index, handleAddEntry, handleDisplayE
       setMonthCompletion([])
    }
    
-   // const fetchCurrentMonth =   (item) => {
-   //    dbBrp.transaction((tx) => {
-   //       tx.executeSql('SELECT * FROM brp2024 WHERE month = ?', [item],
-   //       (_, result) => {
-   //          const rows = result.rows;
-   //          const dataArray = [];
-   //          for (let i = 0; i < rows.length; i++) {
-   //             const item = rows.item(i);
-   //             dataArray.push(item);
-   //          }
-   //          setCurrentMonthEntries([...dataArray]);
-   //       },
-   //       (_, error) => {
-   //             alert("No Entry yet")
-   //             console.error('Error querying data:', error);
-   //       }
-   //       );
-   //    })
-
-
-   // }
    const fetchCurrentMonth = async (item) => {
       const dbBrp = await openBrpDatabase();
       return new Promise( () => {
@@ -275,20 +254,6 @@ export default function Brp({navigation, globalStyle}){
    const [index, setIndex] = useState(0)
    const [entry, setEntry] = useState([]);
    const [itemId, setItemId] = useState(0);
-
-   // const updateLayout = async (index) => {
-
-   //    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-   //    const array = [...listData];
-   //    array.map((value, placeIndex)=>{
-   //       if(placeIndex === index){
-   //          (array[placeIndex]['isExpanded']) = !array[placeIndex]['isExpanded']
-   //       }else{
-   //          (array[placeIndex]['isExpanded']) = false
-   //       }
-   //    });
-   //    setListData(array);
-   // }
 
    const handleAddEntryModal =  (item) =>{
       setAddEntryVisible(item);

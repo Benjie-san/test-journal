@@ -3,17 +3,17 @@ import React,{ useState, useEffect } from 'react';
 import Modal from "react-native-modal";
 import { RadioButton } from 'react-native-paper'; 
 import asv from '../constants/asv.json';
+import esv from '../constants/esv.json';
 import tagalog from '../constants/tagab.json';
 import { Entypo } from '@expo/vector-icons';
 import styles from '../styles/passageStyle';
 
 
-const translationsName = ["ASV", "Tagalog"];
-
+const translationsName = ["ESV","ASV", "Tagalog"];
 
 const TranslationModal = ({visible, handleModal, handleTranslation, globalStyle}) => {
 
-	const [checked, setChecked] = useState('ASV');
+	const [checked, setChecked] = useState('ESV');
 
 	const handleRadioButton = (item, index) =>{
 		handleTranslation(item, index);
@@ -66,10 +66,10 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, v
 	const [fetchedVerse, setFetchedVerse] = useState([]);
 	const [verseNumber, setVerseNumber] = useState([]);
 
-	const [currentTranslation, setCurrentTranslation] = useState("ASV");
-	const translations = [asv, tagalog];
+	const [currentTranslation, setCurrentTranslation] = useState("ESV");
+	const translations = [esv, asv, tagalog];
 	const [translationPickerModalVisible, settranslationPickerModalVisible] = useState(false);
-
+	const [fetchedFromDb, setFetchedFromDb] = useState([]);
 
 	const handleTranslationPickerModal = (item) =>{
 		settranslationPickerModalVisible(item)
@@ -139,9 +139,9 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, v
 	
 
 	}
-
+	
 	useEffect(() => {
-		getVerse(scripture, asv);
+		getVerse(scripture, esv);
 	}, [scripture]);
 	
    return (
@@ -195,6 +195,7 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, v
 						</>
 						) : ( <Text style={{fontSize: 30, paddingBottom: 150, color: globalStyle.color}} >No Verses Found</Text> ) 
 					}
+		
 						
 					</ScrollView>
 

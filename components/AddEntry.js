@@ -39,8 +39,6 @@ const handlePassageVisible = (item) => {
    setPassageModalVisible(item);
 }
 
-
-
 const handleDateModal = () => {
    setDateModalVisible(!dateModalVisible)
 }
@@ -89,8 +87,8 @@ const cleanStates = () =>{
 }
 
 const handleSave = () =>{
-   handleAlertModalVisible(true)
    saveEntry();
+   handleAlertModalVisible(true)
 }
 
 const saveEntry = () => {
@@ -98,7 +96,7 @@ const saveEntry = () => {
    let isEmpty = [date, title, question, observation, application, prayer];
    if(!isEmpty.every((item)=>item=="")){
 
-      if(type=="journal"){
+      if(type=="journal" || type == "sermon"){
          db.transaction((tx) => {
             tx.executeSql(
             'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
@@ -261,7 +259,6 @@ useEffect(() => {
                         onPress={ () => handlePassageVisible(true) }
                      >
                         <Entypo name="chevron-thin-up" size={24} color={globalStyle?.color} />
-                        {/* <Text style={{ fontSize: 20 ,color: globalStyle?.color }}>View Verse</Text> */}
                      </TouchableOpacity>
                   </View>
    

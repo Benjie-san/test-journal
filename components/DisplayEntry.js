@@ -193,15 +193,9 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
    const [prayer, setPrayer] = useState("");
    const [question, setQuestion] = useState("");
    const [type, setType] = useState("");
-   // const lastModified = useRef(new Date());
-   // const [modifiedDate, setModifiedDate] = useState();
    const [status, setStatus] = useState("");
    const [month, setMonth] = useState("");
    const [day, setDay] = useState("");
-
-   // //showing and hiding of editmode
-   // const [editMode, setEditMode] = useState(false);
-   // const [editModeCount, setEditModeCount] = useState(0);
 
    //for system buttons
    const appState = useRef(AppState.currentState);
@@ -283,10 +277,6 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
       }
    }
 
-   // const handleEditMode = () => {
-   //    setEditModeCount(editModeCount+1);
-   //    setEditMode(!editMode)
-   // }
 
    const handleMenuVisible = ()=>{
       setMenuVisible(!menuVisible);
@@ -307,7 +297,7 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
       setEditMode(false);
    }
 
-   const handleDelete = (id, dataId) => {
+   const handleDelete = () => {
 
       if(type == "opm"){
          db.transaction((tx) => {
@@ -476,7 +466,7 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
                {/*HEADER TITLE*/}
                <Text style={{fontSize: 20, color: globalStyle?.color}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
 
-               <View style={{flexDirection: 'row', alignItems: "center"}}>
+               <View style={{flexDirection: 'row', alignItems: "center", gap:10}}>
                   <TouchableOpacity onPress={handleUpdateEntry}>
                      <MaterialCommunityIcons name="content-save-edit-outline" size={30} color={globalStyle?.color}/>
                   </TouchableOpacity>
@@ -491,19 +481,6 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
 
             {/*FORMS*/}
             <View style={[styles.modal, {backgroundColor: globalStyle?.bgBody,}]}>
-{/*          
-            { 
-            !editMode ? ( <View style={{flex:1, width: '100%', height: '100%', zIndex: 2, backgroundColor: 'transparent', position: "absolute",}}></View>
-            ) : null
-            } */}
-{/* 
-               <View style={[styles.editModeContainer,]}>
-                  <Text  style={{color:globalStyle?.color}}>Last Modified: </Text>
-                  <View style={{   alignItems: 'center', justifyContent: 'space-evenly', flexDirection: 'row', gap: 10}}>
-                     <Text style={{color:globalStyle?.color}}>{ currentDay ?? ''}</Text>
-                     <Text style={{color:globalStyle?.color}}>{currentTime ?? ''}</Text>
-                  </View>
-               </View> */}
 
             <ScrollView style={{flex: 1}} >
 
@@ -577,7 +554,6 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
                         >
 
                            <Entypo name="chevron-thin-up" size={24} color={globalStyle?.color} />
-                           {/* <Text style={{ fontSize: 20 ,color: globalStyle?.color }}>View Verse</Text> */}
                         
                         </TouchableOpacity>
                      </View>
