@@ -31,18 +31,19 @@ modal:{
    height: '100%',
 },
 inputContainer:{
-   width: "80%",
+   width: "90%",
    textAlign: 'left',
    justifyContent: 'center',
    alignItems: 'left',
 },
 touchableContainer:{
-   width: "80%",
+   width: "90%",
    flexDirection: 'row',
    textAlign: 'left',
    justifyContent: 'space-between',
    alignItems: 'left',
    margin: 5,
+   paddingBottom: 5,
 },
 inputSubContainer:{
    width: "48%",
@@ -82,27 +83,7 @@ touchable:{
    alignItems: 'center',
    flexDirection:'row',
    padding: 5,
-},
-scriptureSelector:{
-   width: "80%",
-   alignItems: "center",
-   flexDirection: "row",
-   justifyContent: 'space-between',
-   margin: 5,
-},
-scripturePicker:{
-   width:'65%', 
-   borderRadius: 5, 
-   borderWidth: 0,
-   backgroundColor: '#bfbfbf',
-   overflow: 'hidden',
-},
-scriptureDay:{
-   width: '30%', 
-   backgroundColor: '#bfbfbf',
-   borderRadius: 5,
-   padding: 10,
-   height: 53,
+
 },
 menuPopup:{
    borderRadius: 8,

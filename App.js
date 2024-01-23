@@ -20,13 +20,14 @@ export default function App() {
   const [globalStyle, setGlobalStyle] = useState({});
 
   const darkModeStyle = {
-    bgHeader: '#212A3E',
-    bgBody: '#394867',
-    noteList: '#212A3E',
+    bgHeader: '#111315',
+    bgBody: '#30353C',
+    noteList: '#111315',
     color: '#fff',
     borderColor: '#fff',
     input: '#000',
     verseModal: '#212A3E',
+    fontSize: 16,
   };
 
   const lightModeStyles = {
@@ -37,6 +38,7 @@ export default function App() {
     borderColor: '#cccccc',
     input: '#bfbfbf',
     verseModal: '#fff', 
+    fontSize: 16,
   };
   
   const handleGlobalStyle= () => {

@@ -1,40 +1,26 @@
 //import for react stuffs
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Pressable, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Pressable, ActivityIndicator, Platform } from 'react-native';
 import React, {useEffect, useState, useRef} from 'react';
 import * as Notifications from 'expo-notifications';
 import Modal from "react-native-modal";
-import * as FileSystem from 'expo-file-system';
 import {Asset} from 'expo-asset';
+import * as FileSystem from 'expo-file-system';
 import * as SQLite from 'expo-sqlite';
-
-// import for data
-const db = SQLite.openDatabase('_journal_database.db');
+import * as Sharing from 'expo-sharing';
+import * as DocumentPicker from 'expo-document-picker';
 
 // import for components
 import Navbar from '../components/Navbar';
-
 import AddEntry from '../components/AddEntry';
 import DisplayEntry from '../components/DisplayEntry';
 import Search from './Search';
+import More from './More';
 
+//import vector-icons
 import AntDesign from '@expo/vector-icons/AntDesign';
-import Fontisto from '@expo/vector-icons/Fontisto';
 import { Ionicons } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-
-async function openBrpDatabase() {
-  if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
-    await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
-    }
-  else{
-    await FileSystem.downloadAsync(
-          Asset.fromModule(require('../assets/brpDatabase.db')).uri,
-          FileSystem.documentDirectory + 'SQLite/brpDatabase.db'
-    );
-}
-  return SQLite.openDatabase("brpDatabase.db");
-}
 
 const AddModal = ({visible, type, handleModal, globalStyle}) => {
   const handlePress = (item) =>{
@@ -55,7 +41,7 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
       >
       
         <View style={{
-            backgroundColor: globalStyle.bgBody,
+            backgroundColor: globalStyle.bgHeader,
             borderWidth: 1,
             borderColor: globalStyle.borderColor,
             padding: 20,
@@ -64,25 +50,25 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
             flexDirection:'column',
             justifyContent:"center",
         }} >
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <MaterialIcons name="post-add" size={28} color={globalStyle.color} />            
-            <Text style={{fontSize: 25,  color: globalStyle.color,}}>Add</Text>
+          <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
+            <MaterialIcons name="post-add" size={28} color={globalStyle?.color} />            
+            <Text style={{fontSize: 25,  color: globalStyle?.color, }}>Add</Text>
           </View>
           
           <TouchableOpacity 
             onPress={() => handlePress()} 
-            style={[styles.btn, {alignItems: "left", borderBottomColor:  globalStyle.color, flexDirection: 'row', gap: 5}]}
+            style={[styles.btn, {alignItems: "left", backgroundColor: globalStyle?.bgBody, flexDirection: 'row', gap: 5}]}
           >
-            <Entypo name="book" size={26} color={globalStyle.color} />
-            <Text style={{fontSize: 18, color: globalStyle.color, textAlign:'right'}}>Journal Entry/Sermon Notes</Text>
+            <Entypo name="book" size={26} color={globalStyle?.color} />
+            <Text style={{fontSize: 18, color: globalStyle?.color, textAlign:'right'}}>Journal Entry/Sermon Notes</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
             onPress={() => handlePress("opm")} 
-            style={[styles.btn, {alignItems: "left", flexDirection: 'row', gap: 10, borderBottomWidth: 0}]}
+            style={[styles.btn, {alignItems: "left", flexDirection: 'row', gap: 10, backgroundColor: globalStyle?.bgBody}]}
           >
-            <Entypo name="open-book" size={26} color={globalStyle.color} />
-            <Text style={{fontSize: 18,  color: globalStyle.color,}}>OPM Reflection</Text>
+            <Entypo name="open-book" size={26} color={globalStyle?.color} />
+            <Text style={{fontSize: 18,  color: globalStyle?.color,}}>OPM Reflection</Text>
           </TouchableOpacity>
 
         </View>
@@ -93,12 +79,17 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
 
 export default function Home({navigation, route, darkMode, handleDarkMode, globalStyle}) {
 
+  // import for data
+  const [db, setDb] = useState( SQLite.openDatabase('_journal_database.db') );
+
   const [notes, setNotes] = useState([]);// showing all the data
   const [notesId, setNotesId] = useState([]);
   //states for modal
   const [addEntryVisible, setAddEntryVisible] = useState(false)
   const [displayEntryVisible, setDisplayEntryVisible] = useState(false)
   const [searchVisible, setSearchVisible] = useState(false)
+  const [moreVisible, setMoreVisible] = useState(false)
+
 
   //states for passing props in the modals
   const [type, setType] = useState("");
@@ -125,6 +116,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     month: months[todayDate.getMonth()],
     year: todayDate.getFullYear(),
   };
+
   //const todayVerse = data[today.month][today.day-1]["verse"]; // for setting today's verse
   const [visibleAddModal, setVisibleAddModal] = useState(false); // add modal
   const [todayVerse, setTodayVerse] = useState("");
@@ -135,28 +127,93 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
 
   const [refresh, setRefresh] = useState(false);
 
+  // BACK UP AND RESTORE FUNCTIONS
+
+  const backUp = async () => {
+
+    // if(Platform.OS === "android"){
+    //   const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+    //   if(permissions.granted){
+    //     const base64 = await FileSystem.readAsStringAsync(
+    //       FileSystem.documentDirectory + 'SQLite/_journal_database.db',
+    //       {
+    //         encoding: FileSystem.EncodingType.UTF
+    //       }
+    //     );
+    //       await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri,'_journal_database.db', 'application/octet-stream')
+    //       .then( async (uri) =>{
+    //         await FileSystem.writeAsStringAsync(uri, base64, {endcoding: FileSystem.EncodingType.UTF8})
+    //       })
+    //       .catch( (e) => console.log(e) )
+    //   } else{
+    //     console.log("Permission Not Granted")
+    //   }
+    // } else{
+    //   await Sharing.shareAsync(FileSystem.documentDirectory + 'SQLite/_journal_database.db');
+    // }
+
+
+  }
+
+  const restore = async () => {
+
+    // let result = await DocumentPicker.getDocumentAsync({
+    //   copyToCacheDirectory: true
+    // });
+
+    // if(result.type === 'success'){
+  
+    //   setNoteListLoading(true);
+      
+    //   if( !(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists){
+    //     await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
+    //   }
+
+    //   const base64 = await FileSystem.readAsStringAsync(
+    //     result.uri,
+    //     {
+    //       encoding: FileSystem.EncodingType.UTF8
+    //     }
+    //   );
+
+    //   await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + 'SQLite/_journal_database.db', base64, {encoding: FileSystem.EncodingType.UTF8}); 
+    //   await db.closeAsync();
+    //   setDb(SQLite.openDatabase('_journal_database.db'));
+    // }else{
+    //   console.log(result)
+    // }
+
+    // handleMoreModal(false);
+
+  };
+
+
   // NAVIGATION FUNCTIONS
 
   const openBrp = () => {
     navigation.navigate("BRP");
   }
 
-
   //HANDLE FUNCTIONS
 
-  //handles opening adding modal
+  //handles opening adding entry modal
   const handleAddEntryModal =  (item) =>{
     setAddEntryVisible(item);
   }
-  //handles opening display modal
+  //handles opening display entry modal
   const handleDisplayEntryModal =  (item) =>{
     setDisplayEntryVisible(item);
-
   }
 
-  const handleScripture = (item) => {
-      setScripture(item)
+  // when search modal button is shown
+  const handleSearchModal = (item) =>{
+    setSearchVisible(item);
   }
+
+  const handleMoreModal = (item) =>{
+    setMoreVisible(item);
+  }
+
 
   const handleType = (item) => {
       setType(item)
@@ -164,10 +221,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
 
   const handleItem = (item) =>{
     setItem(item)
-  }
-
-  const handleEntry = (item) => {
-      setEntry(item)
   }
 
   const handleCurrentEntry = (item) =>{
@@ -219,11 +272,8 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
       fetchData(type);
     }
   }
-
-  const handleSearchModal = (item) =>{
-    setSearchVisible(item);
-  }
-
+  
+  // when pull to refresh is called
   const handleRefresh = (item) => {
     let type = item.toLowerCase();
     setRefresh(true)
@@ -360,7 +410,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
       tx.executeSql(
         "SELECT * FROM entries ORDER BY modifiedDate DESC;",
         [],
-        (_, result) => {
+        (txObj, result) => {
           const rows = result.rows;
           const dataArray = [];
           const dataArray2 = [];
@@ -372,7 +422,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
             dataArray2.push(item.dataId);
 
           }
-          dataArray.sort( (a,b)=>b.modifiedDate - a.modifiedDate );
           setNotes(dataArray);
           setNotesId(dataArray2);
           setNoteListLoading(false);
@@ -400,17 +449,31 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
             setVerseLoading(false);
           },
           (_, error) => {
-                alert("No Entry yet")
                 console.error('Error querying data:', error);
           }
           );
       })
     });
+  };
+
+  async function openBrpDatabase() {
+    if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
+      await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
+      }
+    else{
+      await FileSystem.downloadAsync(
+            Asset.fromModule(require('../assets/brpDatabase.db')).uri,
+            FileSystem.documentDirectory + 'SQLite/brpDatabase.db'
+      );
   }
+    return SQLite.openDatabase("brpDatabase.db");
+  };
 
   //creating the table
   const setupDatabase = () => {
     // Check if the table exists
+
+    setNoteListLoading(true);
     db.transaction((tx) => {
       tx.executeSql(
         'SELECT name FROM sqlite_master WHERE type="table" AND name="entries";',
@@ -539,20 +602,30 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     fetchAllData();
     setCurrentSortBtn("All");
     setIsSelected(true);
-  }, [])
+  }, []);
 
   useEffect(() => {
     getJournalCount();
     getOpmCount();
     getSermonCount();
-  }, [allCount, journalCount, opmCount, sermonCount, currentSortBtn])
+  }, [allCount, journalCount, opmCount, sermonCount, currentSortBtn]);
 
   useEffect(() => {
     //openBrpDatabase()
     setupDatabase();
+
   }, []);
 
-  //for push notifications
+  // useEffect(() => {
+  //   if(notes.length !== notesId.length){
+  //     fetchAllData();
+  //   }
+  // }, [db])
+  
+
+
+
+  // // for push notifications
   // useEffect(() => {
   //   scheduleNotifications();
 
@@ -581,19 +654,9 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
       {/*Home header*/}
       <View style={[ {width: '100%', padding: 12, flexDirection:'row', alignItems: 'center', justifyContent: 'space-between', borderBottomColor: '#cccccc', borderBottomWidth: 1, backgroundColor: globalStyle.bgHeader}]}>
 
-        {darkMode ?
-          (
-            <TouchableOpacity onPress={ () => handleDarkMode() } styles={[{width: 30, height: 30}]}>
-              <Fontisto name="day-sunny" size={24} color={globalStyle.color} />
-            </TouchableOpacity>
-          )
-          :
-          (
-            <TouchableOpacity  onPress={ () => handleDarkMode() } styles={[{width: 30, height: 30}]}>
-                <Fontisto name="night-clear" size={24} color={globalStyle.color} />
-            </TouchableOpacity>
-          )
-        }
+        <TouchableOpacity onPress={ () => handleMoreModal(true) }>
+          <AntDesign name="menuunfold" size={24} color={globalStyle.color} />
+        </TouchableOpacity>
 
         <Text style={{padding: 5, fontSize: 20, textAlign: "center", fontWeight: 'bold', color : globalStyle.color }}>Journal { today.year }</Text>
 
@@ -673,17 +736,18 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
           :
           ( <FlatList
               style={{width: '100%'}}
-              data={notes}
+              data={ notes } 
               refreshing={refresh}
               onRefresh={()=>handleRefresh(currentSortBtn)}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={ [styles.entry, {backgroundColor: globalStyle.noteList, borderColor: globalStyle.borderColor, borderWidth:1}] }
+                  style={ [styles.entry, {backgroundColor: globalStyle.noteList, elevation: 2, gap: 5}] }
                   onPress={ ()=> handleDisplayEntryFetch(item) }
                 >
-                  <Text style={{color: globalStyle.color}}>{`${item.date}`}</Text>
-                  <Text style={{color: globalStyle.color}}>{`${item.scripture}`}</Text>
+                  {/* <Text style={{color: globalStyle.color, fontSize: 14}}>{item.type == 'opm' ? 'OPM Reflection' : type == "sermon" ? 'Sermon Notes' : "Journal Entry"}</Text> */}
+                  <Text style={{color: globalStyle.color, fontSize: 14, flex:1, overflow:'hidden'}}>{item.title}</Text>
+                  <Text style={{color: globalStyle.color, fontSize: 14, flex:1, overflow:'hidden'}}>{item.scripture}</Text>
                   <View style={[styles.border, {width: 30, height: 30, backgroundColor: item.status,}]}></View>
 
                 </TouchableOpacity>
@@ -708,8 +772,11 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType}  globalStyle={globalStyle}/>
 
     {/*Search modal*/}
-    <Search visible={searchVisible} handleModal={handleSearchModal}  globalStyle={globalStyle} />
+    <Search visible={searchVisible} handleModal={handleSearchModal} globalStyle={globalStyle} />
 
+    {/*More modal*/}
+    <More visible={moreVisible} handleModal={handleMoreModal} darkMode={darkMode} handleDarkMode={handleDarkMode} globalStyle={globalStyle} backUp={backUp} restore={restore} />
+    
     {/*modal for displaying add entry*/}
     <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal}  globalStyle={globalStyle}/>
 
@@ -730,10 +797,11 @@ const styles = StyleSheet.create({
     borderColor: 'black',
   },
   btn:{
-    borderBottomWidth:1,
     padding: 15,
     alignItems: 'center',
     margin: 5,
+    borderRadius: 10,
+    elevation: 2,
   },
   homeContainer:{
     flex: 1,

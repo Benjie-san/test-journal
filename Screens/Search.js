@@ -84,7 +84,7 @@ export default function Search({visible, handleModal, globalStyle}) {
          avoidKeyboard={false}
          propagateSwipe
          onBackButtonPress={ ()=> handleModal() }
-         onBackdropPress={() => handleModal()}
+         onBackdropPress={ () => handleModal() }
          style={{
             flex:1, 
             margin: 0, 
@@ -147,8 +147,7 @@ const styles = StyleSheet.create({
    },
    btn:{
       borderBottomWidth:1,
-      borderBottomColor: 'black',
-      padding: 15,
+      padding: 10,
       alignItems: 'center',
       margin: 5,
    },

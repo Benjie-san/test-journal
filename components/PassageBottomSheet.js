@@ -8,7 +8,6 @@ import tagalog from '../constants/tagab.json';
 import { Entypo } from '@expo/vector-icons';
 import styles from '../styles/passageStyle';
 
-
 const translationsName = ["ESV","ASV", "Tagalog"];
 
 const TranslationModal = ({visible, handleModal, handleTranslation, globalStyle}) => {
@@ -69,7 +68,6 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, v
 	const [currentTranslation, setCurrentTranslation] = useState("ESV");
 	const translations = [esv, asv, tagalog];
 	const [translationPickerModalVisible, settranslationPickerModalVisible] = useState(false);
-	const [fetchedFromDb, setFetchedFromDb] = useState([]);
 
 	const handleTranslationPickerModal = (item) =>{
 		settranslationPickerModalVisible(item)
@@ -150,31 +148,30 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, v
 			onBackdropPress={() => handleModal(false)}
 			onBackButtonPress={() => handleModal(false)}
 			isVisible={visible}
-			onSwipeComplete={() => handleModal(!visible)}
 			animationIn="bounceInUp"
 			animationOut="bounceOutDown"
 			animationInTiming={900}
 			animationOutTiming={500}
 			backdropTransitionInTiming={1000}
 			backdropTransitionOutTiming={500}
-			swipeDirection="down"
 			style={styles.modal}
 		>
 			<View style={[styles.modalContent, {backgroundColor: globalStyle?.verseModal}]}>
 				
 				<View style={styles.center}>
-					<View style={[styles.barIcon, {backgroundColor: globalStyle?.borderColor}]} />
-
+					<TouchableOpacity onPress={()=>handleModal(false)}>
+						<Entypo name={"chevron-thin-down"} size={22} color={globalStyle.color}/>
+					</TouchableOpacity>
 					<View style={[styles.header, ]} >
 						<Text style={[{color: globalStyle?.color, fontSize: 17, fontWeight: 'bold'}]} >
 							{scripture !== '' ? scripture : "Set Scripture first"}
 						</Text>
-				
-						<TouchableOpacity disabled={scripture !== '' ? false : true} onPress={ ()=> handleTranslationPickerModal(true)  } style={[styles.headerBtn, ] } > 
-							<Text style={[ {color: globalStyle?.color, fontSize: 17}]}>{currentTranslation}</Text>
-							<Entypo name="chevron-thin-down" size={20} color={globalStyle?.color} />
-
-						</TouchableOpacity>
+						{scripture !== '' ? (
+							<TouchableOpacity onPress={ ()=> handleTranslationPickerModal(true)  } style={[styles.headerBtn, ] } > 
+								<Text style={[ {color: globalStyle?.color, fontSize: 17}]}>{currentTranslation}</Text>
+							</TouchableOpacity>
+						) : null }
+					
 
 					</View>
 

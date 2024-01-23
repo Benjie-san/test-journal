@@ -490,10 +490,10 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
                
                      {/*DATE*/}
                      <View style={styles.inputSubContainer}>
-                        <Text  style={{color:globalStyle?.color}}>Date:</Text>
+                        <Text  style={{color:globalStyle?.color,  fontSize: globalStyle?.fontSize}}>Date:</Text>
                         <Pressable style={styles.touchable} onPress={handleDateModal}>
                            <TextInput
-                           style={{color: 'black'}}
+                           style={{color: 'black', fontSize: globalStyle?.fontSize}}
                            value={date}
                            onChangeText={handleChangeDate}
                            editable={false}
@@ -506,9 +506,9 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
 
                      {/*SCRIPTURE*/}
                      <View style={styles.inputSubContainer}>
-                        <Text  style={{color:globalStyle?.color}}>{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }</Text>
+                        <Text  style={{color:globalStyle?.color,  fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }</Text>
 
-                        <TextInput style={styles.touchable} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
+                        <TextInput style={[styles.touchable, { fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
 
                      </View>
 
@@ -516,36 +516,36 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
 
                   {/*TITLE*/}
                   <View style={styles.inputContainer}>
-                     <Text  style={{color:globalStyle?.color}}>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
-                     <TextInput style={[styles.input, {minHeight: 50}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
+                     <Text  style={{color:globalStyle?.color,  fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
+                     <TextInput style={[styles.input, {minHeight: 50, fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
                   </View>
 
                   {/*QUESTION*/}
                   { type != "journal" ?
                      (
                         <View style={styles.inputContainer}>
-                           <Text  style={{color:globalStyle?.color}}>Question:</Text>
-                           <TextInput style={[styles.input, {minHeight: 50}]} editable onChangeText={ text => handleChangeText(text, "question") } value={question} multiline={true} />
+                           <Text  style={{color:globalStyle?.color, fontSize: globalStyle?.fontSize}}>Question:</Text>
+                           <TextInput style={[styles.input, {minHeight: 50, fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "question") } value={question} multiline={true} />
                         </View>
                      ) : null
                   }
 
                   {/*OBSERVATION*/}
                   <View style={styles.inputContainer}>
-                     <Text  style={{color:globalStyle?.color}}>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
-                     <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "observation") } value={observation}  multiline={true} />
+                     <Text  style={{color:globalStyle?.color,  fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
+                     <TextInput style={[styles.input, { fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "observation") } value={observation}  multiline={true} />
                   </View>
 
                   {/*APPLICATION*/}
                   <View style={styles.inputContainer}>
-                     <Text  style={{color:globalStyle?.color}}>{type === "sermon" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
-                     <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
+                     <Text  style={{color:globalStyle?.color,  fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
+                     <TextInput style={[styles.input,{ fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
                   </View>
 
                   {/*PRAYER*/}
                   <KeyboardAvoidingView behavior='padding' style={styles.inputContainer} >
-                     <Text style={{color:globalStyle?.color}}>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
-                     <TextInput style={styles.input} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
+                     <Text style={{color:globalStyle?.color , fontSize: globalStyle?.fontSize}}>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
+                     <TextInput style={[styles.input, { fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
 
                      <View style={[styles.flex,{paddingTop: 20,}]}>
                         <TouchableOpacity 

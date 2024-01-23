@@ -12,7 +12,7 @@ const Navbar = ({path, onPress, onPressAddEntry, isSelected, openBrp}) => {
 
    return(
    <View style={[styles.navbar]}>
-      <View style={{elevation: 50, borderRadius: 50, width: 60, height: 60, padding: 10,
+      <View style={{borderRadius: 50, width: 60, height: 60, padding: 10,
       margin: 10, alignItems: 'center', justifyContent: 'center'}}>
       <TouchableOpacity onPress={ ()=>onPressAddEntry() } style={[styles.addEntry]}>
          <Image style={{width: 30, height: 30,}} source={require("../assets/write.png")}/>
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
       height: 60,
       alignItems: 'center',
       justifyContent: 'center',
-
+      elevation: 5,
    },
 });
 
