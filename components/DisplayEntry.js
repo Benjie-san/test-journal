@@ -220,8 +220,11 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
 
    const handleAlertModalVisible = (item) =>{
    
-      if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
+      if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer){   
          setMessage("Entry Updated");
+         setAlertModalVisible(item);
+      } else if(currentEntry?.status !== status){
+         setMessage(status === "#8CFF31" ? "Unmark as done" : "Mark as done");
          setAlertModalVisible(item);
       }
    }
@@ -280,6 +283,7 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
 
    const handleStatus = (item) =>{
       setStatus(item);
+      handleAlertModalVisible(true);
    }
 
    const cleanStates = () =>{

@@ -32,7 +32,7 @@ export default function App() {
 
   const lightModeStyles = {
     bgHeader: '#fff',
-    bgBody: '#f2f2f2',
+    bgBody: '#f2f2f2',   
     noteList: '#fff',
     color: '#000',
     borderColor: '#cccccc',

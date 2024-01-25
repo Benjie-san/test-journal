@@ -230,8 +230,8 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   }
 
   // when add write button is clicked
-  const handleAddButton = (type) => {
-    if(type == "today"){
+  const handleAddButton = (item) => {
+    if(item == "today"){
       setScripture(todayVerse.verse);
       if(todayVerse.verse == "Sermon Notes"){
         setType("sermon");
@@ -239,16 +239,19 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
         setType("journal")
       }
       handleAddEntryModal(true);
+
     } else {
-      if(type == "opm"){
+      if(item == "opm"){
         setType("opm");
+        setScripture("");
+
         handleAddEntryModal(true);
       }else{
         openBrp()
       }
     }
-
-}
+  
+  }
 
   const handleVisibleAddModal = () => {
     setVisibleAddModal(!visibleAddModal);
@@ -429,6 +432,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
           setCurrentSortBtn("All");
           setIsSelected(true);
           setNoteListLoading(false);
+          setType("");
         },
         (_, error) => {
           console.error('Error querying data:', error);

@@ -10,9 +10,9 @@ const AlertModal = ({visible, message, globalStyle}) =>{
          style={[styles.flex, {margin: 0, flex:1, paddingTop: 400,}]}
          animationIn="fadeIn"
          animationOut="fadeOut"
-         backdropOpacity={0.1}
+         backdropOpacity={0}
       >
-         <View style={{backgroundColor: globalStyle?.bgBody, padding: 10, borderRadius: 10, borderWidth:1, borderColor: globalStyle?.borderColor}}>
+         <View style={{backgroundColor: globalStyle?.bgBody, padding: 10, borderRadius: 10, borderWidth:1, borderColor: globalStyle?.borderColor, elevation: 5}}>
             <Text style={{color: globalStyle?.color}}>{message}</Text>
          </View>
       </Modal>

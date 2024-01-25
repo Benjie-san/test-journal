@@ -46,6 +46,7 @@ const handleDateModal = () => {
 const handleBackButton = () =>{
    handleModal(false);
    cleanStates();
+
    if(route.name == "Home" ){
       fetchAllData();
    }
@@ -91,7 +92,8 @@ const cleanStates = () =>{
 
 const handleSave = () =>{
    saveEntry();
-   handleAlertModalVisible(true)
+   handleAlertModalVisible(true);
+   cleanStates();
 }
 
 const saveEntry = () => {
@@ -133,9 +135,11 @@ const saveEntry = () => {
 
 useEffect(() => {
    if(type == 'journal'){
-      setScripture(verse)
+      setScripture(verse);
+   }else{
+      setScripture("");
    }
-}, [verse])
+}, [verse, scripture]);
 
 useEffect(() => {
    if(alertModalVisible == true){
