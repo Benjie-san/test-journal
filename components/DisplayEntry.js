@@ -10,18 +10,14 @@ import PassageBottomSheet from './PassageBottomSheet';
 import { Entypo } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AlertModal from './AlertModal';
-
-
-const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-
 import styles from '../styles/entryStyle';
 
-const DeleteConfirmationModal = ({visible, deleteEntry, id, handleModal,handleMainModal, globalStyle}) => {
+const DeleteConfirmationModal = ({visible, deleteEntry, handleModal,handleMainModal, globalStyle}) => {
 
    const handleDelete = () =>{
-      deleteEntry(id);
+      deleteEntry();
       handleModal();
-      handleMainModal()
+      handleMainModal();
    }
    return (
       <>
@@ -70,7 +66,7 @@ const DeleteConfirmationModal = ({visible, deleteEntry, id, handleModal,handleMa
    );
 }
 
-const MenuModal = ({visible, handleCloseModal, deleteEntry, id, status, entry, type, handleStatus, handleMainModal, globalStyle, handleUpdateEntry}) => {
+const MenuModal = ({visible, handleCloseModal, deleteEntry, status, entry, type, handleStatus, handleMainModal, globalStyle, updateEntry}) => {
    const [deleteModal, setDeleteModal] = useState(false);
 
    const handleDeleteModal = () => {
@@ -110,13 +106,9 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id, status, entry, t
       }
       else if(item == "#ffad33"){
          handleStatus("#8CFF31");
-         handleUpdateEntry();
-         alert("Marked as done");
       }
       else if(item == "#8CFF31"){
          handleStatus("#ffad33");
-         handleUpdateEntry();
-         alert("Unmarked as done");
       }
       else if(item == "Share"){
          onShare();
@@ -165,7 +157,7 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id, status, entry, t
                > 
                <View  style={{flexDirection: 'row', alignItems: "center", gap: 10,}}> 
                   <AntDesign name="checksquareo" size={20} color={globalStyle?.color} />        
-                  <Text style={{fontSize: 18,  color: globalStyle?.color}}>{status == "#8cff31" ? "Unmark as done" : "Mark as done"}</Text>
+                  <Text style={{fontSize: 18,  color: globalStyle?.color}}>{status === "#8CFF31" ? "Unmark as done" : "Mark as done"}</Text>
                </View>
                </TouchableOpacity>
 
@@ -173,12 +165,12 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id, status, entry, t
          </View>
          </Modal>
 
-         <DeleteConfirmationModal visible={deleteModal} deleteEntry={deleteEntry} id={id} handleModal={handleDeleteModal} handleMainModal={handleMainModal}  globalStyle={globalStyle} />
+         <DeleteConfirmationModal visible={deleteModal} deleteEntry={deleteEntry} handleModal={handleDeleteModal} handleMainModal={handleMainModal}  globalStyle={globalStyle} />
       </>
    );
 }
 
-export default function DisplayEntry({visible, handleModal, currentEntry, globalStyle }){
+export default function DisplayEntry({visible, handleModal, currentEntry, globalStyle, route, fetchAllData }){
 //for showing modals
    const [dateModalVisible, setDateModalVisible] = useState(false);
    const [menuVisible, setMenuVisible] = useState(false);
@@ -241,15 +233,17 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
    }
    // when closed is pressed
    const handleBackButton = () =>{
-      // if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
+      if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
 
-      //    updateEntry();
-      //    handleModal(false);
-      // }else{
-      //    handleModal(false);
+         updateEntry();
+         handleModal(false);
+      }else{
+         handleModal(false);
 
-      // }
-      handleModal(false);
+      }
+      if(route.name == "Home" ){
+         fetchAllData();
+      }
    }
 
    const onChangeDate = ({type}, selectedDate) =>{
@@ -285,7 +279,7 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
    }
 
    const handleStatus = (item) =>{
-      setStatus(item)
+      setStatus(item);
    }
 
    const cleanStates = () =>{
@@ -296,7 +290,7 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
       setObservation("");
       setApplication("");
       setPrayer("");
-      setEditMode(false);
+      setStatus("");
    }
 
    const handleDelete = () => {
@@ -327,6 +321,9 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
                }
             );
          });
+      }
+      if(route.name == "Home" ){
+         fetchAllData();
       }
    }
 
@@ -469,11 +466,11 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
                <Text style={{fontSize: 20, color: globalStyle?.color}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
 
                <View style={{flexDirection: 'row', alignItems: "center", gap:10}}>
-                  <TouchableOpacity onPress={handleUpdateEntry}>
+                  <TouchableOpacity onPress={ () => handleUpdateEntry()}>
                      <MaterialCommunityIcons name="content-save-edit-outline" size={30} color={globalStyle?.color}/>
                   </TouchableOpacity>
 
-                  <TouchableOpacity onPress={handleMenuVisible}>
+                  <TouchableOpacity onPress={() => handleMenuVisible()}>
                      <Feather name="more-vertical" size={25} color={globalStyle?.color} />
                   </TouchableOpacity>
                </View>
@@ -576,7 +573,7 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
 
          </Modal>
       
-         <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={type} handleMainModal={handleModal} globalStyle={globalStyle} handleUpdateEntry={handleUpdateEntry} />
+         <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={type} handleMainModal={handleModal} globalStyle={globalStyle} updateEntry={updateEntry} />
          
       </>
    )

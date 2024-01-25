@@ -13,7 +13,7 @@ import AlertModal from './AlertModal';
 const db = SQLite.openDatabase('_journal_database.db');
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-export default function AddEntry({visible, handleModal, verse, type, status, itemId, index, globalStyle}) {
+export default function AddEntry({visible, handleModal, verse, type, status, itemId, index, globalStyle, fetchAllData, route}) {
 
 const [entryDate, setEntryDate] = useState(new Date());
 const [date, setDate] = useState(new Date().toDateString());
@@ -46,6 +46,9 @@ const handleDateModal = () => {
 const handleBackButton = () =>{
    handleModal(false);
    cleanStates();
+   if(route.name == "Home" ){
+      fetchAllData();
+   }
 }
 
 const onChangeDate = ({type}, selectedDate) =>{
@@ -132,7 +135,7 @@ useEffect(() => {
    if(type == 'journal'){
       setScripture(verse)
    }
-}, [verse, scripture])
+}, [verse])
 
 useEffect(() => {
    if(alertModalVisible == true){
@@ -142,6 +145,9 @@ useEffect(() => {
          handleAlertModalVisible(false);
          handleModal(false);
          cleanStates();
+         if(route.name == "Home" ){
+            fetchAllData();
+         }
 
       }, 1000)
   

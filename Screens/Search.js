@@ -7,7 +7,7 @@ import Modal from "react-native-modal";
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 
-export default function Search({visible, handleModal, globalStyle}) {
+export default function Search({visible, handleModal, globalStyle, fetchAllData, route}) {
    const [searchItem, setSearchItem] = useState("");
    const [searchedResult, setsSearchedResult] = useState([]);
    const [displayEntryVisible, setDisplayEntryVisible] = useState(false)
@@ -15,6 +15,7 @@ export default function Search({visible, handleModal, globalStyle}) {
 
    const handleDisplayEntryModal =  (item) =>{
       setDisplayEntryVisible(item);
+      handleModal(false)
    }
 
    const handleCurrentEntry = (item) =>{
@@ -129,7 +130,7 @@ export default function Search({visible, handleModal, globalStyle}) {
          </View>
       </Modal>
       {/*For displaying the component*/}
-      <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType} globalStyle={globalStyle}/>
+      <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType} globalStyle={globalStyle} fetchAllData={fetchAllData} route={route}/>
       </>
    )
 }

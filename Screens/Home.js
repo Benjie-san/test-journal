@@ -1,6 +1,6 @@
 //import for react stuffs
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, Pressable, ActivityIndicator, Platform } from 'react-native';
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
 import * as Notifications from 'expo-notifications';
 import Modal from "react-native-modal";
 import {Asset} from 'expo-asset';
@@ -8,6 +8,7 @@ import * as FileSystem from 'expo-file-system';
 import * as SQLite from 'expo-sqlite';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
+import { useIsFocused } from '@react-navigation/native';
 
 // import for components
 import Navbar from '../components/Navbar';
@@ -90,6 +91,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   const [searchVisible, setSearchVisible] = useState(false)
   const [moreVisible, setMoreVisible] = useState(false)
 
+  const isFocused = useIsFocused();
 
   //states for passing props in the modals
   const [type, setType] = useState("");
@@ -191,7 +193,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   // NAVIGATION FUNCTIONS
 
   const openBrp = () => {
-    navigation.navigate("BRP", {fetchAllData: fetchAllData});
+    navigation.navigate("BRP");
   }
 
   //HANDLE FUNCTIONS
@@ -424,6 +426,8 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
           }
           setNotes(dataArray);
           setNotesId(dataArray2);
+          setCurrentSortBtn("All");
+          setIsSelected(true);
           setNoteListLoading(false);
         },
         (_, error) => {
@@ -490,9 +494,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
                 (_, result) => {
                   console.log('Table created successfully');
                   fetchAllData();
-                  getJournalCount();
-                  getOpmCount();
-                  getSermonCount();
                   fetchTodayVerse();
                 },
                 (_, error) => {
@@ -503,9 +504,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
           } else {
             console.log('Table already exists');
             fetchAllData();
-            getJournalCount();
-            getOpmCount();
-            getSermonCount();
             fetchTodayVerse();
           }
         },
@@ -596,33 +594,24 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   };
 
   // USE EFFECTS
-
   // for creating the db
-  useEffect(() => {
-    fetchAllData();
-    setCurrentSortBtn("All");
-    setIsSelected(true);
-  }, []);
 
   useEffect(() => {
     getJournalCount();
     getOpmCount();
     getSermonCount();
-  }, [allCount, journalCount, opmCount, sermonCount, currentSortBtn]);
+  }, [currentSortBtn]);
 
   useEffect(() => {
     //openBrpDatabase()
     setupDatabase();
 
   }, []);
-
-  // useEffect(() => {
-  //   if(notes.length !== notesId.length){
-  //     fetchAllData();
-  //   }
-  // }, [db])
-  
-
+  useEffect(() => {
+    if(isFocused){
+      fetchAllData();
+    }
+  }, [isFocused]);
 
 
   // // for push notifications
@@ -642,7 +631,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   //   registerForPushNotificationsAsync();
 
   //   // Handle notifications when the app is open
-  //   //Notifications.addNotificationReceivedListener(handleNotification);
+  //   Notifications.addNotificationReceivedListener(handleNotification);
   // }, []);
 
   return (
@@ -766,13 +755,13 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     {/*MODALSS*/}
 
     {/*ADD ITEM MODAL*/}
-    <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} index={months.indexOf(todayVerse?.month)} itemId={todayVerse?.id} globalStyle={globalStyle} />
+    <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} index={months.indexOf(todayVerse?.month)} itemId={todayVerse?.id} globalStyle={globalStyle} fetchAllData={fetchAllData} route={route}/>
 
     {/*For displaying the component*/}
-    <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType}  globalStyle={globalStyle}/>
+    <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType}  globalStyle={globalStyle}  fetchAllData={fetchAllData} route={route} />
 
     {/*Search modal*/}
-    <Search visible={searchVisible} handleModal={handleSearchModal} globalStyle={globalStyle} />
+    <Search visible={searchVisible} handleModal={handleSearchModal} globalStyle={globalStyle} fetchAllData={fetchAllData}  route={route} />
 
     {/*More modal*/}
     <More visible={moreVisible} handleModal={handleMoreModal} darkMode={darkMode} handleDarkMode={handleDarkMode} globalStyle={globalStyle} backUp={backUp} restore={restore} />

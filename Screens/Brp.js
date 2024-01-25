@@ -244,8 +244,7 @@ const ExpandableComponent = ({onRef, item, index, handleAddEntry, handleDisplayE
    );
 }
 
-export default function Brp({navigation, globalStyle}){
-
+export default function Brp({navigation, globalStyle, route}){
 
    const [listData, setListData] = useState(content); // state that populates the items from data
    const [addEntryVisible, setAddEntryVisible] = useState(false)
@@ -337,9 +336,9 @@ export default function Brp({navigation, globalStyle}){
          </View>
    </View>
 
-   <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} itemId={itemId} index={index} globalStyle={globalStyle}  />
+   <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} itemId={itemId} index={index} globalStyle={globalStyle} route={route} />
 
-   <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={entry} handleEntry={handleEntry} itemId={itemId} globalStyle={globalStyle}   />
+   <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={entry} handleEntry={handleEntry} itemId={itemId} globalStyle={globalStyle} route={route}  />
 
    </>
    )
