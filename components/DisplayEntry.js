@@ -70,7 +70,7 @@ const DeleteConfirmationModal = ({visible, deleteEntry, id, handleModal,handleMa
    );
 }
 
-const MenuModal = ({visible, handleCloseModal, deleteEntry, id, status, entry, type, handleStatus, handleMainModal, globalStyle}) => {
+const MenuModal = ({visible, handleCloseModal, deleteEntry, id, status, entry, type, handleStatus, handleMainModal, globalStyle, handleUpdateEntry}) => {
    const [deleteModal, setDeleteModal] = useState(false);
 
    const handleDeleteModal = () => {
@@ -110,10 +110,12 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, id, status, entry, t
       }
       else if(item == "#ffad33"){
          handleStatus("#8CFF31");
+         handleUpdateEntry();
          alert("Marked as done");
       }
       else if(item == "#8CFF31"){
          handleStatus("#ffad33");
+         handleUpdateEntry();
          alert("Unmarked as done");
       }
       else if(item == "Share"){
@@ -574,7 +576,7 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
 
          </Modal>
       
-         <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={type} handleMainModal={handleModal} globalStyle={globalStyle} />
+         <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={type} handleMainModal={handleModal} globalStyle={globalStyle} handleUpdateEntry={handleUpdateEntry} />
          
       </>
    )

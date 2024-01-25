@@ -114,7 +114,7 @@ export default function Search({visible, handleModal, globalStyle}) {
                   renderItem={({ item }) => (
                   
                      <TouchableOpacity style={[styles.entry, {backgroundColor: globalStyle.noteList, borderColor: globalStyle.borderColor, borderWidth:1}]} onPress={ ()=> handleDisplayEntryFetch(item.dataId) }>
-                        <Text style={{color: globalStyle.color}}>{`${item.date}`}</Text>
+                        <Text style={{color: globalStyle.color}}>{`${item.title}`}</Text>
                         <Text style={{color: globalStyle.color}}>{`${item.scripture}`}</Text>
                         <View style={[styles.border, {width: 30, height: 30, backgroundColor: item.status}]}></View>
 

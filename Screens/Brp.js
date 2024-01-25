@@ -42,6 +42,8 @@ async function openBrpDatabase() {
 
 const ExpandableComponent = ({onRef, item, index, handleAddEntry, handleDisplayEntryModal, handleScripture, handleType, handleIndex, handleEntry, handleItemId, displayEntryVisible, addEntryVisible, globalStyle}) =>{
    
+
+
    //states for showing it
    const [height, setHeight] = useState(0);
    const [show, setShow] = useState(false);
@@ -244,6 +246,7 @@ const ExpandableComponent = ({onRef, item, index, handleAddEntry, handleDisplayE
 
 export default function Brp({navigation, globalStyle}){
 
+
    const [listData, setListData] = useState(content); // state that populates the items from data
    const [addEntryVisible, setAddEntryVisible] = useState(false)
    const [displayEntryVisible, setDisplayEntryVisible] = useState(false)
@@ -334,9 +337,9 @@ export default function Brp({navigation, globalStyle}){
          </View>
    </View>
 
-   <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} itemId={itemId} index={index} globalStyle={globalStyle}/>
+   <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} itemId={itemId} index={index} globalStyle={globalStyle}  />
 
-   <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={entry} handleEntry={handleEntry} itemId={itemId} globalStyle={globalStyle} />
+   <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={entry} handleEntry={handleEntry} itemId={itemId} globalStyle={globalStyle}   />
 
    </>
    )

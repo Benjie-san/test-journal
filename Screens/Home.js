@@ -191,7 +191,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   // NAVIGATION FUNCTIONS
 
   const openBrp = () => {
-    navigation.navigate("BRP");
+    navigation.navigate("BRP", {fetchAllData: fetchAllData});
   }
 
   //HANDLE FUNCTIONS
@@ -766,7 +766,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     {/*MODALSS*/}
 
     {/*ADD ITEM MODAL*/}
-    <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} index={months.indexOf(todayVerse?.month)} itemId={todayVerse?.id} globalStyle={globalStyle}/>
+    <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} index={months.indexOf(todayVerse?.month)} itemId={todayVerse?.id} globalStyle={globalStyle} />
 
     {/*For displaying the component*/}
     <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType}  globalStyle={globalStyle}/>
@@ -826,6 +826,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     borderRadius: 5,
     gap: 10,
+    elevation: 3,
   },
   sortingButtons:{
     width: '100%',
