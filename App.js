@@ -1,6 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
 import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
+
+
+
 //RN Navigation Imports
 import { NavigationContainer } from "@react-navigation/native";
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
@@ -10,9 +13,13 @@ import { Home, Brp, Search, More } from "./Screens/index"; // all of the screens
 
 import Settings from "./components/Settings";
 
-// //icon imports
+//icon imports
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+
+import * as SQLite from 'expo-sqlite';
+
+const dbSettings = SQLite.openDatabase("settings.db");
 
 const Tab = createMaterialBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -55,7 +62,7 @@ export default function App() {
     if (darkMode) {
       setGlobalStyle(darkModeStyle);
     } else {
-      setGlobalStyle(lightModeStyles);
+      setGlobalStyle(lightModeStyles); //false then lightMode
     }
   };
 
@@ -152,7 +159,6 @@ export default function App() {
     </SearchStack.Navigator>
   );
 
-
   const StackMore = () => (
     <MoreStack.Navigator>
       <MoreStack.Screen
@@ -183,11 +189,10 @@ export default function App() {
       />
     </MoreStack.Navigator>
   );
+
   const setupSettingsDatabase = () => {
     // Check if the table exists
-
-    setNoteListLoading(true);
-    db.transaction((tx) => {
+    dbSettings.transaction((tx) => {
       tx.executeSql(
         'SELECT name FROM sqlite_master WHERE type="table" AND name="settings";',
         [],
@@ -196,21 +201,22 @@ export default function App() {
 
           if (!tableExists) {
             // Table doesn't exist, create it
-            db.transaction((tx) => {
+            dbSettings.transaction((tx) => {
               tx.executeSql(
-                'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY AUTOINCREMENT,);',
+                'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY AUTOINCREMENT, currentTheme TEXT, fontSize TEXT, defaultSort TEXT, notifTime TEXT);',
                 [],
-                (_, result) => {
-                  console.log('Table Settings: created successfully');
-                  fetchTodayVerse();
+                (_, result) => { 
+                  console.log('Table Settings: created successfully'); 
+                  insertDefaultSettings();
+                  handleGlobalStyle(false);
                 },
-                (_, error) => {
-                  console.error('Error creating table Settings:', error);
-                }
+                (_, error) => { console.error('Error creating table Settings:', error); }
               );
             });
           } else {
             console.log('Table Settings: already exists');
+            insertDefaultSettings();
+            handleGlobalStyle(false);
           }
         },
 
@@ -218,9 +224,26 @@ export default function App() {
     });
   };
 
+  const insertDefaultSettings = () => {
+    console.log("true");
+    dbSettings.transaction((tx) => {
+      tx.executeSql(
+      'INSERT INTO settings (currentTheme, fontSize, defaultSort, notifTime) VALUES (?, ?, ?, ?);',
+      [JSON.stringify(lightModeStyles), "16", "modifiedDate", "6"],
+      (tx, results) => {
+        console.log("Success default Settings are SET!!!");
+      },
+      (error) => {
+         // Handle error
+        console.log(error);
+      }
+      );
+  });
+  }
+
   useEffect(() => {
-    handleGlobalStyle(darkMode);
-  }, [darkMode]);
+    setupSettingsDatabase();
+  }, []);
 
   return (
     <>

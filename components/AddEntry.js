@@ -16,160 +16,160 @@ const months = ["January","February","March","April","May","June","July","August
 
 export default function AddEntry({visible, handleModal, verse, type, status, itemId, index, globalStyle, fetchAllData, route}) {
 
-const [entryDate, setEntryDate] = useState(new Date());
-const [date, setDate] = useState(new Date().toDateString());
-const [title, setTitle] = useState("");
-const [scripture, setScripture] = useState("");
-const [observation, setObservation] = useState("");
-const [application, setApplication] = useState("");
-const [prayer, setPrayer] = useState("");
-const [question, setQuestion] = useState("");
+   const [entryDate, setEntryDate] = useState(new Date());
+   const [date, setDate] = useState(new Date().toDateString());
+   const [title, setTitle] = useState("");
+   const [scripture, setScripture] = useState("");
+   const [observation, setObservation] = useState("");
+   const [application, setApplication] = useState("");
+   const [prayer, setPrayer] = useState("");
+   const [question, setQuestion] = useState("");
 
-const [dateModalVisible, setDateModalVisible] = useState(false);
-const [passageModalVisble, setPassageModalVisible] = useState(false);
-const [alertModalVisible, setAlertModalVisible] = useState(false);
+   const [dateModalVisible, setDateModalVisible] = useState(false);
+   const [passageModalVisble, setPassageModalVisible] = useState(false);
+   const [alertModalVisible, setAlertModalVisible] = useState(false);
 
-const [message, setMessage] = useState("");
-const appState = useRef(AppState.currentState);
-const [appCurrentState, setAppCurrentState] = useState(appState.current);
+   const [message, setMessage] = useState("");
+   const appState = useRef(AppState.currentState);
+   const [appCurrentState, setAppCurrentState] = useState(appState.current);
 
-const [passage, setPassage] = useState(""); 
-const handlePassage = (item) => {
-   setPassage(item);
-}
-
-const handleAlertModalVisible = (item) =>{
-   setMessage("Entry Saved");
-   setAlertModalVisible(item);
-}
-
-const handlePassageVisible = (item) => {
-   setPassageModalVisible(item);
-}
-
-const handleDateModal = () => {
-   setDateModalVisible(!dateModalVisible)
-}
-
-const handleBackButton = () =>{
-   handleModal(false);
-   cleanStates();
-
-   if(route.name == "Home" ){
-      fetchAllData();
+   const [passage, setPassage] = useState(""); 
+   const handlePassage = (item) => {
+      setPassage(item);
    }
-}
 
-const onChangeDate = ({type}, selectedDate) =>{
-   if(type == "set"){   
-      setDateModalVisible(false);
-      const currentDate = selectedDate;
-      setEntryDate(currentDate);
-      handleChangeDate(currentDate.toDateString());
-   } else{
-      handleDateModal();
+   const handleAlertModalVisible = (item) =>{
+      setMessage("Entry Saved");
+      setAlertModalVisible(item);
    }
-}
 
-const handleChangeDate = (item) =>{
-   setDate(item);
-}
-
-const handleChangeText = (text, valueFor) =>{
-
-   switch(valueFor){
-      case 'title': setTitle(text) ;break;
-      case 'question': setQuestion(text) ;break;
-      case 'scripture': setScripture(text) ;break;
-      case 'observation': setObservation(text) ;break;
-      case 'application': setApplication(text) ;break;
-      case 'prayer': setPrayer(text) ;break;
-      
+   const handlePassageVisible = (item) => {
+      setPassageModalVisible(item);
    }
-}
 
-const cleanStates = () =>{
-   setDate(new Date().toDateString());
-   setTitle("");
-   setQuestion("");
-   setScripture("");
-   setObservation("");
-   setApplication("");
-   setPrayer("");
-}
+   const handleDateModal = () => {
+      setDateModalVisible(!dateModalVisible)
+   }
 
-const handleSave = () =>{
-   saveEntry();
-   handleAlertModalVisible(true);
-   cleanStates();
-}
+   const handleBackButton = () =>{
+      handleModal(false);
+      cleanStates();
 
-const saveEntry = () => {
-   // adding entry to db
-   let isEmpty = [date, title, question, observation, application, prayer];
-   if(!isEmpty.every((item)=>item=="")){
-
-      if(type=="journal" || type == "sermon"){
-         db.transaction((tx) => {
-            tx.executeSql(
-            'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-            [date, title, question, scripture, observation, application, prayer, status, type, Date.now(), itemId, months[index]],
-            (tx, results) => {
-               console.log("Success!!!");
-            },
-            (error) => {
-               // Handle error
-               console.log(error);
-            }
-            );
-         });
-      }else{
-         db.transaction((tx) => {
-            tx.executeSql(
-            'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-            [date, title, question, scripture, observation, application, prayer, status, type, Date.now(), null, months[index]],
-            (tx, results) => {
-               console.log("Success!!!");
-            },
-            (error) => {
-               // Handle error
-               console.log(error);
-            }
-            );
-         });
+      if(route.name == "Home" ){
+         fetchAllData();
       }
    }
-}
 
-useEffect(() => {
-   if(type == 'journal'){
-      setScripture(verse);
-   }else{
+   const onChangeDate = ({type}, selectedDate) =>{
+      if(type == "set"){   
+         setDateModalVisible(false);
+         const currentDate = selectedDate;
+         setEntryDate(currentDate);
+         handleChangeDate(currentDate.toDateString());
+      } else{
+         handleDateModal();
+      }
+   }
+
+   const handleChangeDate = (item) =>{
+      setDate(item);
+   }
+
+   const handleChangeText = (text, valueFor) =>{
+
+      switch(valueFor){
+         case 'title': setTitle(text) ;break;
+         case 'question': setQuestion(text) ;break;
+         case 'scripture': setScripture(text) ;break;
+         case 'observation': setObservation(text) ;break;
+         case 'application': setApplication(text) ;break;
+         case 'prayer': setPrayer(text) ;break;
+         
+      }
+   }
+
+   const cleanStates = () =>{
+      setDate(new Date().toDateString());
+      setTitle("");
+      setQuestion("");
       setScripture("");
+      setObservation("");
+      setApplication("");
+      setPrayer("");
    }
-}, [verse, scripture]);
 
-useEffect(() => {
-   if(alertModalVisible == true){
+   const handleSave = () =>{
+      saveEntry();
+      handleAlertModalVisible(true);
+      cleanStates();
+   }
 
-      const interval = setTimeout(() => {
-         // After 3 seconds set the show value to false
-         handleAlertModalVisible(false);
-         handleModal(false);
-         cleanStates();
-         if(route.name == "Home" ){
-            fetchAllData();
+   const saveEntry = () => {
+      // adding entry to db
+      let isEmpty = [date, title, question, observation, application, prayer];
+      if(!isEmpty.every((item)=>item=="")){
+
+         if(type=="journal" || type == "sermon"){
+            db.transaction((tx) => {
+               tx.executeSql(
+               'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+               [date, title, question, scripture, observation, application, prayer, status, type, Date.now(), itemId, months[index]],
+               (tx, results) => {
+                  console.log("Success!!!");
+               },
+               (error) => {
+                  // Handle error
+                  console.log(error);
+               }
+               );
+            });
+         }else{
+            db.transaction((tx) => {
+               tx.executeSql(
+               'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+               [date, title, question, scripture, observation, application, prayer, status, type, Date.now(), null, months[index]],
+               (tx, results) => {
+                  console.log("Success!!!");
+               },
+               (error) => {
+                  // Handle error
+                  console.log(error);
+               }
+               );
+            });
          }
-
-      }, 1000)
-  
-
-      return () => {
-      clearTimeout(interval)
       }
    }
 
-}, [alertModalVisible])
+   useEffect(() => {
+      if(type == 'journal'){
+         setScripture(verse);
+      }else{
+         setScripture("");
+      }
+   }, [verse, scripture]);
+
+   useEffect(() => {
+      if(alertModalVisible == true){
+
+         const interval = setTimeout(() => {
+            // After 3 seconds set the show value to false
+            handleAlertModalVisible(false);
+            handleModal(false);
+            cleanStates();
+            if(route.name == "Home" ){
+               fetchAllData();
+            }
+
+         }, 1000)
+   
+
+         return () => {
+         clearTimeout(interval)
+         }
+      }
+
+   }, [alertModalVisible])
 
 useEffect(() => {
    const subscription = AppState.addEventListener('change', nextAppState => {
