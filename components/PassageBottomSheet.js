@@ -20,16 +20,15 @@ const TranslationModal = ({visible, handleModal, handleTranslation, globalStyle}
 		handleModal(false);
 	}
 
-   return(
+  return(
       <>
-         <Modal
-				animationIn="fadeIn"
-				animationOut="fadeOut"
-				onBackdropPress={() => handleModal(false)}
-				onBackButtonPress={() => handleModal(false)}
-				isVisible={visible}
-			
-			>
+        <Modal
+					animationIn="fadeIn"
+					animationOut="fadeOut"
+					onBackdropPress={() => handleModal(false)}
+					onBackButtonPress={() => handleModal(false)}
+					isVisible={visible}
+				>
             <View style={[styles.picker, {backgroundColor: globalStyle.verseModal}]}>
 					{
 						translationsName.map( (item, index) => (
@@ -60,7 +59,7 @@ const TranslationModal = ({visible, handleModal, handleTranslation, globalStyle}
    );
 }
 
-export default function PassageBottomSheet({globalStyle, visible, handleModal, verse, scripture, type}) {	
+export default function PassageBottomSheet({globalStyle, visible, handleModal, verse, scripture, type, handlePassage}) {	
 	
 	const [fetchedVerse, setFetchedVerse] = useState([]);
 	const [verseNumber, setVerseNumber] = useState([]);
@@ -87,7 +86,7 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, v
 		let end = 0;
 		let verseTextResult = [];
 		let verseNumberResult = []
-	
+		let passage = [];
 		if(scripture != ''){
 			let checkVerse = scripture.split(":");
 			if( checkVerse[0] !== scripture ){
@@ -117,11 +116,13 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, v
 							if(item.verse >= start && item.verse <= end){
 								verseNumberResult.push(`${item.verse}`)
 								verseTextResult.push(`${item.text}`)
+								passage.push(`${item.verse} ${item.text}`);
 							}
 						} else{
 							if (item.verse == start) {
 								verseNumberResult.push(`${item.verse}`)
 								verseTextResult.push(`${item.text}`)
+								passage.push(`${item.verse} ${item.text}`);
 							}
 						}
 					}
@@ -131,11 +132,9 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, v
 			
 		setFetchedVerse(verseTextResult);
 		setVerseNumber(verseNumberResult);
-	
-		
+		handlePassage(passage);
 		}
 	
-
 	}
 	
 	useEffect(() => {

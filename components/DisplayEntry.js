@@ -76,7 +76,7 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, status, entry, type,
    const onShare = async () => {
       let message = "";
       if(type == "journal"){
-         message =  `Date:\n${entry.date}\n\nScripture:\n${entry.scripture}\n\nTitle:\n${entry.title}\n\nObservation:\n${entry.observation}\n\nApplication:\n${entry.application}\n\nPrayer:\n${entry.prayer}\n`
+         message =  `Date:\n${entry.date}\n\nScripture:\n${entry.scripture}\n\n${entry.passage.toString()}\n\nTitle:\n${entry.title}\n\nObservation:\n${entry.observation}\n\nApplication:\n${entry.application}\n\nPrayer:\n${entry.prayer}\n`
       }else if(type == "opm"){
          message =  `Date:\n${entry.date}\n\nOPM Passage:\n${entry.scripture}\n\nTheme:\n${entry.title}\n\nQuestion:\n${entry.question}\n\nKey Points:\n${entry.observation}\n\nRecommendations:\n${entry.application}\n\nReflection/Realization:\n${entry.prayer}\n\n`
       } else if(type == "sermon"){
@@ -190,6 +190,7 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
    const [status, setStatus] = useState("");
    const [month, setMonth] = useState("");
    const [day, setDay] = useState("");
+   const [passage, setPassage] = useState(""); 
 
    //for system buttons
    const appState = useRef(AppState.currentState);
@@ -206,6 +207,11 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
       observation: observation,
       application: application,
       prayer: prayer,
+      passage: passage,
+   }
+
+   const handlePassage = (item) => {
+      setPassage(item);
    }
 
    const [passageModalVisble, setPassageModalVisible] = useState(false);
@@ -572,7 +578,7 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
 
             <AlertModal message={message} visible={alertModalVisible} globalStyle={globalStyle} />
             
-            <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} globalStyle={globalStyle} scripture={scripture} type={type} />
+            <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} globalStyle={globalStyle} scripture={scripture} type={type} handlePassage={handlePassage} />
          
 
          </Modal>

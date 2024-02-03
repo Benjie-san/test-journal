@@ -77,7 +77,7 @@ export default function Search({visible, handleModal, globalStyle, fetchAllData,
 
    return (
       <>
-      <Modal 
+      {/* <Modal 
          isVisible={visible}
          animationIn="slideInRight"
          animationOut="slideOutRight"
@@ -95,7 +95,7 @@ export default function Search({visible, handleModal, globalStyle, fetchAllData,
             width: "80%",
             height: "100%",
          }}
-      >
+      > */}
          <View style={styles.container}>
             <View style={{flexDirection: 'row', alignItems: 'center', padding: 12, gap: 10,  borderBottomColor: '#cccccc', borderBottomWidth:1 , backgroundColor: globalStyle.bgHeader}}>
                <TouchableOpacity  onPress={ () => handleModal() } styles={[{width: 30, height: 30}]}>
@@ -128,7 +128,7 @@ export default function Search({visible, handleModal, globalStyle, fetchAllData,
 
 
          </View>
-      </Modal>
+      {/* </Modal> */}
       {/*For displaying the component*/}
       <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType} globalStyle={globalStyle} fetchAllData={fetchAllData} route={route}/>
       </>

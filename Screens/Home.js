@@ -16,12 +16,14 @@ import AddEntry from '../components/AddEntry';
 import DisplayEntry from '../components/DisplayEntry';
 import Search from './Search';
 import More from './More';
+import TopBar from '../components/TopBar';
 
 //import vector-icons
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Ionicons } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
+
 
 const AddModal = ({visible, type, handleModal, globalStyle}) => {
   const handlePress = (item) =>{
@@ -78,12 +80,27 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
   );
 }
 
+// const HomeScreen = () => (
+//   <View style={styles.flex}>
+//     <Text>HomeScreen</Text>
+//   </View>
+// );
+
+// const SettingScreen = () => (
+//   <View style={styles.flex}>
+//     <Text>SettingScreen</Text>
+//   </View>
+// );
+
 export default function Home({navigation, route, darkMode, handleDarkMode, globalStyle}) {
 
   // import for data
   const [db, setDb] = useState( SQLite.openDatabase('_journal_database.db') );
 
   const [notes, setNotes] = useState([]);// showing all the data
+  const [notesJournal, setNotesJournal] = useState([]);// showing all the data
+  const [notesOPM, setNotesOPM] = useState([]);// showing all the data
+
   const [notesId, setNotesId] = useState([]);
   //states for modal
   const [addEntryVisible, setAddEntryVisible] = useState(false)
@@ -105,8 +122,8 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   const [journalCount, setJournalCount] = useState(0);
   const [opmCount, setOpmCount] = useState(0);
   const [sermonCount, setSermonCount] = useState(0);
-  const sortButtons = ["All", "Journal", "OPM", "Sermon"];
-  const sortButtonCount = [allCount, journalCount, opmCount, sermonCount];
+  const sortButtons = ["All", "Journal", "OPM"];
+  const sortButtonCount = [allCount, journalCount, sermonCount, opmCount];
   const [currentSortBtn, setCurrentSortBtn] = useState("");
   const [isSelected, setIsSelected] = useState(false);
 
@@ -126,69 +143,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   //states for loading indicators
   const [noteListLoading, setNoteListLoading] = useState(true);
   const [verseLoading, setVerseLoading] = useState(true);
-
-  const [refresh, setRefresh] = useState(false);
-
-  // BACK UP AND RESTORE FUNCTIONS
-
-  const backUp = async () => {
-
-    // if(Platform.OS === "android"){
-    //   const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-    //   if(permissions.granted){
-    //     const base64 = await FileSystem.readAsStringAsync(
-    //       FileSystem.documentDirectory + 'SQLite/_journal_database.db',
-    //       {
-    //         encoding: FileSystem.EncodingType.UTF
-    //       }
-    //     );
-    //       await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri,'_journal_database.db', 'application/octet-stream')
-    //       .then( async (uri) =>{
-    //         await FileSystem.writeAsStringAsync(uri, base64, {endcoding: FileSystem.EncodingType.UTF8})
-    //       })
-    //       .catch( (e) => console.log(e) )
-    //   } else{
-    //     console.log("Permission Not Granted")
-    //   }
-    // } else{
-    //   await Sharing.shareAsync(FileSystem.documentDirectory + 'SQLite/_journal_database.db');
-    // }
-
-
-  }
-
-  const restore = async () => {
-
-    // let result = await DocumentPicker.getDocumentAsync({
-    //   copyToCacheDirectory: true
-    // });
-
-    // if(result.type === 'success'){
-  
-    //   setNoteListLoading(true);
-      
-    //   if( !(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists){
-    //     await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
-    //   }
-
-    //   const base64 = await FileSystem.readAsStringAsync(
-    //     result.uri,
-    //     {
-    //       encoding: FileSystem.EncodingType.UTF8
-    //     }
-    //   );
-
-    //   await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + 'SQLite/_journal_database.db', base64, {encoding: FileSystem.EncodingType.UTF8}); 
-    //   await db.closeAsync();
-    //   setDb(SQLite.openDatabase('_journal_database.db'));
-    // }else{
-    //   console.log(result)
-    // }
-
-    // handleMoreModal(false);
-
-  };
-
 
   // NAVIGATION FUNCTIONS
 
@@ -255,40 +209,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
 
   const handleVisibleAddModal = () => {
     setVisibleAddModal(!visibleAddModal);
-  }
-
-  const handleSortButtons = (item) =>{
-
-    let type = item.toLowerCase();
-
-    if(currentSortBtn == ""){
-      setCurrentSortBtn(item);
-      setIsSelected(true);
-    } else if(type != currentSortBtn){
-      setCurrentSortBtn(item);
-      setIsSelected(true);
-    }
-
-    if(type=="all"){
-      setCurrentSortBtn("All");
-      setIsSelected(true);
-      fetchAllData();
-    }else{
-      fetchData(type);
-    }
-  }
-  
-  // when pull to refresh is called
-  const handleRefresh = (item) => {
-    let type = item.toLowerCase();
-    setRefresh(true)
-    if(type == "all"){
-   
-      fetchAllData();
-    }else{
-      fetchData(type);
-    }
-    setRefresh(false)
   }
 
 
@@ -389,24 +309,46 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   }
 
   const fetchData = (type) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM entries WHERE type = ? ORDER BY modifiedDate DESC;",
-        [type],
-        (_, result) => {
-          const rows = result.rows;
-          const dataArray = [];
-          for (let i = 0; i < rows.length; i++) {
-            const item = rows.item(i);
-            dataArray.push(item);
+    if(type == "journal"){
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM entries WHERE type = ? OR type = ? ORDER BY modifiedDate DESC;",
+          ["journal", "sermon"],
+          (_, result) => {
+            const rows = result.rows;
+            const dataArray = [];
+            for (let i = 0; i < rows.length; i++) {
+              const item = rows.item(i);
+              dataArray.push(item);
+            }
+            setNotesJournal(dataArray);
+          },
+          (_, error) => {
+            console.error('Error querying data:', error);
           }
-          setNotes(dataArray);
-        },
-        (_, error) => {
-          console.error('Error querying data:', error);
-        }
-      );
-    });
+        );
+      });
+      
+    } else{
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM entries WHERE type = ? ORDER BY modifiedDate DESC;",
+          ["opm"],
+          (_, result) => {
+            const rows = result.rows;
+            const dataArray = [];
+            for (let i = 0; i < rows.length; i++) {
+              const item = rows.item(i);
+              dataArray.push(item);
+            }
+            setNotesOPM(dataArray);
+          },
+          (_, error) => {
+            console.error('Error querying data:', error);
+          }
+        );
+      });
+    }
   };
 
   const fetchAllData = () => {
@@ -478,7 +420,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   };
 
   //creating the table
-  const setupDatabase = () => {
+  const setupEntriesDatabase = () => {
     // Check if the table exists
 
     setNoteListLoading(true);
@@ -496,18 +438,16 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
                 'CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, title TEXT, question TEXT, scripture TEXT, observation TEXT, application TEXT, prayer TEXT, status TEXT, type TEXT, modifiedDate TEXT, dataId INTEGER, month TEXT);',
                 [],
                 (_, result) => {
-                  console.log('Table created successfully');
-                  fetchAllData();
+                  console.log('Table entries: created successfully');
                   fetchTodayVerse();
                 },
                 (_, error) => {
-                  console.error('Error creating table:', error);
+                  console.error('Error creating table entries:', error);
                 }
               );
             });
           } else {
-            console.log('Table already exists');
-            fetchAllData();
+            console.log('Table entries: already exists');
             fetchTodayVerse();
           }
         },
@@ -597,23 +537,50 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     console.log(notification);
   };
 
+  const formatLastModified = (timestamp) => {
+    const lastModifiedTime = new Date(timestamp);
+    const now = new Date();
+
+    // Calculate the difference in milliseconds
+    const timeDifference = now - lastModifiedTime;
+
+    // Convert milliseconds to seconds, hours, or days as needed
+    const seconds = Math.floor(timeDifference / 1000);
+    const minutes = Math.floor(timeDifference / (1000 * 60));
+    const hours = Math.floor(timeDifference / (1000 * 60 * 60));
+    const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+
+    // Choose the appropriate format based on the time difference
+    if (seconds < 60) {
+      return `${seconds} seconds ago`;
+    } 
+    else if (minutes < 60) {
+      return `${minutes} minutes ago`;
+    } 
+    else if (hours < 24) {
+      return `${hours} hours ago`;
+    } else {
+      return `${days} days ago`;
+    }
+  };
+
   // USE EFFECTS
   // for creating the db
 
   useEffect(() => {
-    getJournalCount();
-    getOpmCount();
-    getSermonCount();
-  }, [currentSortBtn]);
-
-  useEffect(() => {
     //openBrpDatabase()
-    setupDatabase();
+    setupEntriesDatabase();
 
   }, []);
+
   useEffect(() => {
     if(isFocused){
       fetchAllData();
+      fetchData("journal");
+      fetchData("opm");
+      getJournalCount();
+      getOpmCount();
+      getSermonCount();
     }
   }, [isFocused]);
 
@@ -640,34 +607,10 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
 
   return (
   <>
-
     {/*MAIN VIEW*/}
     <View style={[styles.homeContainer]}>
-
-      {/*Home header*/}
-      <View style={[ {width: '100%', padding: 12, flexDirection:'row', alignItems: 'center', justifyContent: 'space-between', borderBottomColor: '#cccccc', borderBottomWidth: 1, backgroundColor: globalStyle.bgHeader}]}>
-
-        <TouchableOpacity onPress={ () => handleMoreModal(true) }>
-          <AntDesign name="menuunfold" size={24} color={globalStyle.color} />
-        </TouchableOpacity>
-
-        <Text style={{padding: 5, fontSize: 20, textAlign: "center", fontWeight: 'bold', color : globalStyle.color }}>Journal { today.year }</Text>
-
-        <TouchableOpacity onPress={ () => handleSearchModal(true) } >
-          <AntDesign name="search1" size={24} color={globalStyle.color} />
-        </TouchableOpacity>
-      </View>
-
       {/*Todays passage*/}
-      <View style={[styles.passageToday, 
-        {width: "100%", 
-        height: 'auto', 
-        padding: 15,
-        backgroundColor:globalStyle.bgHeader, 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        justifyContent:'space-between'}
-        ]}>
+      <View style={[styles.passageToday, {backgroundColor:globalStyle.bgHeader,}]}>
 
           { verseLoading ? <ActivityIndicator style={{width: '40%'}} /> : (
             <View style={[{flexDirection: 'column'}]}>
@@ -693,68 +636,11 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
           }
 
       </View>
-
-      {/*Sorting Buttons*/}
-      <View style={[styles.sortingButtons, {backgroundColor: globalStyle.bgHeader, borderBottomColor: globalStyle.borderColor, borderBottomWidth:1}]}>
-
-        {
-          sortButtons.map( (item, index) => {
-
-          return  <TouchableOpacity key={index} onPress={ () => handleSortButtons(item) }  style={[styles.sortingBtn,
-          {borderBottomColor: currentSortBtn == item ? isSelected ? "#1d9bf0" : '#transparent' : 'transparent',}]}>
-
-                <Text
-                  style={[styles.sortBtnText,
-                    {color: currentSortBtn == item ? isSelected ? "#1d9bf0" : globalStyle.color :  globalStyle.color,}]}>
-                    {item == "Sermon" ? "Sermon Notes" : item }
-                </Text>
-
-                <View style={[styles.itemCount,
-                  {backgroundColor: currentSortBtn == item ? isSelected ? "#1d9bf0" : '#808080' : '#808080', }]}>
-                  <Text style={{textAlign: 'center', color:  currentSortBtn == item ?  isSelected ?  '#fff' : '#f5f5f5' : '#f5f5f5'}}>
-                    {sortButtonCount[index]}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-
-            })
-        }
-      </View>
-
-      {/*Displaying items*/}
-      {noteListLoading ? <ActivityIndicator style={styles.flex} size={'large'}/> :
-      (<View style={[ styles.notelist, {backgroundColor: globalStyle.bgBody}]}>
-        {notes.length === 0 ?
-          (<Text style={{fontSize: 30, paddingBottom: 150, color: globalStyle.color}}>No Entries Found</Text>)
-          :
-          ( <FlatList
-              style={{width: '100%'}}
-              data={ notes } 
-              refreshing={refresh}
-              onRefresh={()=>handleRefresh(currentSortBtn)}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={ [styles.entry, {backgroundColor: globalStyle.noteList, elevation: 2, gap: 5}] }
-                  onPress={ ()=> handleDisplayEntryFetch(item) }
-                >
-                  {/* <Text style={{color: globalStyle.color, fontSize: 14}}>{item.type == 'opm' ? 'OPM Reflection' : type == "sermon" ? 'Sermon Notes' : "Journal Entry"}</Text> */}
-                  <Text style={{color: globalStyle.color, fontSize: 14, flex:1, overflow:'hidden'}}>{item.title}</Text>
-                  <Text style={{color: globalStyle.color, fontSize: 14, flex:1, overflow:'hidden'}}>{item.scripture}</Text>
-                  <View style={[styles.border, {width: 30, height: 30, backgroundColor: item.status,}]}></View>
-
-                </TouchableOpacity>
-              )}
-            />)
-        }
-      </View>)
-      }
-
-
-      {/*Navbar*/}
-      <Navbar onPressAddEntry={handleVisibleAddModal} />
-
     </View>
+
+    <TopBar globalStyle={globalStyle} notes={notes} notesJournal={notesJournal} notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount} fetchAllData={fetchAllData} fetchData={fetchData} formatLastModified={formatLastModified} />
+    
+    <Navbar onPressAddEntry={handleVisibleAddModal} />
 
     {/*MODALSS*/}
 
@@ -764,12 +650,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     {/*For displaying the component*/}
     <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType}  globalStyle={globalStyle}  fetchAllData={fetchAllData} route={route} />
 
-    {/*Search modal*/}
-    <Search visible={searchVisible} handleModal={handleSearchModal} globalStyle={globalStyle} fetchAllData={fetchAllData}  route={route} />
-
-    {/*More modal*/}
-    <More visible={moreVisible} handleModal={handleMoreModal} darkMode={darkMode} handleDarkMode={handleDarkMode} globalStyle={globalStyle} backUp={backUp} restore={restore} />
-    
     {/*modal for displaying add entry*/}
     <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal}  globalStyle={globalStyle}/>
 
@@ -797,19 +677,20 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   homeContainer:{
-    flex: 1,
     alignItems: "center",
     backgroundColor: '#fff',
     flexDirection: 'column',
-    paddingTop: 20,
-    width: '100%',
-    height: '100%',
   },
   passageToday:{
     justifyContent:"space-between",
     alignItems: "center",
     flexDirection: 'row',
-    padding: 5,
+    width: "100%", 
+    height: 'auto', 
+    padding: 15,
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent:'space-between'
   },
   addEntryShortcut:{
     padding: 10,
@@ -820,52 +701,5 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     gap: 10,
     elevation: 3,
-  },
-  sortingButtons:{
-    width: '100%',
-    height: '8%',
-    flexDirection: 'row',
-    alignItems:'center',
-    justifyContent: 'space-evenly',
-  },
-  sortingBtn:{
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-    borderBottomWidth: 2,
-    width: "auto",
-    padding: 5,
-    gap: 5,
-  },
-  sortBtnText:{
-    fontSize: 12,
-  },
-  itemCount:{
-    paddingRight: 12,
-    paddingLeft: 12,
-    borderRadius: 10,
-  },
-  notelist:{
-    flex: 1,
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding:10,
-  },
-  entry:{
-    marginBottom: 5,
-    borderRadius: 5,
-    padding: 14,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-
-  shadowProp: {
-    shadowColor: '#171717',
-    shadowOffset: {width: -2, height: 4},
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
   },
 })

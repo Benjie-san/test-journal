@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TextInput, Pressable, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Share} from 'react-native';
+import { StyleSheet, Text, View, TextInput, Pressable, TouchableOpacity, ScrollView, KeyboardAvoidingView, AppState} from 'react-native';
 import React, {useState, useEffect, useRef, useMemo} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
@@ -9,6 +9,7 @@ import * as SQLite from 'expo-sqlite';
 import styles from '../styles/entryStyle';
 import PassageBottomSheet from './PassageBottomSheet';
 import AlertModal from './AlertModal';
+
 
 const db = SQLite.openDatabase('_journal_database.db');
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -29,6 +30,13 @@ const [passageModalVisble, setPassageModalVisible] = useState(false);
 const [alertModalVisible, setAlertModalVisible] = useState(false);
 
 const [message, setMessage] = useState("");
+const appState = useRef(AppState.currentState);
+const [appCurrentState, setAppCurrentState] = useState(appState.current);
+
+const [passage, setPassage] = useState(""); 
+const handlePassage = (item) => {
+   setPassage(item);
+}
 
 const handleAlertModalVisible = (item) =>{
    setMessage("Entry Saved");
@@ -163,6 +171,27 @@ useEffect(() => {
 
 }, [alertModalVisible])
 
+useEffect(() => {
+   const subscription = AppState.addEventListener('change', nextAppState => {
+
+   if (appState.current.match(/inactive|background/) &&
+   nextAppState === 'active') {
+      return;
+   }else{
+      if(visible === true){
+         handleSave();
+      }
+   }
+
+   appState.current = nextAppState;
+   setAppCurrentState(appState.current);
+   });
+
+   return () => {
+   subscription.remove();
+   };
+}, [visible, date, title, question, scripture, observation, application, prayer, status]);
+
 
    return (
          <Modal 
@@ -290,7 +319,7 @@ useEffect(() => {
 
             <AlertModal message={message} visible={alertModalVisible} globalStyle={globalStyle} />
 
-            <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} globalStyle={globalStyle} scripture={scripture} type={type}/>
+            <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} globalStyle={globalStyle} scripture={scripture} type={type} handlePassage={handlePassage}/>
          
          </Modal>
    )
