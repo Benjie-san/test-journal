@@ -7,9 +7,9 @@ const Tab = createMaterialTopTabNavigator();
 const FlatListComponent = ({notes, noteListLoading, globalStyle, formatLastModified,handleDisplayEntryFetch }) => (
   <View style={styles.flex}>
     {noteListLoading ? <ActivityIndicator style={styles.flex} size={'large'}/> :
-    (<View style={[ styles.notelist, {backgroundColor: globalStyle.bgBody}]}>
+    (<View style={[ styles.notelist, {backgroundColor: globalStyle?.bgBody}]}>
       {notes.length === 0 ?
-        (<Text style={{fontSize: 30, paddingBottom: 150, color: globalStyle.color}}>No Entries Found</Text>)
+        (<Text style={{fontSize: 30, paddingBottom: 150, color: globalStyle?.color}}>No Entries Found</Text>)
         :
         ( <FlatList
             style={{width: '100%'}}
@@ -17,13 +17,13 @@ const FlatListComponent = ({notes, noteListLoading, globalStyle, formatLastModif
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={ [styles.entry, {backgroundColor: globalStyle.noteList, elevation: 2, gap: 5}] }
+                style={ [styles.entry, {backgroundColor: globalStyle?.noteList, elevation: 2, gap: 5}] }
                 onPress={ ()=> handleDisplayEntryFetch(item) }
               >
           
-                <Text style={{color: globalStyle.color, fontSize: 14, overflow:'hidden'}}>{item.title}</Text>
+                <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden'}}>{item.title}</Text>
           
-                <Text style={{color: globalStyle.color, fontSize: 14, overflow:'hidden'}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden'}}>{formatLastModified(Number(item.modifiedDate))}</Text>
               </TouchableOpacity>
             )}
           />)
@@ -57,7 +57,7 @@ const OPMEntries = ({notesOPM, noteListLoading, globalStyle, handleDisplayEntryF
 
 const SortBtn = ({name, count, focused, globalStyle}) => (
   <View style={[styles.sortingBtn]}>
-    <Text style={[styles.sortBtnText, {color: focused ? "#1d9bf0" : globalStyle.color}]}>
+    <Text style={[styles.sortBtnText, {color: focused ? "#1d9bf0" : globalStyle?.color}]}>
         {name}
     </Text>
 

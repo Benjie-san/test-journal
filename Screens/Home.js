@@ -23,6 +23,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { Ionicons } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 
 const AddModal = ({visible, type, handleModal, globalStyle}) => {
@@ -44,9 +45,9 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
       >
       
         <View style={{
-            backgroundColor: globalStyle.bgHeader,
+            backgroundColor: globalStyle?.bgHeader,
             borderWidth: 1,
-            borderColor: globalStyle.borderColor,
+            borderColor: globalStyle?.borderColor,
             padding: 20,
             borderRadius: 10,
             alignItems:'left',
@@ -54,7 +55,8 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
             justifyContent:"center",
         }} >
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
-            <MaterialIcons name="post-add" size={28} color={globalStyle?.color} />            
+            <MaterialIcons name="post-add" size={28} color={globalStyle?.color} />  
+            <FontAwesome5 name="fire" size={24} color="black" />          
             <Text style={{fontSize: 25,  color: globalStyle?.color, }}>Add</Text>
           </View>
           
@@ -610,13 +612,13 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     {/*MAIN VIEW*/}
     <View style={[styles.homeContainer]}>
       {/*Todays passage*/}
-      <View style={[styles.passageToday, {backgroundColor:globalStyle.bgHeader,}]}>
+      <View style={[styles.passageToday, {backgroundColor:globalStyle?.bgHeader,}]}>
 
           { verseLoading ? <ActivityIndicator style={{width: '40%'}} /> : (
             <View style={[{flexDirection: 'column'}]}>
-              <Text style={{fontSize: 20, fontWeight: 'bold', color: globalStyle.color,}}>Today's Passage</Text>
-              <Text style={{fontSize: 19, color:  globalStyle.color}}>{todayVerse.verse}</Text>
-              <Text style={{fontSize: 18 , color: globalStyle.color}}>{today.month + " " + today.day}</Text>
+              <Text style={{fontSize: 20, fontWeight: 'bold', color: globalStyle?.color,}}>Today's Passage</Text>
+              <Text style={{fontSize: 19, color:  globalStyle?.color}}>{todayVerse.verse}</Text>
+              <Text style={{fontSize: 18 , color: globalStyle?.color}}>{today.month + " " + today.day}</Text>
             </View>
 
           ) }

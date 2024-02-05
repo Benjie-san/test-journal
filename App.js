@@ -18,8 +18,9 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import * as SQLite from 'expo-sqlite';
+import { createIconSetFromFontello } from "react-native-vector-icons";
 
-const dbSettings = SQLite.openDatabase("settings.db");
+const dbSettings = SQLite.openDatabase("settings4.db");
 
 const Tab = createMaterialBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -42,6 +43,7 @@ export default function App() {
     verseModal: "#212A3E",
     fontSize: 16,
     settingsColor: '#1d9bf0',
+    name: 'Dark',
   };
 
   const lightModeStyles = {
@@ -55,11 +57,13 @@ export default function App() {
     verseModal: "#fff",
     fontSize: 16,
     settingsColor: '#1d9bf0',
-
+    name: 'Light',
   };
 
-  const handleGlobalStyle = (darkMode) => {
-    if (darkMode) {
+  const handleGlobalStyle = (mode) => {
+    console.log("mode: " + mode);
+
+    if (mode == "dark") {
       setGlobalStyle(darkModeStyle);
     } else {
       setGlobalStyle(lightModeStyles); //false then lightMode
@@ -67,8 +71,9 @@ export default function App() {
   };
 
   const handleDarkMode = (darkMode) => {
+    console.log("darkMode: " + darkMode);
     handleGlobalStyle(darkMode);
-    setDarkMode(darkMode);
+    updateSettingsDb(darkMode);
   };
 
   const RenderHome = (props) => (
@@ -79,6 +84,7 @@ export default function App() {
       globalStyle={globalStyle}
     />
   );
+
   const RenderBrp = (props) => <Brp {...props} globalStyle={globalStyle} />;
 
   const RenderSearch = (props) => (
@@ -110,10 +116,10 @@ export default function App() {
           headerTitle: "Journal 2024",
           headerTitleAlign: "center",
           headerStyle: {
-            backgroundColor: globalStyle.bgHeader,
+            backgroundColor: globalStyle?.bgHeader,
           },
           headerTitleStyle:{
-            color: globalStyle.color,
+            color: globalStyle?.color,
           }
         }}
         name="HomeStack"
@@ -122,17 +128,16 @@ export default function App() {
     </HomeStack.Navigator>
   );
 
-
   const StackBrp = () => (
     <BrpStack.Navigator>
       <BrpStack.Screen
         options={{
           headerTitle: "Bible Reading Plan",
           headerStyle: {
-            backgroundColor: globalStyle.bgHeader,
+            backgroundColor: globalStyle?.bgHeader,
           },
           headerTitleStyle:{
-            color: globalStyle.color,
+            color: globalStyle?.color,
           }
         }}
         name="BrpStack"
@@ -147,10 +152,10 @@ export default function App() {
         options={{
           headerTitle: "Search",
           headerStyle: {
-            backgroundColor: globalStyle.bgHeader,
+            backgroundColor: globalStyle?.bgHeader,
           },
           headerTitleStyle:{
-            color: globalStyle.color,
+            color: globalStyle?.color,
           }
         }}
         name="SearchStack"
@@ -165,10 +170,10 @@ export default function App() {
         options={{
           headerTitle: "More",
           headerStyle: {
-            backgroundColor: globalStyle.bgHeader,
+            backgroundColor: globalStyle?.bgHeader,
           },
           headerTitleStyle:{
-            color: globalStyle.color,
+            color: globalStyle?.color,
           }
         }}
         name="MoreStack"
@@ -178,10 +183,10 @@ export default function App() {
         options={{
           headerTitle: "Settings",
           headerStyle: {
-            backgroundColor: globalStyle.bgHeader,
+            backgroundColor: globalStyle?.bgHeader,
           },
           headerTitleStyle:{
-            color: globalStyle.color,
+            color: globalStyle?.color,
           }
         }}
         name="Settings"
@@ -208,15 +213,14 @@ export default function App() {
                 (_, result) => { 
                   console.log('Table Settings: created successfully'); 
                   insertDefaultSettings();
-                  handleGlobalStyle(false);
+
                 },
                 (_, error) => { console.error('Error creating table Settings:', error); }
               );
             });
           } else {
             console.log('Table Settings: already exists');
-            insertDefaultSettings();
-            handleGlobalStyle(false);
+            fetchDefaultSettings();
           }
         },
 
@@ -224,13 +228,39 @@ export default function App() {
     });
   };
 
+  const fetchDefaultSettings = () =>{
+    console.log("called")
+    dbSettings.transaction((tx) => {
+      tx.executeSql(
+      'SELECT * FROM settings',
+      [],
+      (_, result) => {
+          const rows = result.rows;
+          const dataArray = [];
+          for (let i = 0; i < rows.length; i++) {
+            const item = rows.item(i);
+            dataArray.push(item);
+          
+          }
+          console.log(dataArray)
+          handleGlobalStyle(dataArray[0].currentTheme);
+          console.log("Settings are fetched")
+        
+        },
+        (_, error) => {
+          console.error('Error querying data:', error);
+        }
+      );
+    });
+  }
+
   const insertDefaultSettings = () => {
-    console.log("true");
     dbSettings.transaction((tx) => {
       tx.executeSql(
       'INSERT INTO settings (currentTheme, fontSize, defaultSort, notifTime) VALUES (?, ?, ?, ?);',
-      [JSON.stringify(lightModeStyles), "16", "modifiedDate", "6"],
+      ["light", "16", "modifiedDate", "6"],
       (tx, results) => {
+        handleGlobalStyle("light");
         console.log("Success default Settings are SET!!!");
       },
       (error) => {
@@ -238,8 +268,27 @@ export default function App() {
         console.log(error);
       }
       );
-  });
+    });
   }
+
+  const updateSettingsDb = (theme) =>{
+    dbSettings.transaction((tx) => {
+      tx.executeSql(
+        'UPDATE settings SET currentTheme = ?, fontSize = ?, defaultSort = ?, notifTime = ? WHERE id = ?;',
+        [theme, "16", "modifiedDate", "6", 0],
+        (_, result) => {
+          console.log('Data SETTINGS updated successfully');
+        },
+        (_, error) => {
+          console.error('Error updating SETTINGS data:', error);
+        }
+        );
+    });
+  }
+
+  useEffect(() => {
+    setupSettingsDatabase();
+  }, []);
 
   useEffect(() => {
     setupSettingsDatabase();
@@ -271,7 +320,7 @@ export default function App() {
         <Tab.Navigator
           initialRouteName="Home"
           activeColor="#1d9bf0"
-          barStyle={{ backgroundColor: globalStyle.bgHeader }}
+          barStyle={{ backgroundColor: globalStyle?.bgHeader }}
           
         >
           <Tab.Screen

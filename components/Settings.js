@@ -8,8 +8,8 @@ import SettingsModal from './SettingsModal';
 export default function Settings({navigation, darkMode, handleDarkMode, globalStyle}) {
 
   const [themeModal, setThemeModal] = useState(false);
-  const [theme, setTheme] = useState("Light");
-  const [checked, setChecked] = useState("Light");
+  const [theme, setTheme] = useState(globalStyle?.name);
+  const [checked, setChecked] = useState(globalStyle?.name);
 
   const handleTheme = (name, item) =>{
     console.log(name);
@@ -33,13 +33,13 @@ export default function Settings({navigation, darkMode, handleDarkMode, globalSt
             <Text style={{color: globalStyle?.settingsColor, fontSize: 20}} >General</Text>
 
             <TouchableOpacity onPress={() => handleThemeModal(true)}>
-              <Text  style={{fontSize: globalStyle.fontSize+2, color: globalStyle.color}} >Default Theme</Text>
-              <Text  style={{fontSize: globalStyle.fontSize, color: globalStyle.color, opacity: 0.8}} >{theme}</Text>
+              <Text  style={{fontSize: globalStyle?.fontSize+2, color: globalStyle?.color}} >Default Theme</Text>
+              <Text  style={{fontSize: globalStyle?.fontSize, color: globalStyle?.color, opacity: 0.8}} >{theme}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity>
-              <Text  style={{fontSize: globalStyle.fontSize+2, color: globalStyle.color}} >Default Font Size</Text>
-              <Text  style={{fontSize: globalStyle.fontSize, color: globalStyle.color, opacity: 0.8}} >Small</Text>
+              <Text  style={{fontSize: globalStyle?.fontSize+2, color: globalStyle?.color}} >Default Font Size</Text>
+              <Text  style={{fontSize: globalStyle?.fontSize, color: globalStyle?.color, opacity: 0.8}} >Small</Text>
             </TouchableOpacity>
             
           </View>
@@ -51,8 +51,8 @@ export default function Settings({navigation, darkMode, handleDarkMode, globalSt
             <Text style={{color: globalStyle?.settingsColor, fontSize: 20}} >Sort</Text>
 
             <TouchableOpacity>
-              <Text  style={{fontSize: globalStyle.fontSize+2, color: globalStyle.color}} >Default Entries Sort Order</Text>
-              <Text  style={{fontSize: globalStyle.fontSize, color: globalStyle.color, opacity: 0.8}} >Last Modified</Text>
+              <Text  style={{fontSize: globalStyle?.fontSize+2, color: globalStyle?.color}} >Default Entries Sort Order</Text>
+              <Text  style={{fontSize: globalStyle?.fontSize, color: globalStyle?.color, opacity: 0.8}} >Last Modified</Text>
             </TouchableOpacity>
 
           </View>
@@ -73,26 +73,26 @@ export default function Settings({navigation, darkMode, handleDarkMode, globalSt
 
     <SettingsModal visible={themeModal} handleModal={handleThemeModal} globalStyle={globalStyle} >
 
-      <Text style={{fontSize: globalStyle.fontSize+2, color: globalStyle.color, paddingBottom: 10,}}>Set Theme:</Text>
+      <Text style={{fontSize: globalStyle?.fontSize+2, color: globalStyle?.color, paddingBottom: 10,}}>Set Theme:</Text>
       
-      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleTheme("Light", false)}>
+      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleTheme("Light", "light")}>
         <RadioButton
           uncheckedColor={globalStyle?.color}
           value={"Light"} 
-          onPress={ () => handleTheme("Light", false) } 
+          onPress={ () => handleTheme("Light", "light") } 
           status={ checked == "Light" ? 'checked' : 'unchecked' }
         />
-        <Text style={{fontSize: globalStyle.fontSize, color: globalStyle.color}}>Light Mode</Text>
+        <Text style={{fontSize: globalStyle?.fontSize, color: globalStyle?.color}}>Light Mode</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleTheme("Dark", true)} >
+      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleTheme("Dark", "dark")} >
         <RadioButton
           uncheckedColor={globalStyle?.color}
           value={"Dark"} 
-          onPress={ () => handleTheme("Dark", true) } 
+          onPress={ () => handleTheme("Dark", "dark") } 
           status={ checked == "Dark" ? 'checked' : 'unchecked' }
         />
-        <Text style={{fontSize: globalStyle.fontSize, color: globalStyle.color}}>Dark Mode</Text>
+        <Text style={{fontSize: globalStyle?.fontSize, color: globalStyle?.color}}>Dark Mode</Text>
       </TouchableOpacity>
     </SettingsModal>
 

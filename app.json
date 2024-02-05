@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "journal",
+    "name": "CBC App",
     "slug": "test-journal",
     "version": "1.0.1",
     "orientation": "portrait",
@@ -18,7 +18,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.journal.journal",
+      "package": "com.cbc.journal",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

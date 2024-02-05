@@ -52,7 +52,7 @@ const DeleteConfirmationModal = ({visible, deleteEntry, handleModal,handleMainMo
                margin:5,
                alignItems:'center',
                flexDirection:'row'}}>
-               <TouchableOpacity style={[styles.deleteButtons,{ borderColor: globalStyle?.borderColor, borderWidth: 1, backgroundColor: globalStyle.bgHeader}]} onPress={handleModal}>
+               <TouchableOpacity style={[styles.deleteButtons,{ borderColor: globalStyle?.borderColor, borderWidth: 1, backgroundColor: globalStyle?.bgHeader}]} onPress={handleModal}>
                   <Text style={{ color: globalStyle?.color}} >Cancel</Text>
                </TouchableOpacity>
                <TouchableOpacity  style={[styles.deleteButtons, {backgroundColor: 'red', borderColor: globalStyle?.borderColor,  borderWidth: 1,}]} onPress={() => handleDelete()}>
@@ -236,10 +236,11 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
    }
    
 
-// HANDLE FUNCTIONS
+   // HANDLE FUNCTIONS
    const handleDateModal = () => {
       setDateModalVisible(!dateModalVisible)
    }
+
    // when closed is pressed
    const handleBackButton = () =>{
       if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
