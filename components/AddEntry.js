@@ -14,6 +14,84 @@ import AlertModal from './AlertModal';
 const db = SQLite.openDatabase('_journal_database.db');
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
+const BackConfirmationModal = ({visible, handleModal, handleMainModal, globalStyle, saveEntry, }) => {
+
+   const handleSave = () =>{
+      saveEntry();
+      handleModal(false);
+      handleMainModal(false);
+   }
+   return (
+   <>
+      <Modal
+      isVisible={visible}
+      coverScreen={true}
+      style={{ flex: 1, margin: 0 }}
+      animationIn="fadeIn"
+      animationOut="fadeOut"
+      onBackdropPress={() => handleModal(false)}
+      onBackButtonPress={handleModal}
+      >
+         <View style={[styles.flex]}>
+            <View
+               style={{
+                  backgroundColor: globalStyle?.bgBody,
+                  width: "50%",
+                  height: "20%",
+                  padding: 20,
+                  borderRadius: 10,
+                  alignItems: "center",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  borderColor: globalStyle?.borderColor,
+                  borderWidth: 1,
+               }}
+            >
+               <Text style={{ textAlign: "center", color: globalStyle?.color }}>
+                  Are you sure want to discard your entry?
+               </Text>
+               <View
+               style={{
+                  margin: 5,
+                  alignItems: "center",
+                  flexDirection: "row",
+                  }}
+               >
+               <TouchableOpacity
+                  style={[
+                     styles.deleteButtons,
+                     {
+                     borderColor: globalStyle?.borderColor,
+                     borderWidth: 1,
+                     backgroundColor: globalStyle?.bgHeader,
+                     },
+                  ]}
+                  onPress={()=>handleMainModal()}
+               >
+                  <Text style={{ color: globalStyle?.color }}>DISCARD</Text>
+               </TouchableOpacity>
+
+               <TouchableOpacity
+                  style={[
+                  styles.deleteButtons,
+                     {
+                     backgroundColor: globalStyle?.settingsColor,
+                     borderColor: globalStyle?.borderColor,
+                     borderWidth: 1,
+                     },
+                  ]}
+                  onPress={() => handleSave()}
+               >
+               <Text style={{ color: "white" }}>SAVE</Text>
+               </TouchableOpacity>
+               </View>
+            </View>
+            </View>
+         </Modal>
+      </>
+   );
+}
+
 export default function AddEntry({visible, handleModal, verse, type, status, itemId, index, globalStyle, fetchAllData, route}) {
 
    const [entryDate, setEntryDate] = useState(new Date());
@@ -34,8 +112,24 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
    const [appCurrentState, setAppCurrentState] = useState(appState.current);
 
    const [passage, setPassage] = useState(""); 
+
+
+
    const handlePassage = (item) => {
       setPassage(item);
+   }
+
+   const [backConfirmVisible, setBackConfirmVisible] = useState(false);
+
+   const handleBackConfirmModal = (item) =>{
+      setBackConfirmVisible(item);
+      if(item == false){
+         cleanStates();
+         if(route.name == "Home" ){
+            fetchAllData();
+         }
+      }
+     
    }
 
    const handleAlertModalVisible = (item) =>{
@@ -197,7 +291,7 @@ useEffect(() => {
          <Modal 
             coverScreen={true} 
             isVisible={visible}
-            onBackButtonPress={ ()=> handleBackButton() }
+            onBackButtonPress={ ()=> handleBackConfirmModal(true) }
             animationIn="slideInRight"
             animationOut="slideOutRight"
             transparent={true}
@@ -209,14 +303,11 @@ useEffect(() => {
             {/*HEADER*/}
             <View style={[styles.header, {backgroundColor: globalStyle?.bgHeader, borderBottomColor: globalStyle?.borderColor ,}]}> 
 
-               <TouchableOpacity onPress={()=> handleBackButton()}>
-                  <AntDesign name="close" size={30} color={globalStyle?.color}/>
-               </TouchableOpacity>
-
                <Text style={{fontSize: 20, color:globalStyle?.color}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
 
                <TouchableOpacity onPress={ ()=>handleSave() }>
-                  <MaterialCommunityIcons name="content-save-check-outline" size={30} color={globalStyle?.color} />
+                  {/* <MaterialCommunityIcons name="content-save-check-outline" size={30} color={globalStyle?.color} /> */}
+                  <Text style={{color: globalStyle?.settingsColor}} > SAVE </Text>
                </TouchableOpacity>
 
             </View>
@@ -267,8 +358,8 @@ useEffect(() => {
                   </View>
 
                   <View style={styles.inputContainer}>
-                  <Text  style={{color:globalStyle?.color, fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
-                  <TextInput style={[styles.input, {minHeight: 50, fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
+                     <Text  style={{color:globalStyle?.color, fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
+                     <TextInput style={[styles.input, {minHeight: 50, fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
                   </View>
 
                   { type != "journal" ?
@@ -281,41 +372,37 @@ useEffect(() => {
                   }
 
                   <View style={styles.inputContainer}>
-                  <Text  style={{color:globalStyle?.color, fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
-                  <TextInput style={[styles.input, {fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "observation") } value={observation}  multiline={true} />
+                     <Text  style={{color:globalStyle?.color, fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
+                     <TextInput style={[styles.input, {fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "observation") } value={observation}  multiline={true} />
                   </View>
 
                   <View style={styles.inputContainer}>
-                  <Text  style={{color:globalStyle?.color , fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
-                  <TextInput style={[styles.input, {fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
+                     <Text  style={{color:globalStyle?.color , fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
+                     <TextInput style={[styles.input, {fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
                   </View>
 
                   <KeyboardAvoidingView behavior='padding' style={styles.inputContainer} >
-                  <Text  style={{color:globalStyle?.color , fontSize: globalStyle?.fontSize}}>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
-                  <TextInput style={[styles.input, {fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
+                     <Text  style={{color:globalStyle?.color , fontSize: globalStyle?.fontSize}}>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
+                     <TextInput style={[styles.input, {fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
 
-                  <View style={[styles.flex,{paddingTop: 20,}]}>
-                     <TouchableOpacity 
-                        style={[styles.border, {  backgroundColor: globalStyle?.bgHeader, borderColor: globalStyle?.borderColor ,alignItems: 'center', justifyContent: 'space-evenly', flexDirection: 'column', padding: 10, gap: 5, width: 200 }]} 
-                        onPress={ () => handlePassageVisible(true) }
-                     >
-                        <Entypo name="chevron-thin-up" size={24} color={globalStyle?.color} />
-                     </TouchableOpacity>
-                  </View>
+                     <View style={[styles.flex,{paddingTop: 20,}]}>
+                        <TouchableOpacity 
+                           style={[styles.border, {  backgroundColor: globalStyle?.bgHeader, borderColor: globalStyle?.borderColor ,alignItems: 'center', justifyContent: 'space-evenly', flexDirection: 'column', padding: 10, gap: 5, width: 200 }]} 
+                           onPress={ () => handlePassageVisible(true) }
+                        >
+                           <Entypo name="chevron-thin-up" size={24} color={globalStyle?.color} />
+                        </TouchableOpacity>
+                     </View>
    
-               
                   </KeyboardAvoidingView>
 
                </View>
-               <View>
                
-         
-            </View>
-
-         
             </ScrollView>
 
             </View>
+
+            <BackConfirmationModal message={message} visible={backConfirmVisible} handleModal={handleBackConfirmModal} handleMainModal={handleModal} saveEntry={saveEntry} globalStyle={globalStyle}  />
 
             <AlertModal message={message} visible={alertModalVisible} globalStyle={globalStyle} />
 

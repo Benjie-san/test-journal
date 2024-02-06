@@ -12,6 +12,87 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AlertModal from './AlertModal';
 import styles from '../styles/entryStyle';
 
+const BackConfirmationModal = ({visible, handleModal, handleMainModal, globalStyle, updateEntry, }) => {
+
+   const handleSave = () =>{
+      handleModal(false);
+      handleMainModal(false);
+   }
+   const handleClose = () =>{
+      handleModal(false);
+      handleMainModal(false);
+   }
+   return (
+   <>
+      <Modal
+      isVisible={visible}
+      coverScreen={true}
+      style={{ flex: 1, margin: 0 }}
+      animationIn="fadeIn"
+      animationOut="fadeOut"
+      onBackdropPress={() => handleModal(false)}
+      onBackButtonPress={handleModal}
+      >
+         <View style={[styles.flex]}>
+            <View
+               style={{
+                  backgroundColor: globalStyle?.bgBody,
+                  width: "50%",
+                  height: "20%",
+                  padding: 20,
+                  borderRadius: 10,
+                  alignItems: "center",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  borderColor: globalStyle?.borderColor,
+                  borderWidth: 1,
+               }}
+            >
+               <Text style={{ textAlign: "center", color: globalStyle?.color }}>
+                  Are you sure want to exit?
+               </Text>
+               <View
+               style={{
+                  margin: 5,
+                  alignItems: "center",
+                  flexDirection: "row",
+                  }}
+               >
+               <TouchableOpacity
+                  style={[
+                     styles.deleteButtons,
+                     {
+                     borderColor: globalStyle?.borderColor,
+                     borderWidth: 1,
+                     backgroundColor: globalStyle?.bgHeader,
+                     },
+                  ]}
+                  onPress={()=>handleModal(false)}
+               >
+                  <Text style={{ color: globalStyle?.color }}>NO</Text>
+               </TouchableOpacity>
+
+               <TouchableOpacity
+                  style={[
+                  styles.deleteButtons,
+                     {
+                     backgroundColor: "red",
+                     borderColor: globalStyle?.borderColor,
+                     borderWidth: 1,
+                     },
+                  ]}
+                  onPress={() => handleClose()}
+               >
+               <Text style={{ color: "white" }}>YES</Text>
+               </TouchableOpacity>
+               </View>
+            </View>
+            </View>
+         </Modal>
+      </>
+   );
+}
+
 const DeleteConfirmationModal = ({visible, deleteEntry, handleModal,handleMainModal, globalStyle}) => {
 
    const handleDelete = () =>{
@@ -104,11 +185,11 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, status, entry, type,
       if(item == "Delete"){
          handleDeleteModal();
       }
-      else if(item == "#ffad33"){
+      else if(item == "#fff"){
          handleStatus("#8CFF31");
       }
       else if(item == "#8CFF31"){
-         handleStatus("#ffad33");
+         handleStatus("#fff");
       }
       else if(item == "Share"){
          onShare();
@@ -210,6 +291,23 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
       passage: passage,
    }
 
+   const [backConfirmVisible, setBackConfirmVisible] = useState(false);
+
+   const handleBackConfirmModal = (item) =>{
+   
+      if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
+         setBackConfirmVisible(item);
+      }else{
+         handleModal(false);
+
+      }
+      if(route.name == "Home" ){
+         fetchAllData();
+      }
+   
+   }
+
+
    const handlePassage = (item) => {
       setPassage(item);
    }
@@ -230,7 +328,7 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
          setMessage("Entry Updated");
          setAlertModalVisible(item);
       } else if(currentEntry?.status !== status){
-         setMessage(status === "#8CFF31" ? "Unmark as done" : "Mark as done");
+         setMessage(status === "#8CFF31" ? "Marked as done" : "Unmarked as done" );
          setAlertModalVisible(item);
       }
    }
@@ -456,10 +554,9 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
          <Modal 
             coverScreen={true} 
             isVisible={visible}
-            onBackButtonPress={ ()=> handleBackButton() }
+            onBackButtonPress={ ()=> handleBackConfirmModal(true) }
             animationIn="slideInRight"
             animationOut="slideOutRight"
-            transparent={true}
             style={{flex:1, margin: 0}}
             hasBackdrop={false}
             avoidKeyboard={false}
@@ -469,16 +566,17 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
             <View style={[styles.header, {backgroundColor: globalStyle?.bgHeader, borderBottomColor: globalStyle?.borderColor,}]}> 
 
                {/*CLOSE BUTTON*/}
-               <TouchableOpacity onPress={()=> handleBackButton()}>
+               {/* <TouchableOpacity onPress={()=> handleBackButton()}>
                   <AntDesign name="close" size={30} color={globalStyle?.color} />
-               </TouchableOpacity>
+               </TouchableOpacity> */}
                
                {/*HEADER TITLE*/}
                <Text style={{fontSize: 20, color: globalStyle?.color}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
 
                <View style={{flexDirection: 'row', alignItems: "center", gap:10}}>
                   <TouchableOpacity onPress={ () => handleUpdateEntry()}>
-                     <MaterialCommunityIcons name="content-save-edit-outline" size={30} color={globalStyle?.color}/>
+                     {/* <MaterialCommunityIcons name="content-save-edit-outline" size={30} color={globalStyle?.color}/> */}
+                     <Text style={{color: globalStyle?.settingsColor}} > SAVE </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity onPress={() => handleMenuVisible()}>
@@ -583,6 +681,8 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
          
 
          </Modal>
+
+         <BackConfirmationModal message={message} visible={backConfirmVisible} handleModal={handleBackConfirmModal} handleMainModal={handleModal} updateEntry={updateEntry} globalStyle={globalStyle}  />
       
          <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={type} handleMainModal={handleModal} globalStyle={globalStyle} updateEntry={updateEntry} />
          

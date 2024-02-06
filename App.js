@@ -18,7 +18,6 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import * as SQLite from 'expo-sqlite';
-import { createIconSetFromFontello } from "react-native-vector-icons";
 
 const dbSettings = SQLite.openDatabase("settings4.db");
 
@@ -61,8 +60,6 @@ export default function App() {
   };
 
   const handleGlobalStyle = (mode) => {
-    console.log("mode: " + mode);
-
     if (mode == "dark") {
       setGlobalStyle(darkModeStyle);
     } else {
@@ -71,9 +68,8 @@ export default function App() {
   };
 
   const handleDarkMode = (darkMode) => {
-    console.log("darkMode: " + darkMode);
-    handleGlobalStyle(darkMode);
     updateSettingsDb(darkMode);
+    fetchDefaultSettings();
   };
 
   const RenderHome = (props) => (
@@ -174,7 +170,8 @@ export default function App() {
           },
           headerTitleStyle:{
             color: globalStyle?.color,
-          }
+          },
+          animation:'slide_from_right',
         }}
         name="MoreStack"
         component={RenderMore}
@@ -187,7 +184,9 @@ export default function App() {
           },
           headerTitleStyle:{
             color: globalStyle?.color,
-          }
+          },
+          headerTintColor: globalStyle?.color,
+          animation:'slide_from_right',
         }}
         name="Settings"
         component={RenderSettings}
@@ -229,11 +228,11 @@ export default function App() {
   };
 
   const fetchDefaultSettings = () =>{
-    console.log("called")
+    //console.log("called");
     dbSettings.transaction((tx) => {
       tx.executeSql(
-      'SELECT * FROM settings',
-      [],
+      'SELECT * FROM settings WHERE id = ?',
+      [1],
       (_, result) => {
           const rows = result.rows;
           const dataArray = [];
@@ -242,7 +241,7 @@ export default function App() {
             dataArray.push(item);
           
           }
-          console.log(dataArray)
+          //console.log(dataArray)
           handleGlobalStyle(dataArray[0].currentTheme);
           console.log("Settings are fetched")
         
@@ -255,6 +254,7 @@ export default function App() {
   }
 
   const insertDefaultSettings = () => {
+    console.log("insert called")
     dbSettings.transaction((tx) => {
       tx.executeSql(
       'INSERT INTO settings (currentTheme, fontSize, defaultSort, notifTime) VALUES (?, ?, ?, ?);',
@@ -272,12 +272,14 @@ export default function App() {
   }
 
   const updateSettingsDb = (theme) =>{
+    console.log(theme);
     dbSettings.transaction((tx) => {
       tx.executeSql(
         'UPDATE settings SET currentTheme = ?, fontSize = ?, defaultSort = ?, notifTime = ? WHERE id = ?;',
-        [theme, "16", "modifiedDate", "6", 0],
+        [theme, "16", "modifiedDate", "7", 1],
         (_, result) => {
           console.log('Data SETTINGS updated successfully');
+          handleGlobalStyle(theme);
         },
         (_, error) => {
           console.error('Error updating SETTINGS data:', error);
@@ -285,10 +287,6 @@ export default function App() {
         );
     });
   }
-
-  useEffect(() => {
-    setupSettingsDatabase();
-  }, []);
 
   useEffect(() => {
     setupSettingsDatabase();

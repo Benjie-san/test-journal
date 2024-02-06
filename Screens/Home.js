@@ -55,8 +55,7 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
             justifyContent:"center",
         }} >
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
-            <MaterialIcons name="post-add" size={28} color={globalStyle?.color} />  
-            <FontAwesome5 name="fire" size={24} color="black" />          
+            <MaterialIcons name="post-add" size={28} color={globalStyle?.color} />           
             <Text style={{fontSize: 25,  color: globalStyle?.color, }}>Add</Text>
           </View>
           
@@ -612,7 +611,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     {/*MAIN VIEW*/}
     <View style={[styles.homeContainer]}>
       {/*Todays passage*/}
-      <View style={[styles.passageToday, {backgroundColor:globalStyle?.bgHeader,}]}>
+      <View style={[styles.passageToday, {backgroundColor:globalStyle?.bgHeader,  borderTopColor: globalStyle.borderColor, borderTopWidth: 1}]}>
 
           { verseLoading ? <ActivityIndicator style={{width: '40%'}} /> : (
             <View style={[{flexDirection: 'column'}]}>
@@ -647,7 +646,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     {/*MODALSS*/}
 
     {/*ADD ITEM MODAL*/}
-    <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} index={months.indexOf(todayVerse?.month)} itemId={todayVerse?.id} globalStyle={globalStyle} fetchAllData={fetchAllData} route={route}/>
+    <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#fff" handleType={handleType} index={months.indexOf(todayVerse?.month)} itemId={todayVerse?.id} globalStyle={globalStyle} fetchAllData={fetchAllData} route={route}/>
 
     {/*For displaying the component*/}
     <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType}  globalStyle={globalStyle}  fetchAllData={fetchAllData} route={route} />

@@ -54,7 +54,6 @@ input:{
    backgroundColor: '#bfbfbf',
    width: "100%",
    minHeight: 100,
-   maxHeight: 300,
    padding: 10,
    marginBottom: 10,
 },

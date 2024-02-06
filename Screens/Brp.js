@@ -15,8 +15,15 @@ import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated"
 
 
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const theme2024 =["SYSTEMS IMPROVEMENT", "SYSTEMS IMPROVEMENT", "MACRO-EVANGELISM","MACRO-EVANGELISM", 'ACCOUNT SETTLEMENT', 'ACCOUNT SETTLEMENT', "RELATIONAL DISCIPLESHIP", "RELATIONAL DISCIPLESHIP", "TRAINING-CENTERED", "TRAINING-CENTERED", "CHURCH", "CHURCH"];
-
+const todayDate = new Date();
+const today ={
+   day:todayDate.getDate(),
+   month: months[todayDate.getMonth()],
+   year: todayDate.getFullYear(),
+}
+;
 let content = Object.keys(data).map( (key, index) =>
    (
       {
@@ -42,8 +49,6 @@ async function openBrpDatabase() {
 
 const ExpandableComponent = ({onRef, item, index, handleAddEntry, handleDisplayEntryModal, handleScripture, handleType, handleIndex, handleEntry, handleItemId, displayEntryVisible, addEntryVisible, globalStyle}) =>{
    
-
-
    //states for showing it
    const [height, setHeight] = useState(0);
    const [show, setShow] = useState(false);
@@ -54,7 +59,6 @@ const ExpandableComponent = ({onRef, item, index, handleAddEntry, handleDisplayE
 
     // for item completion states
    const [idArray, setIdArray] = useState([]);
-   const [idPending, setIdpending] = useState([]);
    const [idComplete, setIdcomplete] = useState([]);
    
    //state for loading
@@ -107,22 +111,18 @@ const ExpandableComponent = ({onRef, item, index, handleAddEntry, handleDisplayE
                const rows = result.rows;
                const dataArray = [];
                const dataArray2 = [];
-               const dataArray3  = [];
                const dataArray4  = [];
 
                for (let i = 0; i < rows.length; i++) {
                   const item = rows.item(i);
                   dataArray.push(item);
                   dataArray2.push(item.dataId);
-                  if(item.status == '#ffad33'){
-                     dataArray3.push(item.dataId);
-                  }else if(item.status == '#8CFF31'){
+                 if(item.status == '#8CFF31'){
                      dataArray4.push(item.dataId);
                   }
                }
                setMonthCompletion(dataArray);
                setIdArray(dataArray2);
-               setIdpending(dataArray3);
                setIdcomplete(dataArray4);
             },
             (_, error) => {
@@ -178,11 +178,16 @@ const ExpandableComponent = ({onRef, item, index, handleAddEntry, handleDisplayE
       }
    });
 
+   
+   const getThatDay = (item)=>{
+      //const day = new Date();
+      const day = new Date(Date.parse(`${today.year}-${index+1}-${item}`));
+      return days[day.getDay()];
+   }
 
    useEffect(() => {
       if(show){
          onRef.current.scrollToIndex({ index, animated: true });
-         
       } 
 
    }, [show])
@@ -203,31 +208,32 @@ const ExpandableComponent = ({onRef, item, index, handleAddEntry, handleDisplayE
       <View style={[{flex:1,  flexGrow:1}]}>
          <TouchableOpacity 
             onPress={() => handleMonthPress()} 
-            style={[styles.months, { borderBottomWidth: show ? 0:1, borderColor: globalStyle.color, }]}
+            style={[styles.months, { borderBottomWidth: show ? 0:1, borderColor: globalStyle?.color, }]}
          >
             <Text style={{fontSize: 20, color: globalStyle.color}}>{item.category_name}</Text> 
-            <Entypo name={show ? "chevron-thin-up" : "chevron-thin-down"} size={28} color={globalStyle.color}/>
+            {show?(<Text style={{fontSize: 17, paddingLeft: 10,  color: globalStyle?.color, }}>{theme2024[index]}</Text>):null}
+            <Entypo name={show ? "chevron-thin-up" : "chevron-thin-down"} size={28} color={globalStyle?.color}/>
          </TouchableOpacity>
    
          <Animated.View style={animatedStyle}>
       
-            <View onLayout={onLayout} style={{position: 'absolute', width: '100%', backgroundColor: globalStyle.bgBody,}}>
-               <Text style={{fontSize: 17, paddingLeft: 10,  color: globalStyle.color, }}>{theme2024[index]}</Text>
-            
+            <View onLayout={onLayout} style={{position: 'absolute', width: '100%', padding: 10,}}>
+
                {
-                  currentMonthEntries.map((item, index) => (
+                  currentMonthEntries.map((item, key) => (
       
                   <TouchableOpacity
-                     onPress={()=>handleItemPress(item, index)}
-                     style={[styles.dailyEntry, {backgroundColor: globalStyle.bgBody, borderBottomColor: globalStyle.color, borderBottomWidth: 1}]}
-                     key={index}>
+                     onPress={()=>handleItemPress(item, key)}
+                     style={[styles.dailyEntry, {backgroundColor: globalStyle?.bgHeader, borderBottomColor: globalStyle?.color, borderBottomWidth: 1}]}
+                     key={key}>
                         <View style={{flexDirection: 'row'}}> 
-                           <Text style={{fontSize: 17, paddingLeft: 10,  color: globalStyle.color}}>{item.day},</Text>
-                           <Text style={{fontSize: 17, paddingLeft: 10,  color: globalStyle.color}}>{item.verse}</Text>
+                           <Text style={{fontSize: 17,  color: globalStyle?.color}}>{getThatDay(item.day)},</Text>
+                           <Text style={{fontSize: 17,   color: globalStyle?.color}}> {item.day}  -</Text>
+                           <Text style={{fontSize: 17, paddingLeft: 10,  color: globalStyle?.color}}>{item.verse}</Text>
                         </View>
 
                         <View style={[styles.check, styles.border,
-                           {backgroundColor: idArray.includes(item.id) ? idPending.includes(item.id) ?  "#ffad33" : idComplete.includes(item.id) ? "#8CFF31":'#f5f5f5' : '#fff'}]}>
+                           {backgroundColor: idArray.includes(item.id) ? idComplete.includes(item.id) ? "#8CFF31":'#fff': '#fff'}]}>
 
                         </View>
                
@@ -336,7 +342,7 @@ export default function Brp({navigation, globalStyle, route}){
          </View>
    </View>
 
-   <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#ffad33" handleType={handleType} itemId={itemId} index={index} globalStyle={globalStyle} route={route} />
+   <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#fff" handleType={handleType} itemId={itemId} index={index} globalStyle={globalStyle} route={route} />
 
    <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={entry} handleEntry={handleEntry} itemId={itemId} globalStyle={globalStyle} route={route}  />
 
@@ -365,9 +371,8 @@ const styles = StyleSheet.create({
 
    },
    dailyEntry:{
-      width: '100%',
-      padding: 14,
-      height: 50,
+      padding: 16,
+      height: 55,
       justifyContent: "space-between",
       flexDirection: "row",
       alignItems: "center",
