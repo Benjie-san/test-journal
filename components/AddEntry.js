@@ -113,8 +113,6 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
 
    const [passage, setPassage] = useState(""); 
 
-
-
    const handlePassage = (item) => {
       setPassage(item);
    }
@@ -125,11 +123,8 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
       setBackConfirmVisible(item);
       if(item == false){
          cleanStates();
-         if(route.name == "Home" ){
-            fetchAllData();
-         }
+   
       }
-     
    }
 
    const handleAlertModalVisible = (item) =>{
@@ -148,10 +143,6 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
    const handleBackButton = () =>{
       handleModal(false);
       cleanStates();
-
-      if(route.name == "Home" ){
-         fetchAllData();
-      }
    }
 
    const onChangeDate = ({type}, selectedDate) =>{
@@ -224,6 +215,9 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
                [date, title, question, scripture, observation, application, prayer, status, type, Date.now(), null, months[index]],
                (tx, results) => {
                   console.log("Success!!!");
+                  if(type == "opm"){
+                     fetchAllData();
+                  }
                },
                (error) => {
                   // Handle error
@@ -238,8 +232,6 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
    useEffect(() => {
       if(type == 'journal'){
          setScripture(verse);
-      }else{
-         setScripture("");
       }
    }, [verse, scripture]);
 
@@ -251,10 +243,6 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
             handleAlertModalVisible(false);
             handleModal(false);
             cleanStates();
-            if(route.name == "Home" ){
-               fetchAllData();
-            }
-
          }, 1000)
    
 

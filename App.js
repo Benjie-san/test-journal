@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Platform } from "react-native";
 import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-
-
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
 
 //RN Navigation Imports
 import { NavigationContainer } from "@react-navigation/native";
@@ -19,17 +19,31 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import * as SQLite from 'expo-sqlite';
 
+//for DB of settings
 const dbSettings = SQLite.openDatabase("settings4.db");
 
+//init of stack navs
 const Tab = createMaterialBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
 const BrpStack = createNativeStackNavigator();
 const SearchStack = createNativeStackNavigator();
 const MoreStack = createNativeStackNavigator();
 
+// Notifications.setNotificationHandler({
+//   handleNotification: async () => ({
+//     shouldShowAlert: true,
+//     shouldPlaySound: false,
+//     shouldSetBadge: false,
+//   }),
+// });
+
 export default function App() {
+  // Styles
   const [darkMode, setDarkMode] = useState(false);
   const [globalStyle, setGlobalStyle] = useState({});
+
+  // Expo Notifications
+  const [expoPushToken, setExpoPushToken] = useState();
 
   const darkModeStyle = {
     header: '#000',
@@ -291,8 +305,8 @@ export default function App() {
   // PUSH NOTIFICATION FUNCTIONS
 
   const scheduleNotifications = async () => {
-    const morningNotificationTime = setNotificationTime(8, 0);
-    const eveningNotificationTime = setNotificationTime(21, 0);
+    const morningNotificationTime = setNotificationTime(6, 0);
+    const eveningNotificationTime = setNotificationTime(18, 0);
 
     // Schedule morning notification
     await Notifications.scheduleNotificationAsync({
@@ -300,16 +314,17 @@ export default function App() {
         title: 'Good Morning!',
         body: `Have you completed your journal passage for today?`,
       },
-      trigger: { hour: morningNotificationTime.hours, minute: morningNotificationTime.minutes, repeats: false},
+      trigger: { seconds: morningNotificationTime.hours * morningNotificationTime.minutes  },
     });
 
     // Schedule evening notification
     await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Good Evening',
-        body: `Have you fisnished your Journal today?`,
+        body: `Have you finished your Journal today?`,
       },
-      trigger: { hour: eveningNotificationTime.hours, minute: eveningNotificationTime.minutes, repeats: false },
+      trigger: { seconds: eveningNotificationTime.hours * eveningNotificationTime.minutes },
+  
     });
   };
 
@@ -345,30 +360,36 @@ export default function App() {
     }
 
     const token = (await Notifications.getExpoPushTokenAsync()).data;
-    console.log(token);
+    //console.log(token);
   };
 
-    // for push notifications
-    useEffect(() => {
-      scheduleNotifications();
   
-      // Set up an interval to schedule notifications every day
-      const intervalId = setInterval(() => {
-        scheduleNotifications();
-      }, 24 * 60 * 60 * 1000); // Schedule notifications every 24 hours
-  
-      // Clear the interval when the component is unmounted
-      return () => clearInterval(intervalId);
-    }, []);
-  
-    useEffect(() => {
-      registerForPushNotificationsAsync();
-  
-      // Handle notifications when the app is open
-      Notifications.addNotificationReceivedListener(handleNotification);
-    }, []);
-  
+  const handleNotification = (notification) => {
+    // Handle the received notification
+    console.log(notification);
+  };
 
+
+  // for push notifications
+  useEffect(() => {
+    scheduleNotifications();
+
+    // Set up an interval to schedule notifications every day
+    const intervalId = setInterval(() => {
+      scheduleNotifications();
+    }, 24 * 60 * 60 * 1000); // Schedule notifications every 24 hours
+
+    // Clear the interval when the component is unmounted
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    registerForPushNotificationsAsync();
+
+    // Handle notifications when the app is open
+    Notifications.addNotificationReceivedListener(handleNotification);
+  }, []);
+  
 
   useEffect(() => {
     setupSettingsDatabase();
@@ -401,7 +422,7 @@ export default function App() {
           initialRouteName="Home"
           activeColor="#1d9bf0"
           barStyle={{ backgroundColor: globalStyle?.bgHeader }}
-          
+          lazy
         >
           <Tab.Screen
             component={StackHome}
@@ -510,3 +531,37 @@ export default function App() {
     </>
   );
 }
+
+// async function registerForPushNotificationsAsync() {
+//   let token;
+
+//   if (Platform.OS === 'android') {
+//     await Notifications.setNotificationChannelAsync('default', {
+//       name: 'default',
+//       importance: Notifications.AndroidImportance.MAX,
+//       vibrationPattern: [0, 250, 250, 250],
+//       lightColor: '#FF231F7C',
+//     });
+//   }
+
+//   if (Device.isDevice) {
+//     const { status: existingStatus } = await Notifications.getPermissionsAsync();
+//     let finalStatus = existingStatus;
+//     if (existingStatus !== 'granted') {
+//       const { status } = await Notifications.requestPermissionsAsync();
+//       finalStatus = status;
+//     }
+//     if (finalStatus !== 'granted') {
+//       alert('Failed to get push token for push notification!');
+//       return;
+//     }
+//     // Learn more about projectId:
+//     // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
+//     token = (await Notifications.getExpoPushTokenAsync({ projectId: 'your-project-id' })).data;
+//     console.log(token);
+//   } else {
+//     alert('Must use physical device for Push Notifications');
+//   }
+
+//   return token;
+// }

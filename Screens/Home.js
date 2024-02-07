@@ -1,29 +1,23 @@
 //import for react stuffs
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, Pressable, ActivityIndicator, Platform } from 'react-native';
 import React, {useEffect, useState, useRef, useCallback} from 'react';
-import * as Notifications from 'expo-notifications';
 import Modal from "react-native-modal";
 import {Asset} from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 import * as SQLite from 'expo-sqlite';
-import * as Sharing from 'expo-sharing';
-import * as DocumentPicker from 'expo-document-picker';
 import { useIsFocused } from '@react-navigation/native';
 
 // import for components
 import Navbar from '../components/Navbar';
 import AddEntry from '../components/AddEntry';
 import DisplayEntry from '../components/DisplayEntry';
-import Search from './Search';
-import More from './More';
+
 import TopBar from '../components/TopBar';
 
 //import vector-icons
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { Ionicons } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-import { FontAwesome5 } from '@expo/vector-icons';
 
 
 const AddModal = ({visible, type, handleModal, globalStyle}) => {
@@ -170,7 +164,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   const handleMoreModal = (item) =>{
     setMoreVisible(item);
   }
-
 
   const handleType = (item) => {
       setType(item)
@@ -353,7 +346,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   };
 
   const fetchAllData = () => {
-
+    console.log("Fetched All Data")
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT * FROM entries ORDER BY modifiedDate DESC;",
@@ -473,11 +466,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     });
   };
 
-
-  const handleNotification = (notification) => {
-    // Handle the received notification
-    console.log(notification);
-  };
 
   const formatLastModified = (timestamp) => {
     const lastModifiedTime = new Date(timestamp);

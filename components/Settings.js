@@ -12,7 +12,6 @@ export default function Settings({navigation, darkMode, handleDarkMode, globalSt
   const [checked, setChecked] = useState(globalStyle?.name);
 
   const handleTheme = (name, item) =>{
-    console.log(name);
 		setChecked(name);
 		setTheme(name);
     setThemeModal(false);

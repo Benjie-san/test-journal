@@ -222,14 +222,14 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, status, entry, type,
                </View>
                </TouchableOpacity>
 
-               {/* <TouchableOpacity 
+               <TouchableOpacity 
                style={styles.menuItems}  
                > 
                   <View style={{flexDirection: 'row', alignItems: "center", gap: 10,}}>
                      <Feather name="archive" size={20} color={globalStyle?.color} />        
                      <Text style={{fontSize: 18, color: globalStyle?.color}}>Archive</Text>
                   </View>
-               </TouchableOpacity> */}
+               </TouchableOpacity>
 
                <TouchableOpacity 
                style={styles.menuItems}  
@@ -441,7 +441,7 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
             );
          });
       }
-      if(route.name == "Home" ){
+      if(route.name == "Home"){
          fetchAllData();
       }
    }

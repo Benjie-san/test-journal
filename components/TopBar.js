@@ -2,6 +2,8 @@ import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, FlatList }
 import React,{useState, useEffect} from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
+import FlatListItems from './FlatListItems';
+
 const Tab = createMaterialTopTabNavigator();
 
 const FlatListComponent = ({notes, noteListLoading, globalStyle, formatLastModified,handleDisplayEntryFetch }) => (
@@ -16,15 +18,7 @@ const FlatListComponent = ({notes, noteListLoading, globalStyle, formatLastModif
             data={ notes } 
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                style={ [styles.entry, {backgroundColor: globalStyle?.noteList, elevation: 2, gap: 5}] }
-                onPress={ ()=> handleDisplayEntryFetch(item) }
-              >
-          
-                <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden'}}>{item.title}</Text>
-          
-                <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden'}}>{formatLastModified(Number(item.modifiedDate))}</Text>
-              </TouchableOpacity>
+              <FlatListItems item={item} handleDisplayEntryFetch={handleDisplayEntryFetch} globalStyle={globalStyle}/>
             )}
           />)
       }
@@ -69,7 +63,7 @@ const SortBtn = ({name, count, focused, globalStyle}) => (
   </View>
 );
 
-const TopBar = ({ globalStyle, notes, notesJournal, notesOPM, noteListLoading, handleDisplayEntryFetch, sortButtonCount,formatLastModified}) => {
+const TopBar = ({ globalStyle, notes, notesJournal, notesOPM, noteListLoading, handleDisplayEntryFetch, sortButtonCount, formatLastModified}) => {
 
   const RenderAll = () => <AllEntries globalStyle={globalStyle} notes={notes} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} formatLastModified={formatLastModified}/>
 
