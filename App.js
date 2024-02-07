@@ -104,7 +104,6 @@ export default function App() {
     />
   );
 
-
   const StackHome = () => (
     <HomeStack.Navigator>
       <HomeStack.Screen
@@ -243,7 +242,7 @@ export default function App() {
           }
           //console.log(dataArray)
           handleGlobalStyle(dataArray[0].currentTheme);
-          console.log("Settings are fetched")
+          //console.log("Settings are fetched")
         
         },
         (_, error) => {
@@ -287,6 +286,89 @@ export default function App() {
         );
     });
   }
+
+  
+  // PUSH NOTIFICATION FUNCTIONS
+
+  const scheduleNotifications = async () => {
+    const morningNotificationTime = setNotificationTime(8, 0);
+    const eveningNotificationTime = setNotificationTime(21, 0);
+
+    // Schedule morning notification
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Good Morning!',
+        body: `Have you completed your journal passage for today?`,
+      },
+      trigger: { hour: morningNotificationTime.hours, minute: morningNotificationTime.minutes, repeats: false},
+    });
+
+    // Schedule evening notification
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Good Evening',
+        body: `Have you fisnished your Journal today?`,
+      },
+      trigger: { hour: eveningNotificationTime.hours, minute: eveningNotificationTime.minutes, repeats: false },
+    });
+  };
+
+  const setNotificationTime = (hours, minutes) => {
+    const now = new Date();
+    const notificationTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
+    const currentTime = now.getTime();
+    const notificationDateTime = notificationTime.getTime();
+
+    // If the notification time has already passed for today, schedule it for the same time tomorrow
+    const scheduledTime = notificationDateTime > currentTime ? notificationDateTime : notificationDateTime + 24 * 60 * 60 * 1000;
+
+    const scheduledDate = new Date(scheduledTime);
+
+    return {
+      hours: scheduledDate.getHours(),
+      minutes: scheduledDate.getMinutes(),
+    };
+  };
+
+  const registerForPushNotificationsAsync = async () => {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== 'granted') {
+      alert('Failed to get push token for push notification!');
+      return;
+    }
+
+    const token = (await Notifications.getExpoPushTokenAsync()).data;
+    console.log(token);
+  };
+
+    // for push notifications
+    useEffect(() => {
+      scheduleNotifications();
+  
+      // Set up an interval to schedule notifications every day
+      const intervalId = setInterval(() => {
+        scheduleNotifications();
+      }, 24 * 60 * 60 * 1000); // Schedule notifications every 24 hours
+  
+      // Clear the interval when the component is unmounted
+      return () => clearInterval(intervalId);
+    }, []);
+  
+    useEffect(() => {
+      registerForPushNotificationsAsync();
+  
+      // Handle notifications when the app is open
+      Notifications.addNotificationReceivedListener(handleNotification);
+    }, []);
+  
+
 
   useEffect(() => {
     setupSettingsDatabase();

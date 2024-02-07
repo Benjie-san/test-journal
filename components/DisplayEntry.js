@@ -213,14 +213,23 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, status, entry, type,
             <View style={[styles.menuPopup, {backgroundColor: globalStyle?.bgHeader}]} >
 
                <TouchableOpacity 
-               style={styles.menuItems}  
-               onPress={() => handlePressBtn("Share")} 
+                  style={[styles.menuItems]}  
+                  onPress={() => handlePressBtn(status)} 
                > 
-               <View style={{flexDirection: 'row', alignItems: "center", gap: 10,}}>
-                  <Feather name="share-2" size={20} color={globalStyle?.color} />        
-                  <Text style={{fontSize: 18, color: globalStyle?.color}}>Share</Text>
+               <View  style={{flexDirection: 'row', alignItems: "center", gap: 10,}}> 
+                  <AntDesign name="checksquareo" size={20} color={globalStyle?.color} />        
+                  <Text style={{fontSize: 18,  color: globalStyle?.color}}>{status === "#8CFF31" ? "Unmark as done" : "Mark as done"}</Text>
                </View>
                </TouchableOpacity>
+
+               {/* <TouchableOpacity 
+               style={styles.menuItems}  
+               > 
+                  <View style={{flexDirection: 'row', alignItems: "center", gap: 10,}}>
+                     <Feather name="archive" size={20} color={globalStyle?.color} />        
+                     <Text style={{fontSize: 18, color: globalStyle?.color}}>Archive</Text>
+                  </View>
+               </TouchableOpacity> */}
 
                <TouchableOpacity 
                style={styles.menuItems}  
@@ -233,14 +242,15 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, status, entry, type,
                </TouchableOpacity>
 
                <TouchableOpacity 
-               style={[styles.menuItems, {borderBottomColor: 'transparent'}]}  
-               onPress={() => handlePressBtn(status)} 
+                  style={[styles.menuItems, {borderBottomColor: 'transparent'}]}  
+                  onPress={() => handlePressBtn("Share")} 
                > 
-               <View  style={{flexDirection: 'row', alignItems: "center", gap: 10,}}> 
-                  <AntDesign name="checksquareo" size={20} color={globalStyle?.color} />        
-                  <Text style={{fontSize: 18,  color: globalStyle?.color}}>{status === "#8CFF31" ? "Unmark as done" : "Mark as done"}</Text>
-               </View>
+                  <View style={{flexDirection: 'row', alignItems: "center", gap: 10,}}>
+                     <Feather name="share-2" size={20} color={globalStyle?.color} />        
+                     <Text style={{fontSize: 18, color: globalStyle?.color}}>Share</Text>
+                  </View>
                </TouchableOpacity>
+
 
             </View>
          </View>

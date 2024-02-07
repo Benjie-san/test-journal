@@ -48,13 +48,13 @@ const styles = StyleSheet.create({
 		gap: 10,
 	},
 	picker:{
-		position: 'absolute',
-		top: 360,
+		width: '40%',
 		justifyContent: 'center',
 		borderRadius: 20,
 		padding: 10,
-		right: 80,
 		paddingVertical: 10,
+		top: 60,
+		left: 180,
 	},
 	verseView:{
 		padding: 10,

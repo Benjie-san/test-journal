@@ -23,40 +23,40 @@ const TranslationModal = ({visible, handleModal, handleTranslation, globalStyle}
   return(
       <>
         <Modal
-					animationIn="fadeIn"
-					animationOut="fadeOut"
-					onBackdropPress={() => handleModal(false)}
-					onBackButtonPress={() => handleModal(false)}
-					isVisible={visible}
-				>
+			animationIn="fadeIn"
+			animationOut="fadeOut"
+			onBackdropPress={() => handleModal(false)}
+			onBackButtonPress={() => handleModal(false)}
+			isVisible={visible}
+		>
             <View style={[styles.picker, {backgroundColor: globalStyle.verseModal}]}>
-					{
-						translationsName.map( (item, index) => (
-							<TouchableOpacity 
-								key={index}
+				{
+					translationsName.map( (item, index) => (
+						<TouchableOpacity 
+							key={index}
+							onPress={ () => handleRadioButton(item, index) } 
+							style={{
+								borderBottomWidth: translationsName.length-1 == index  ? 0 : 1 , 
+								borderBottomColor: globalStyle.borderColor,
+								flexDirection: 'row',
+								alignItems: 'center',
+								gap: 10,
+							}}
+							>
+							<RadioButton
+								uncheckedColor={globalStyle?.color}
+								value={item} 
 								onPress={ () => handleRadioButton(item, index) } 
-								style={{
-									borderBottomWidth: translationsName.length-1 == index  ? 0 : 1 , 
-									borderBottomColor: globalStyle.borderColor,
-									flexDirection: 'row',
-									alignItems: 'center',
-									gap: 10,
-								}}
-								>
-								<RadioButton
-									uncheckedColor={globalStyle?.color}
-									value={item} 
-									onPress={ () => handleRadioButton(item, index) } 
-									status={ checked === item ? 'checked' : 'unchecked' }
-								/>
-								<Text style={[ {color: globalStyle?.color, fontSize: 17}]} >{item}</Text>
-							</TouchableOpacity>
-						) )
-					}
+								status={ checked === item ? 'checked' : 'unchecked' }
+							/>
+							<Text style={[ {color: globalStyle?.color, fontSize: 17}]} >{item}</Text>
+						</TouchableOpacity>
+					) )
+				}
             </View>
-         </Modal>
-      </>
-   );
+        </Modal>
+    </>
+  );
 }
 
 export default function PassageBottomSheet({globalStyle, visible, handleModal, verse, scripture, type, handlePassage}) {	
@@ -141,8 +141,7 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, v
 		getVerse(scripture, esv);
 	}, [scripture]);
 	
-   return (
-
+  return (
 		<Modal
 			onBackdropPress={() => handleModal(false)}
 			onBackButtonPress={() => handleModal(false)}
@@ -191,7 +190,6 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, v
 						</>
 						) : ( <Text style={{fontSize: 30, paddingBottom: 150, color: globalStyle.color}} >No Verses Found</Text> ) 
 					}
-		
 						
 					</ScrollView>
 
