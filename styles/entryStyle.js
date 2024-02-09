@@ -10,6 +10,7 @@ header:{
    flexDirection: 'row',
    borderBottomWidth: 1,
    zIndex: 1,
+   width: '100%',
 },
 flex:{
    flex: 1,
@@ -31,23 +32,23 @@ modal:{
    height: '100%',
 },
 inputContainer:{
-   width: "90%",
+   width: "100%",
    textAlign: 'left',
    justifyContent: 'center',
    alignItems: 'left',
+   padding: 10,
 },
 touchableContainer:{
-   width: "90%",
+   width: "100%",
    flexDirection: 'row',
    textAlign: 'left',
    justifyContent: 'space-between',
    alignItems: 'left',
    margin: 5,
-   paddingBottom: 5,
+   padding: 10,
 },
 inputSubContainer:{
    width: "48%",
-   marginTop: 20,
 },
 input:{    
    borderRadius: 5,

@@ -18,7 +18,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.cbc.journal",
+      "package": "com.journal.journal",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

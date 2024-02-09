@@ -12,6 +12,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Home, Brp, Search, More } from "./Screens/index"; // all of the screens
 
 import Settings from "./components/Settings";
+import AddEntry from './components/AddEntry';
+import DisplayEntry from "./components/DisplayEntry";
 
 //icon imports
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -86,44 +88,41 @@ export default function App() {
     fetchDefaultSettings();
   };
 
+ // ===============================  RENDER SECTIONS ==============================================
+
   const RenderHome = (props) => (
-    <Home
-      {...props}
-      darkMode={darkMode}
-      handleDarkMode={handleDarkMode}
-      globalStyle={globalStyle}
-    />
+    <Home {...props} darkMode={darkMode} handleDarkMode={handleDarkMode} globalStyle={globalStyle} />
   );
+    const RenderAddEntry = (props) => (
+      <AddEntry {...props} globalStyle={globalStyle}  />
+    )
+    const RenderDisplayEntry = (props) => (
+      <DisplayEntry {...props} globalStyle={globalStyle}  />
+    )
 
   const RenderBrp = (props) => <Brp {...props} globalStyle={globalStyle} />;
 
-  const RenderSearch = (props) => (
-    <Search {...props} globalStyle={globalStyle} />
-  );
+  const RenderSearch = (props) => ( <Search {...props} globalStyle={globalStyle} />);
 
   const RenderMore = (props) => (
-    <More
-      {...props}
-      globalStyle={globalStyle}
-      handleDarkMode={handleDarkMode}
-    />
+    <More {...props} globalStyle={globalStyle} handleDarkMode={handleDarkMode} />
   );
 
-  const RenderSettings = (props) => (
-    <Settings
-      {...props}
-      darkMode={darkMode}
-      globalStyle={globalStyle}
-      handleDarkMode={handleDarkMode}
-    />
-  );
+    const RenderSettings = (props) => (
+      <Settings {...props} darkMode={darkMode} globalStyle={globalStyle} handleDarkMode={handleDarkMode} />
+    );
+
+
+
+ // ===============================  STACKS ==============================================
+  
 
   const StackHome = () => (
-    <HomeStack.Navigator>
-      <HomeStack.Screen
-        options={{
-          headerTitle: "Journal 2024",
-          headerTitleAlign: "center",
+    <HomeStack.Navigator  >
+      <HomeStack.Screen   
+        name="HomeStack"
+        component={RenderHome}
+        options={{ headerTitle: "Journal 2024", headerTitleAlign: "left",
           headerStyle: {
             backgroundColor: globalStyle?.bgHeader,
           },
@@ -131,14 +130,31 @@ export default function App() {
             color: globalStyle?.color,
           }
         }}
-        name="HomeStack"
-        component={RenderHome}
+      />
+
+      <HomeStack.Screen   
+        name="AddEntry"
+        component={RenderAddEntry}
+        options={{ 
+          animation:'slide_from_right',
+          headerTintColor: globalStyle?.color,
+      }}
+      />
+
+      <HomeStack.Screen   
+        name="DisplayEntry"
+        component={RenderDisplayEntry}
+        options={{ 
+          animation:'slide_from_right',
+          headerTintColor: globalStyle?.color,
+      }}
       />
     </HomeStack.Navigator>
   );
 
   const StackBrp = () => (
     <BrpStack.Navigator>
+
       <BrpStack.Screen
         options={{
           headerTitle: "Bible Reading Plan",
@@ -152,6 +168,25 @@ export default function App() {
         name="BrpStack"
         component={RenderBrp}
       />
+
+      <BrpStack.Screen   
+        name="AddEntry"
+        component={RenderAddEntry}
+        options={{ 
+          animation:'slide_from_right',
+          headerTintColor: globalStyle?.color,
+      }}
+      />
+
+      <BrpStack.Screen   
+        name="DisplayEntry"
+        component={RenderDisplayEntry}
+        options={{ 
+          animation:'slide_from_right',
+          headerTintColor: globalStyle?.color,
+      }}
+      />
+
     </BrpStack.Navigator>
   );
 
@@ -174,8 +209,10 @@ export default function App() {
   );
 
   const StackMore = () => (
-    <MoreStack.Navigator>
+    <MoreStack.Navigator >
       <MoreStack.Screen
+        name="MoreStack"
+        component={RenderMore}
         options={{
           headerTitle: "More",
           headerStyle: {
@@ -186,10 +223,10 @@ export default function App() {
           },
           animation:'slide_from_right',
         }}
-        name="MoreStack"
-        component={RenderMore}
       />
       <MoreStack.Screen
+        name="Settings"
+        component={RenderSettings}
         options={{
           headerTitle: "Settings",
           headerStyle: {
@@ -201,11 +238,13 @@ export default function App() {
           headerTintColor: globalStyle?.color,
           animation:'slide_from_right',
         }}
-        name="Settings"
-        component={RenderSettings}
+        
       />
     </MoreStack.Navigator>
   );
+
+ // ===============================  DB FOR SETTINGS ==============================================
+
 
   const setupSettingsDatabase = () => {
     // Check if the table exists
@@ -369,6 +408,8 @@ export default function App() {
     console.log(notification);
   };
 
+ // ===============================  USE EFFECTS ==============================================
+
 
   // for push notifications
   useEffect(() => {
@@ -398,25 +439,6 @@ export default function App() {
   return (
     <>
       <StatusBar style="light" backgroundColor={"#1a1a1a"} />
-      {/* <NavigationContainer>
-        <Stack.Navigator>
-
-          <Stack.Screen 
-            name="Home" 
-            component={RenderHome} 
-            options={ ()=> ({
-                headerTitle: '',
-                headerShown: false,
-                animationTypeForReplace: 'push',
-                animation:'slide_from_right',
-              }
-            )}
-          />
-
-        
-
-        </Stack.Navigator>
-      </NavigationContainer>      */}
       <NavigationContainer>
         <Tab.Navigator
           initialRouteName="Home"
@@ -532,36 +554,3 @@ export default function App() {
   );
 }
 
-// async function registerForPushNotificationsAsync() {
-//   let token;
-
-//   if (Platform.OS === 'android') {
-//     await Notifications.setNotificationChannelAsync('default', {
-//       name: 'default',
-//       importance: Notifications.AndroidImportance.MAX,
-//       vibrationPattern: [0, 250, 250, 250],
-//       lightColor: '#FF231F7C',
-//     });
-//   }
-
-//   if (Device.isDevice) {
-//     const { status: existingStatus } = await Notifications.getPermissionsAsync();
-//     let finalStatus = existingStatus;
-//     if (existingStatus !== 'granted') {
-//       const { status } = await Notifications.requestPermissionsAsync();
-//       finalStatus = status;
-//     }
-//     if (finalStatus !== 'granted') {
-//       alert('Failed to get push token for push notification!');
-//       return;
-//     }
-//     // Learn more about projectId:
-//     // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
-//     token = (await Notifications.getExpoPushTokenAsync({ projectId: 'your-project-id' })).data;
-//     console.log(token);
-//   } else {
-//     alert('Must use physical device for Push Notifications');
-//   }
-
-//   return token;
-// }

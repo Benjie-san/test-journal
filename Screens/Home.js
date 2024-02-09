@@ -18,7 +18,7 @@ import TopBar from '../components/TopBar';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Entypo } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-
+import { FontAwesome5 } from '@expo/vector-icons';
 
 const AddModal = ({visible, type, handleModal, globalStyle}) => {
   const handlePress = (item) =>{
@@ -97,30 +97,21 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   const [notesOPM, setNotesOPM] = useState([]);// showing all the data
 
   const [notesId, setNotesId] = useState([]);
-  //states for modal
-  const [addEntryVisible, setAddEntryVisible] = useState(false)
-  const [displayEntryVisible, setDisplayEntryVisible] = useState(false)
-  const [searchVisible, setSearchVisible] = useState(false)
-  const [moreVisible, setMoreVisible] = useState(false)
 
   const isFocused = useIsFocused();
 
   //states for passing props in the modals
-  const [type, setType] = useState("");
-  const [currentEntry, setCurrentEntry] = useState([]);
+
   const [scripture, setScripture] = useState("");
-  const [item, setItem] = useState("");
-  const [index, setIndex] = useState(0)
+
 
   //states for sorting
   const [allCount, setAllCount] = useState(0);
   const [journalCount, setJournalCount] = useState(0);
   const [opmCount, setOpmCount] = useState(0);
   const [sermonCount, setSermonCount] = useState(0);
-  const sortButtons = ["All", "Journal", "OPM"];
   const sortButtonCount = [allCount, journalCount, sermonCount, opmCount];
-  const [currentSortBtn, setCurrentSortBtn] = useState("");
-  const [isSelected, setIsSelected] = useState(false);
+
 
   //for dates
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -145,55 +136,38 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     navigation.navigate("BRP");
   }
 
+  const openAddEntry = (type, scripture) => {
+    navigation.navigate("AddEntry", {
+      verse: scripture,
+      type: type,
+      index: months.indexOf(todayVerse?.month),
+      itemId: todayVerse?.id,
+
+    });
+  }
+  const openDisplayEntry = (item) => {
+    navigation.navigate("DisplayEntry", {
+      entry: item,
+    });
+  }
+
   //HANDLE FUNCTIONS
 
-  //handles opening adding entry modal
-  const handleAddEntryModal =  (item) =>{
-    setAddEntryVisible(item);
-  }
-  //handles opening display entry modal
-  const handleDisplayEntryModal =  (item) =>{
-    setDisplayEntryVisible(item);
-  }
-
-  // when search modal button is shown
-  const handleSearchModal = (item) =>{
-    setSearchVisible(item);
-  }
-
-  const handleMoreModal = (item) =>{
-    setMoreVisible(item);
-  }
-
-  const handleType = (item) => {
-      setType(item)
-  }
-
-  const handleItem = (item) =>{
-    setItem(item)
-  }
-
-  const handleCurrentEntry = (item) =>{
-      setCurrentEntry(item);
-  }
 
   // when add write button is clicked
   const handleAddButton = (item) => {
     if(item == "today"){
       setScripture(todayVerse.verse);
       if(todayVerse.verse == "Sermon Notes"){
-        setType("sermon");
+        openAddEntry("sermon", "");
       }else{
-        setType("journal")
+        openAddEntry("journal", scripture);
       }
-      handleAddEntryModal(true);
 
-    } else {
+    } 
+    else {
       if(item == "opm"){
-        setType("opm");
-        setScripture("");
-
-        handleAddEntryModal(true);
+        openAddEntry("opm", "");
       }else{
         openBrp()
       }
@@ -209,49 +183,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   // DB and FETCH FUNCTION
 
   const handleDisplayEntryFetch = (item) =>{
-    if(item.type == "opm"){
-      db.transaction((tx) => {
-        tx.executeSql(
-          "SELECT * FROM entries WHERE id = ? ;",
-          [item.id],
-          (_, result) => {
-              const rows = result.rows;
-              const dataArray = [];
-              for (let i = 0; i < rows.length; i++) {
-                const item = rows.item(i);
-                dataArray.push(item);
-              }
-              setCurrentEntry(...dataArray);
-          },
-          (_, error) => {
-              alert("No Entry yet")
-              console.error('Error querying data:', error);
-          }
-        );
-      });
-    }else{
-      db.transaction((tx) => {
-        tx.executeSql(
-          "SELECT * FROM entries WHERE dataId = ? ;",
-          [item.dataId],
-          (_, result) => {
-              const rows = result.rows;
-              const dataArray = [];
-              for (let i = 0; i < rows.length; i++) {
-                const item = rows.item(i);
-                dataArray.push(item);
-              }
-              setCurrentEntry(...dataArray);
-          },
-          (_, error) => {
-              alert("No Entry yet")
-              console.error('Error querying data:', error);
-          }
-        );
-      });
-    }
-
-    handleDisplayEntryModal(true);
+    openDisplayEntry(item);
   }
 
   const getJournalCount = (type = "journal") => {
@@ -365,10 +297,8 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
           }
           setNotes(dataArray);
           setNotesId(dataArray2);
-          setCurrentSortBtn("All");
-          setIsSelected(true);
           setNoteListLoading(false);
-          setType("");
+
         },
         (_, error) => {
           console.error('Error querying data:', error);
@@ -514,6 +444,42 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     }
   }, [isFocused]);
 
+
+  
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          style={{
+            gap: 10,
+            alignItems: "center",
+            flexDirection: "row",
+            backgroundColor: globalStyle?.bgBody,
+            borderRadius: 20,
+            paddingLeft: 10,
+            paddingRight: 10,
+            padding: 5,
+          }}
+        >
+          <FontAwesome5
+            name="fire"
+            size={20}
+            color={globalStyle?.borderColor}
+          />
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: "bold",
+              color: globalStyle?.borderColor,
+            }}
+          >
+            0
+          </Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
+
   return (
   <>
     {/*MAIN VIEW*/}
@@ -521,28 +487,28 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
       {/*Todays passage*/}
       <View style={[styles.passageToday, {backgroundColor:globalStyle?.bgHeader,  borderTopColor: globalStyle.borderColor, borderTopWidth: 1}]}>
 
-          { verseLoading ? <ActivityIndicator style={{width: '40%'}} /> : (
-            <View style={[{flexDirection: 'column'}]}>
-              <Text style={{fontSize: 20, fontWeight: 'bold', color: globalStyle?.color,}}>Today's Passage</Text>
-              <Text style={{fontSize: 19, color:  globalStyle?.color}}>{todayVerse.verse}</Text>
-              <Text style={{fontSize: 18 , color: globalStyle?.color}}>{today.month + " " + today.day}</Text>
-            </View>
+        { verseLoading ? <ActivityIndicator style={{width: '40%'}} /> : (
+          <View style={[{flexDirection: 'column'}]}>
+            <Text style={{fontSize: 20, fontWeight: 'bold', color: globalStyle?.color,}}>Today's Passage</Text>
+            <Text style={{fontSize: 19, color:  globalStyle?.color}}>{todayVerse.verse}</Text>
+            <Text style={{fontSize: 18 , color: globalStyle?.color}}>{today.month + " " + today.day}</Text>
+          </View>
 
-          ) }
+        ) }
 
-          { notesId.includes(todayVerse?.id) ?
-            (<Pressable disabled style={[styles.addEntryShortcut,]}>
-                <AntDesign name="check" size={20} color="white" />
-                <Text style={{fontSize: 18, color: "#fff",  paddingRight: 5}}>Entry Added</Text>
-            </Pressable>)
-            :
-            (  <TouchableOpacity onPress={ ()=>handleAddButton("today")}
-          style={[styles.addEntryShortcut, { paddingRight: 10}]}>
-              <AntDesign name="plus" size={20} color="white" />
-              <Text style={{fontSize: 18, color: "#fff", paddingRight: 5}}>Add Entry</Text>
+        { notesId.includes(todayVerse?.id) ?
+          (<Pressable disabled style={[styles.addEntryShortcut,]}>
+              <AntDesign name="check" size={20} color="white" />
+              <Text style={{fontSize: 18, color: "#fff",  paddingRight: 5}}>Entry Added</Text>
+          </Pressable>)
+          :
+          (  <TouchableOpacity onPress={ ()=>handleAddButton("today")}
+        style={[styles.addEntryShortcut, { paddingRight: 10}]}>
+            <AntDesign name="plus" size={20} color="white" />
+            <Text style={{fontSize: 18, color: "#fff", paddingRight: 5}}>Add Entry</Text>
 
-            </TouchableOpacity>)
-          }
+          </TouchableOpacity>)
+        }
 
       </View>
     </View>
@@ -552,12 +518,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     <Navbar onPressAddEntry={handleVisibleAddModal} />
 
     {/*MODALSS*/}
-
-    {/*ADD ITEM MODAL*/}
-    <AddEntry visible={addEntryVisible} handleModal={handleAddEntryModal} verse={scripture} type={type} status="#fff" handleType={handleType} index={months.indexOf(todayVerse?.month)} itemId={todayVerse?.id} globalStyle={globalStyle} fetchAllData={fetchAllData} route={route}/>
-
-    {/*For displaying the component*/}
-    <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType}  globalStyle={globalStyle}  fetchAllData={fetchAllData} route={route} />
 
     {/*modal for displaying add entry*/}
     <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal}  globalStyle={globalStyle}/>

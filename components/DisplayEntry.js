@@ -11,16 +11,17 @@ import { Entypo } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AlertModal from './AlertModal';
 import styles from '../styles/entryStyle';
+import { useIsFocused } from '@react-navigation/native';
 
-const BackConfirmationModal = ({visible, handleModal, handleMainModal, globalStyle, updateEntry, }) => {
+
+
+const BackConfirmationModal = ({visible, handleModal, globalStyle, updateEntry, }) => {
 
    const handleSave = () =>{
       handleModal(false);
-      handleMainModal(false);
    }
    const handleClose = () =>{
       handleModal(false);
-      handleMainModal(false);
    }
    return (
    <>
@@ -93,12 +94,11 @@ const BackConfirmationModal = ({visible, handleModal, handleMainModal, globalSty
    );
 }
 
-const DeleteConfirmationModal = ({visible, deleteEntry, handleModal,handleMainModal, globalStyle}) => {
+const DeleteConfirmationModal = ({visible, deleteEntry, handleModal, globalStyle}) => {
 
    const handleDelete = () =>{
       deleteEntry();
       handleModal();
-      handleMainModal();
    }
    return (
       <>
@@ -147,7 +147,7 @@ const DeleteConfirmationModal = ({visible, deleteEntry, handleModal,handleMainMo
    );
 }
 
-const MenuModal = ({visible, handleCloseModal, deleteEntry, status, entry, type, handleStatus, handleMainModal, globalStyle, updateEntry}) => {
+const MenuModal = ({visible, handleCloseModal, deleteEntry, status, entry, type, handleStatus, globalStyle, updateEntry}) => {
    const [deleteModal, setDeleteModal] = useState(false);
 
    const handleDeleteModal = () => {
@@ -256,13 +256,16 @@ const MenuModal = ({visible, handleCloseModal, deleteEntry, status, entry, type,
          </View>
          </Modal>
 
-         <DeleteConfirmationModal visible={deleteModal} deleteEntry={deleteEntry} handleModal={handleDeleteModal} handleMainModal={handleMainModal}  globalStyle={globalStyle} />
+         <DeleteConfirmationModal visible={deleteModal} deleteEntry={deleteEntry} handleModal={handleDeleteModal}  globalStyle={globalStyle} />
       </>
    );
 }
 
-export default function DisplayEntry({visible, handleModal, currentEntry, globalStyle, route, fetchAllData }){
-//for showing modals
+export default function DisplayEntry({navigation, route, globalStyle }){
+
+   const {entry} = route.params;
+   const isFocused = useIsFocused();
+   //for showing modals
    const [dateModalVisible, setDateModalVisible] = useState(false);
    const [menuVisible, setMenuVisible] = useState(false);
 
@@ -282,6 +285,8 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
    const [month, setMonth] = useState("");
    const [day, setDay] = useState("");
    const [passage, setPassage] = useState(""); 
+
+   const [currentEntry, setCurrentEntry] = useState(entry);
 
    //for system buttons
    const appState = useRef(AppState.currentState);
@@ -307,12 +312,6 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
    
       if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
          setBackConfirmVisible(item);
-      }else{
-         handleModal(false);
-
-      }
-      if(route.name == "Home" ){
-         fetchAllData();
       }
    
    }
@@ -448,7 +447,8 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
 
    //updating the entry
    const updateEntry = () => {
-
+      
+   console.log(type);
       if(type=='opm'){
          db.transaction((tx) => {
             tx.executeSql(
@@ -463,6 +463,7 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
             );
          });
       }else{
+         console.log(application);
          db.transaction((tx) => {
             tx.executeSql(
             'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ? WHERE dataId = ?;',
@@ -479,12 +480,15 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
    }
 
    const handleUpdateEntry = () => {
+      
       updateEntry();
-      handleAlertModalVisible(true)
+      
+      handleAlertModalVisible(true);
    }
 
    // gets the item from present data
-   const getItems = (currentEntry) => {
+
+   const setItems = () =>{
       setId(currentEntry?.id);
       setDataId(currentEntry?.dataId);
       setDate(currentEntry?.date);
@@ -500,13 +504,13 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
       setDay(currentEntry?.day);
    }
 
-   useEffect(() => {
-      getItems(currentEntry);
-   }, [currentEntry])
+   useEffect(() => { 
+      setItems();
+   }, [currentEntry,]);
 
    useEffect(() => {
       if(alertModalVisible == true){
-   
+         console.log("work??")
          const interval = setTimeout(() => {
             // After 3 seconds set the show value to false
             handleAlertModalVisible(false);
@@ -536,7 +540,7 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
       nextAppState === 'active') {
          return;
       }else{
-         if(visible === true){
+         if(isFocused === true){
             updateEntry();
             currentEntry.date = date;
             currentEntry.scripture = scripture;
@@ -556,47 +560,39 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
       return () => {
       subscription.remove();
       };
-   }, [visible, date, title, question, scripture, observation, application, prayer, status, currentEntry]);
+   }, [isFocused, date, title, question, scripture, observation, application, prayer, status, currentEntry]);
+
+   //HEADER
+   useEffect(() => {
+      navigation.setOptions({
+         headerStyle: {backgroundColor: globalStyle?.bgHeader},
+         headerTitle: () => (
+            <Text style={{fontSize: 20, color:globalStyle?.color}}>{entry.type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
+         ),
+         headerRight: () => (
+
+            <View style={{flexDirection: 'row', alignItems: "center", gap:10}}>
+               <TouchableOpacity onPress={ () => handleUpdateEntry()}>
+                  {/* <MaterialCommunityIcons name="content-save-edit-outline" size={30} color={globalStyle?.color}/> */}
+                  <Text style={{color: globalStyle?.settingsColor}} > SAVE </Text>
+               </TouchableOpacity>
+
+               <TouchableOpacity onPress={() => handleMenuVisible()}>
+                  <Feather name="more-vertical" size={25} color={globalStyle?.color} />
+               </TouchableOpacity>
+            </View>
+
+         ),
+         
+      });
+   }, [navigation, entry.type, handleUpdateEntry]);
+
 
    return (
       <>
 
-         <Modal 
-            coverScreen={true} 
-            isVisible={visible}
-            onBackButtonPress={ ()=> handleBackConfirmModal(true) }
-            animationIn="slideInRight"
-            animationOut="slideOutRight"
-            style={{flex:1, margin: 0}}
-            hasBackdrop={false}
-            avoidKeyboard={false}
-            propagateSwipe
-         >
-            {/*HEADER*/}
-            <View style={[styles.header, {backgroundColor: globalStyle?.bgHeader, borderBottomColor: globalStyle?.borderColor,}]}> 
-
-               {/*CLOSE BUTTON*/}
-               {/* <TouchableOpacity onPress={()=> handleBackButton()}>
-                  <AntDesign name="close" size={30} color={globalStyle?.color} />
-               </TouchableOpacity> */}
-               
-               {/*HEADER TITLE*/}
-               <Text style={{fontSize: 20, color: globalStyle?.color}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
-
-               <View style={{flexDirection: 'row', alignItems: "center", gap:10}}>
-                  <TouchableOpacity onPress={ () => handleUpdateEntry()}>
-                     {/* <MaterialCommunityIcons name="content-save-edit-outline" size={30} color={globalStyle?.color}/> */}
-                     <Text style={{color: globalStyle?.settingsColor}} > SAVE </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity onPress={() => handleMenuVisible()}>
-                     <Feather name="more-vertical" size={25} color={globalStyle?.color} />
-                  </TouchableOpacity>
-               </View>
-
-            </View>
-
-
+         <View style={{flex:1, margin: 0}} >
+         
             {/*FORMS*/}
             <View style={[styles.modal, {backgroundColor: globalStyle?.bgBody,}]}>
 
@@ -690,11 +686,11 @@ export default function DisplayEntry({visible, handleModal, currentEntry, global
             <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} globalStyle={globalStyle} scripture={scripture} type={type} handlePassage={handlePassage} />
          
 
-         </Modal>
+         </View>
 
-         <BackConfirmationModal message={message} visible={backConfirmVisible} handleModal={handleBackConfirmModal} handleMainModal={handleModal} updateEntry={updateEntry} globalStyle={globalStyle}  />
+         <BackConfirmationModal message={message} visible={backConfirmVisible} handleModal={handleBackConfirmModal}  updateEntry={updateEntry} globalStyle={globalStyle}  />
       
-         <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={type} handleMainModal={handleModal} globalStyle={globalStyle} updateEntry={updateEntry} />
+         <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={type}  globalStyle={globalStyle} updateEntry={updateEntry} />
          
       </>
    )

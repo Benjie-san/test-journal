@@ -9,17 +9,17 @@ import * as SQLite from 'expo-sqlite';
 import styles from '../styles/entryStyle';
 import PassageBottomSheet from './PassageBottomSheet';
 import AlertModal from './AlertModal';
+import { useIsFocused } from '@react-navigation/native';
 
 
 const db = SQLite.openDatabase('_journal_database.db');
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-const BackConfirmationModal = ({visible, handleModal, handleMainModal, globalStyle, saveEntry, }) => {
+const BackConfirmationModal = ({visible, handleModal, globalStyle, saveEntry, }) => {
 
    const handleSave = () =>{
       saveEntry();
       handleModal(false);
-      handleMainModal(false);
    }
    return (
    <>
@@ -92,7 +92,7 @@ const BackConfirmationModal = ({visible, handleModal, handleMainModal, globalSty
    );
 }
 
-export default function AddEntry({visible, handleModal, verse, type, status, itemId, index, globalStyle, fetchAllData, route}) {
+export default function AddEntry({ navigation, route, globalStyle,}) {
 
    const [entryDate, setEntryDate] = useState(new Date());
    const [date, setDate] = useState(new Date().toDateString());
@@ -110,8 +110,15 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
    const [message, setMessage] = useState("");
    const appState = useRef(AppState.currentState);
    const [appCurrentState, setAppCurrentState] = useState(appState.current);
+   const isFocused = useIsFocused();
 
-   const [passage, setPassage] = useState(""); 
+   const [passage, setPassage] = useState("");
+
+   const { verse, type, index, itemId } = route.params;
+
+   const openBrp = () => {
+      navigation.navigate("BRP");
+   }
 
    const handlePassage = (item) => {
       setPassage(item);
@@ -123,7 +130,7 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
       setBackConfirmVisible(item);
       if(item == false){
          cleanStates();
-   
+
       }
    }
 
@@ -146,7 +153,7 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
    }
 
    const onChangeDate = ({type}, selectedDate) =>{
-      if(type == "set"){   
+      if(type == "set"){
          setDateModalVisible(false);
          const currentDate = selectedDate;
          setEntryDate(currentDate);
@@ -169,7 +176,7 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
          case 'observation': setObservation(text) ;break;
          case 'application': setApplication(text) ;break;
          case 'prayer': setPrayer(text) ;break;
-         
+
       }
    }
 
@@ -198,7 +205,7 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
             db.transaction((tx) => {
                tx.executeSql(
                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-               [date, title, question, scripture, observation, application, prayer, status, type, Date.now(), itemId, months[index]],
+               [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), itemId, months[index]],
                (tx, results) => {
                   console.log("Success!!!");
                },
@@ -212,12 +219,9 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
             db.transaction((tx) => {
                tx.executeSql(
                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-               [date, title, question, scripture, observation, application, prayer, status, type, Date.now(), null, months[index]],
+               [date, title, question, scripture, observation, application, prayer,  '#8CFF31', type, Date.now(), null, months[index]],
                (tx, results) => {
                   console.log("Success!!!");
-                  if(type == "opm"){
-                     fetchAllData();
-                  }
                },
                (error) => {
                   // Handle error
@@ -236,15 +240,34 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
    }, [verse, scripture]);
 
    useEffect(() => {
+      navigation.setOptions({
+         headerStyle: {backgroundColor: globalStyle?.bgHeader},
+         headerTitle: () => (
+      
+            <Text style={{fontSize: 20, color:globalStyle?.color}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
+         ),
+         headerRight: () => (
+            <TouchableOpacity onPress={ ()=>handleSave() }>
+               {/* <MaterialCommunityIcons name="content-save-check-outline" size={30} color={globalStyle?.color} /> */}
+               <Text style={{color: globalStyle?.settingsColor}} > SAVE </Text>
+            </TouchableOpacity>
+
+         ),
+         
+      });
+   }, [navigation, type, handleSave]);
+
+
+   useEffect(() => {
       if(alertModalVisible == true){
 
          const interval = setTimeout(() => {
             // After 3 seconds set the show value to false
             handleAlertModalVisible(false);
-            handleModal(false);
+            openBrp();
             cleanStates();
          }, 1000)
-   
+
 
          return () => {
          clearTimeout(interval)
@@ -253,63 +276,42 @@ export default function AddEntry({visible, handleModal, verse, type, status, ite
 
    }, [alertModalVisible])
 
-useEffect(() => {
-   const subscription = AppState.addEventListener('change', nextAppState => {
+   useEffect(() => {
+      const subscription = AppState.addEventListener('change', nextAppState => {
 
-   if (appState.current.match(/inactive|background/) &&
-   nextAppState === 'active') {
-      return;
-   }else{
-      if(visible === true){
-         handleSave();
+      if (appState.current.match(/inactive|background/) &&
+      nextAppState === 'active') {
+         return;
+      }else{
+         if( isFocused === true){
+            handleSave();
+         }
       }
-   }
 
-   appState.current = nextAppState;
-   setAppCurrentState(appState.current);
-   });
+      appState.current = nextAppState;
+      setAppCurrentState(appState.current);
+      });
 
-   return () => {
-   subscription.remove();
-   };
-}, [visible, date, title, question, scripture, observation, application, prayer, status]);
+      return () => {
+      subscription.remove();
+      };
+   }, [isFocused, date, title, question, scripture, observation, application, prayer,]);
 
 
    return (
-         <Modal 
-            coverScreen={true} 
-            isVisible={visible}
-            onBackButtonPress={ ()=> handleBackConfirmModal(true) }
-            animationIn="slideInRight"
-            animationOut="slideOutRight"
-            transparent={true}
-            style={{flex:1, margin: 0, height: '100%'}}
-            hasBackdrop={false}
-            avoidKeyboard={false}
-            propagateSwipe
-         >
-            {/*HEADER*/}
-            <View style={[styles.header, {backgroundColor: globalStyle?.bgHeader, borderBottomColor: globalStyle?.borderColor ,}]}> 
 
-               <Text style={{fontSize: 20, color:globalStyle?.color}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
-
-               <TouchableOpacity onPress={ ()=>handleSave() }>
-                  {/* <MaterialCommunityIcons name="content-save-check-outline" size={30} color={globalStyle?.color} /> */}
-                  <Text style={{color: globalStyle?.settingsColor}} > SAVE </Text>
-               </TouchableOpacity>
-
-            </View>
+         <View style={[styles.flex, {margin: 0, padding: 0, backgroundColor: globalStyle?.bgBody, }]}>
 
             {/*FORMS*/}
             <View style={[styles.modal, {backgroundColor: globalStyle?.bgBody, }]}>
-         
-            
+
+
             <ScrollView style={{flex:1}}>
-         
-               <View style={[styles.flex]}> 
-            
+
+               <View style={[styles.flex]}>
+
                   <View style={styles.touchableContainer}>
-                  
+
                      <View style={styles.inputSubContainer}>
                         <Text style={{color:globalStyle?.color, fontSize: globalStyle?.fontSize}}>Date:</Text>
                         <Pressable style={styles.touchable} onPress={handleDateModal}>
@@ -326,21 +328,21 @@ useEffect(() => {
                      {
                         dateModalVisible &&
                         (
-                           <DateTimePicker 
-                           mode="date" 
-                           display="spinner" 
+                           <DateTimePicker
+                           mode="date"
+                           display="spinner"
                            value={entryDate}
                            onChange={onChangeDate}
                            />
-                  
-                        ) 
+
+                        )
                      }
 
                      <View style={styles.inputSubContainer}>
                         <Text  style={{color:globalStyle?.color , fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Text:": type == "opm" ? 'OPM Passage:' : 'Scripture:'}</Text>
 
                            <TextInput style={[styles.touchable, {fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
-               
+
                      </View>
 
                   </View>
@@ -374,28 +376,27 @@ useEffect(() => {
                      <TextInput style={[styles.input, {fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
 
                      <View style={[styles.flex,{paddingTop: 20,}]}>
-                        <TouchableOpacity 
-                           style={[styles.border, {  backgroundColor: globalStyle?.bgHeader, borderColor: globalStyle?.borderColor ,alignItems: 'center', justifyContent: 'space-evenly', flexDirection: 'column', padding: 10, gap: 5, width: 200 }]} 
+                        <TouchableOpacity
+                           style={[styles.border, {  backgroundColor: globalStyle?.bgHeader, borderColor: globalStyle?.borderColor ,alignItems: 'center', justifyContent: 'space-evenly', flexDirection: 'column', padding: 10, gap: 5, width: 200 }]}
                            onPress={ () => handlePassageVisible(true) }
                         >
                            <Entypo name="chevron-thin-up" size={24} color={globalStyle?.color} />
                         </TouchableOpacity>
                      </View>
-   
+
                   </KeyboardAvoidingView>
 
                </View>
-               
+
             </ScrollView>
 
             </View>
 
-            <BackConfirmationModal message={message} visible={backConfirmVisible} handleModal={handleBackConfirmModal} handleMainModal={handleModal} saveEntry={saveEntry} globalStyle={globalStyle}  />
+            <BackConfirmationModal message={message} visible={backConfirmVisible} handleModal={handleBackConfirmModal} saveEntry={saveEntry} globalStyle={globalStyle}  />
 
             <AlertModal message={message} visible={alertModalVisible} globalStyle={globalStyle} />
 
             <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} globalStyle={globalStyle} scripture={scripture} type={type} handlePassage={handlePassage}/>
-         
-         </Modal>
+         </View>
    )
 }
