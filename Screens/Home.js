@@ -486,7 +486,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
 
     // Clear the interval when the component is unmounted
     return () => clearInterval(intervalId);
-  }, []);
+  }, [streakCount]);
 
 
   useEffect(() => {
