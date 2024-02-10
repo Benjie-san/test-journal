@@ -20,6 +20,9 @@ import { Entypo } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 
+const dbSettings = SQLite.openDatabase("settings4.db");
+const db = SQLite.openDatabase('_journal_database.db');
+
 const AddModal = ({visible, type, handleModal, globalStyle}) => {
   const handlePress = (item) =>{
     type(item);
@@ -90,7 +93,6 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
 export default function Home({navigation, route, darkMode, handleDarkMode, globalStyle}) {
 
   // import for data
-  const [db, setDb] = useState( SQLite.openDatabase('_journal_database.db') );
 
   const [notes, setNotes] = useState([]);// showing all the data
   const [notesJournal, setNotesJournal] = useState([]);// showing all the data
@@ -129,6 +131,48 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   //states for loading indicators
   const [noteListLoading, setNoteListLoading] = useState(true);
   const [verseLoading, setVerseLoading] = useState(true);
+
+  //FUNCTIONS FOR DAILY STREAK
+  const [streakCount, setStreakCount] = useState(0); 
+
+  const fetchStreakCount = () =>{
+    dbSettings.transaction((tx) => {
+      tx.executeSql(
+      'SELECT dailyStreak FROM settings WHERE id = ?',
+      [1],
+      (_, result) => {
+          const rows = result.rows;
+          const dataArray = [];
+          for (let i = 0; i < rows.length; i++) {
+            const item = rows.item(i);
+            dataArray.push(item);
+          
+          }
+          //console.log(dataArray)
+          setStreakCount(dataArray[0].dailyStreak);
+          console.log("Daily Streak Fetched");
+        },
+        (_, error) => {
+          console.error('Error querying data:', error);
+        }
+      );
+    });
+  };
+
+  const updateStreakCount = () =>{
+    dbSettings.transaction((tx) => {
+      tx.executeSql(
+        'UPDATE settings SET streakCount = ? WHERE id = ?;',
+        [streakCount, 1],
+        (_, result) => {
+          console.log('Data SETTINGS updated successfully');
+        },
+        (_, error) => {
+          console.error('Error updating SETTINGS data:', error);
+        }
+        );
+    });
+  }
 
   // NAVIGATION FUNCTIONS
 
@@ -346,7 +390,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   //creating the table
   const setupEntriesDatabase = () => {
     // Check if the table exists
-
     setNoteListLoading(true);
     db.transaction((tx) => {
       tx.executeSql(
@@ -364,6 +407,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
                 (_, result) => {
                   console.log('Table entries: created successfully');
                   fetchTodayVerse();
+                  fetchStreakCount();
                 },
                 (_, error) => {
                   console.error('Error creating table entries:', error);
@@ -425,7 +469,25 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   };
 
   // USE EFFECTS
-  // for creating the db
+  
+  //for checking if the entry today is created
+  useEffect(() => {
+
+    // Set up an interval to schedule notifications every day
+    const intervalId = setInterval(() => {
+      if(notesId.includes(todayVerse?.id)){
+        setStreakCount(streakCount++);
+        updateStreakCount();
+      }else{
+        setStreakCount(0);
+        updateStreakCount();
+      }
+    }, 24 * 60 * 60 * 1000); // Schedule notifications every 24 hours
+
+    // Clear the interval when the component is unmounted
+    return () => clearInterval(intervalId);
+  }, []);
+
 
   useEffect(() => {
     //openBrpDatabase()
@@ -444,8 +506,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     }
   }, [isFocused]);
 
-
-  
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -461,19 +521,11 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
             padding: 5,
           }}
         >
-          <FontAwesome5
-            name="fire"
-            size={20}
-            color={globalStyle?.borderColor}
+          <FontAwesome5 name="fire" size={20} color={globalStyle?.borderColor}
           />
           <Text
-            style={{
-              fontSize: 20,
-              fontWeight: "bold",
-              color: globalStyle?.borderColor,
-            }}
-          >
-            0
+            style={{ fontSize: 20,fontWeight: "bold", color: globalStyle?.borderColor,}}
+          >{streakCount}
           </Text>
         </TouchableOpacity>
       ),

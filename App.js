@@ -243,7 +243,7 @@ export default function App() {
     </MoreStack.Navigator>
   );
 
- // ===============================  DB FOR SETTINGS ==============================================
+ // =================== DB FOR SETTINGS ==============================================
 
 
   const setupSettingsDatabase = () => {
@@ -259,7 +259,7 @@ export default function App() {
             // Table doesn't exist, create it
             dbSettings.transaction((tx) => {
               tx.executeSql(
-                'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY AUTOINCREMENT, currentTheme TEXT, fontSize TEXT, defaultSort TEXT, notifTime TEXT);',
+                'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY AUTOINCREMENT, currentTheme TEXT, fontSize TEXT, defaultSort TEXT, notifTime TEXT, dailyStreak NUMBER,);',
                 [],
                 (_, result) => { 
                   console.log('Table Settings: created successfully'); 
@@ -309,8 +309,8 @@ export default function App() {
     console.log("insert called")
     dbSettings.transaction((tx) => {
       tx.executeSql(
-      'INSERT INTO settings (currentTheme, fontSize, defaultSort, notifTime) VALUES (?, ?, ?, ?);',
-      ["light", "16", "modifiedDate", "6"],
+      'INSERT INTO settings (currentTheme, fontSize, defaultSort, notifTime, dailyStreak) VALUES (?, ?, ?, ?, ?);',
+      ["light", "16", "modifiedDate", "6", 0],
       (tx, results) => {
         handleGlobalStyle("light");
         console.log("Success default Settings are SET!!!");
@@ -324,11 +324,10 @@ export default function App() {
   }
 
   const updateSettingsDb = (theme) =>{
-    console.log(theme);
     dbSettings.transaction((tx) => {
       tx.executeSql(
-        'UPDATE settings SET currentTheme = ?, fontSize = ?, defaultSort = ?, notifTime = ? WHERE id = ?;',
-        [theme, "16", "modifiedDate", "7", 1],
+        'UPDATE settings SET currentTheme = ? WHERE id = ?;',
+        [theme, 1],
         (_, result) => {
           console.log('Data SETTINGS updated successfully');
           handleGlobalStyle(theme);
