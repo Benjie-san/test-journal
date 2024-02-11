@@ -20,7 +20,7 @@ import { Entypo } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 
-const dbSettings = SQLite.openDatabase("settings4.db");
+const dbSettings = SQLite.openDatabase("settings.db");
 const db = SQLite.openDatabase('_journal_database.db');
 
 const AddModal = ({visible, type, handleModal, globalStyle}) => {
@@ -148,7 +148,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
             dataArray.push(item);
           
           }
-          //console.log(dataArray)
           setStreakCount(dataArray[0].dailyStreak);
           console.log("Daily Streak Fetched");
         },
@@ -162,10 +161,10 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   const updateStreakCount = () =>{
     dbSettings.transaction((tx) => {
       tx.executeSql(
-        'UPDATE settings SET streakCount = ? WHERE id = ?;',
+        'UPDATE settings SET dailyStreak = ? WHERE id = ?;',
         [streakCount, 1],
         (_, result) => {
-          console.log('Data SETTINGS updated successfully');
+          console.log('Data SETTINGS:dailyStreak updated successfully');
         },
         (_, error) => {
           console.error('Error updating SETTINGS data:', error);
@@ -222,7 +221,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   const handleVisibleAddModal = () => {
     setVisibleAddModal(!visibleAddModal);
   }
-
 
   // DB and FETCH FUNCTION
 
@@ -407,7 +405,6 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
                 (_, result) => {
                   console.log('Table entries: created successfully');
                   fetchTodayVerse();
-                  fetchStreakCount();
                 },
                 (_, error) => {
                   console.error('Error creating table entries:', error);
@@ -472,20 +469,13 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   
   //for checking if the entry today is created
   useEffect(() => {
+    if(notesId.includes(todayVerse?.id)){
+      setStreakCount(streakCount+1);
+      updateStreakCount();
+      console.log(streakCount);
+    }
+    fetchStreakCount();
 
-    // Set up an interval to schedule notifications every day
-    const intervalId = setInterval(() => {
-      if(notesId.includes(todayVerse?.id)){
-        setStreakCount(streakCount++);
-        updateStreakCount();
-      }else{
-        setStreakCount(0);
-        updateStreakCount();
-      }
-    }, 24 * 60 * 60 * 1000); // Schedule notifications every 24 hours
-
-    // Clear the interval when the component is unmounted
-    return () => clearInterval(intervalId);
   }, [streakCount]);
 
 
@@ -516,8 +506,8 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
             flexDirection: "row",
             backgroundColor: globalStyle?.bgBody,
             borderRadius: 20,
-            paddingLeft: 10,
-            paddingRight: 10,
+            paddingLeft: 12,
+            paddingRight: 12,
             padding: 5,
           }}
         >

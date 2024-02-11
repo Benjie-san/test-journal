@@ -22,7 +22,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as SQLite from 'expo-sqlite';
 
 //for DB of settings
-const dbSettings = SQLite.openDatabase("settings4.db");
+const dbSettings = SQLite.openDatabase("settings.db");
 
 //init of stack navs
 const Tab = createMaterialBottomTabNavigator();
@@ -259,7 +259,7 @@ export default function App() {
             // Table doesn't exist, create it
             dbSettings.transaction((tx) => {
               tx.executeSql(
-                'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY AUTOINCREMENT, currentTheme TEXT, fontSize TEXT, defaultSort TEXT, notifTime TEXT, dailyStreak NUMBER,);',
+                'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY AUTOINCREMENT, currentTheme TEXT, fontSize TEXT, defaultSort TEXT, notifTime TEXT, dailyStreak NUMBER);',
                 [],
                 (_, result) => { 
                   console.log('Table Settings: created successfully'); 
@@ -344,7 +344,7 @@ export default function App() {
 
   const scheduleNotifications = async () => {
     const morningNotificationTime = setNotificationTime(6, 0);
-    const eveningNotificationTime = setNotificationTime(18, 0);
+    const eveningNotificationTime = setNotificationTime(13, 0);
 
     // Schedule morning notification
     await Notifications.scheduleNotificationAsync({
