@@ -14,6 +14,7 @@ import { Home, Brp, Search, More } from "./Screens/index"; // all of the screens
 import Settings from "./components/Settings";
 import AddEntry from './components/AddEntry';
 import DisplayEntry from "./components/DisplayEntry";
+import Entry from './components/Entry';
 
 //icon imports
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -96,6 +97,9 @@ export default function App() {
     const RenderDisplayEntry = (props) => (
       <DisplayEntry {...props} globalStyle={globalStyle}  />
     )
+    const RenderEntry = (props) => (
+      <Entry {...props} globalStyle={globalStyle}  />
+    );
 
   const RenderBrp = (props) => <Brp {...props} globalStyle={globalStyle} />;
 
@@ -130,8 +134,8 @@ export default function App() {
       />
 
       <HomeStack.Screen   
-        name="AddEntry"
-        component={RenderAddEntry}
+        name="Entry"
+        component={RenderEntry}
         options={{ 
           animation:'slide_from_right',
           headerTintColor: globalStyle?.color,

@@ -174,7 +174,16 @@ export default function Home({navigation, globalStyle}) {
   const openAddEntry = (type, scripture) => {
     navigation.navigate("AddEntry", {
       verse: scripture,
-      type: type,
+      entryType: type,
+      index: months.indexOf(todayVerse?.month),
+      itemId: todayVerse?.id,
+
+    });
+  }
+  const openEntry = (type, scripture) => {
+    navigation.navigate("Entry", {
+      verse: scripture,
+      entryType: type,
       index: months.indexOf(todayVerse?.month),
       itemId: todayVerse?.id,
 
@@ -195,15 +204,15 @@ export default function Home({navigation, globalStyle}) {
     if(item == "today"){
       setScripture(todayVerse.verse);
       if(todayVerse.verse == "Sermon Notes"){
-        openAddEntry("sermon", "");
+        openEntry("sermon", "");
       }else{
-        openAddEntry("journal", scripture);
+        openEntry("journal", scripture);
       }
 
     } 
     else {
       if(item == "opm"){
-        openAddEntry("opm", "");
+        openEntry("opm", "");
       }else{
         openBrp()
       }

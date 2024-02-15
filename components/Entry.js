@@ -261,7 +261,7 @@ return(
 
 export default function Entry({navigation, route, globalStyle }){
 
-const {entry} = route.params;
+const {entry, verse, entryType, index, itemId} = route.params;
 const isFocused = useIsFocused();
 //for showing modals
 const [dateModalVisible, setDateModalVisible] = useState(false);
@@ -278,7 +278,7 @@ const [observation, setObservation] = useState("");
 const [application, setApplication] = useState("");
 const [prayer, setPrayer] = useState("");
 const [question, setQuestion] = useState("");
-const [type, setType] = useState("");
+const [type, setType] = useState(entryType);
 const [status, setStatus] = useState("");
 const [month, setMonth] = useState("");
 const [day, setDay] = useState("");
@@ -448,7 +448,6 @@ const handleDelete = () => {
 //updating the entry
 const updateEntry = () => {
     
-console.log(type);
     if(type=='opm'){
         db.transaction((tx) => {
             tx.executeSql(
@@ -545,7 +544,7 @@ const saveEntry = () => {
 }
 
 useEffect(() => {
-if(type == 'journal'){
+if(entryType == 'journal'){
     setScripture(verse);
 }
 }, [verse, scripture]);
@@ -616,7 +615,7 @@ useEffect(() => {
     navigation.setOptions({
         headerStyle: {backgroundColor: globalStyle?.bgHeader},
         headerTitle: () => (
-            <Text style={{fontSize: 20, color:globalStyle?.color}}>{entry.type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
+            <Text style={{fontSize: 20, color:globalStyle?.color}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
         ),
         headerRight: () => (
 
@@ -626,7 +625,7 @@ useEffect(() => {
                     <Text style={{color: globalStyle?.settingsColor}} > SAVE </Text>
                 </TouchableOpacity>
 
-                {currenState == "update" ? (
+                {currentState == "update" ? (
                     <TouchableOpacity onPress={() => handleMenuVisible()}>
                         <Feather name="more-vertical" size={25} color={globalStyle?.color} />
                     </TouchableOpacity>
@@ -637,7 +636,7 @@ useEffect(() => {
         ),
         
     });
-}, [navigation, entry.type, handleEntry, currentState]);
+}, [navigation, type, handleEntry, currentState]);
 
 
 return (
@@ -687,7 +686,7 @@ return (
                 </View>
 
                 {/*QUESTION*/}
-                { type != "journal" ?
+                { entryType != "journal" ?
                     (
                         <View style={styles.inputContainer}>
                         <Text  style={{color:globalStyle?.color, fontSize: globalStyle?.fontSize}}>Question:</Text>
@@ -735,14 +734,14 @@ return (
 
             <AlertModal message={message} visible={alertModalVisible} globalStyle={globalStyle} />
             
-            <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} globalStyle={globalStyle} scripture={scripture} type={type} handlePassage={handlePassage} />
+            <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} globalStyle={globalStyle} scripture={scripture} type={entryType} handlePassage={handlePassage} />
         
 
         </View>
 
         <BackConfirmationModal message={message} visible={backConfirmVisible} handleModal={handleBackConfirmModal}  updateEntry={updateEntry} globalStyle={globalStyle}  />
     
-        <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={type}  globalStyle={globalStyle} updateEntry={updateEntry} />
+        <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={entryType}  globalStyle={globalStyle} updateEntry={updateEntry} />
         
     </>
 )

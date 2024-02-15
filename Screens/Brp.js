@@ -67,7 +67,7 @@ const ExpandableComponent = ({onRef, item, index, navigation, globalStyle}) =>{
    const openAddEntry = (type, scripture, id, index) => {
       navigation.navigate("AddEntry", {
          verse: scripture,
-         type: type,
+         entryType: type,
          index: index,
          itemId: id,
          status: '#fff',
