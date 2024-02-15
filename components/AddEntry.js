@@ -316,10 +316,10 @@ export default function AddEntry({ navigation, route, globalStyle,}) {
                         <Text style={{color:globalStyle?.color, fontSize: globalStyle?.fontSize}}>Date:</Text>
                         <Pressable style={styles.touchable} onPress={handleDateModal}>
                            <TextInput
-                           style={{color: 'black', fontSize: globalStyle?.fontSize}}
-                           value={date}
-                           onChangeText={handleChangeDate}
-                           editable={false}
+                              style={{color: 'black', fontSize: globalStyle?.fontSize}}
+                              value={date}
+                              onChangeText={handleChangeDate}
+                              editable={false}
                            />
                         </Pressable>
                      </View>
@@ -329,10 +329,10 @@ export default function AddEntry({ navigation, route, globalStyle,}) {
                         dateModalVisible &&
                         (
                            <DateTimePicker
-                           mode="date"
-                           display="spinner"
-                           value={entryDate}
-                           onChange={onChangeDate}
+                              mode="date"
+                              display="spinner"
+                              value={entryDate}
+                              onChange={onChangeDate}
                            />
 
                         )

@@ -22,7 +22,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as SQLite from 'expo-sqlite';
 
 //for DB of settings
-const dbSettings = SQLite.openDatabase("settings.db");
+const dbSettings = SQLite.openDatabase("settings4.db");
 
 //init of stack navs
 const Tab = createMaterialBottomTabNavigator();
@@ -31,21 +31,18 @@ const BrpStack = createNativeStackNavigator();
 const SearchStack = createNativeStackNavigator();
 const MoreStack = createNativeStackNavigator();
 
-// Notifications.setNotificationHandler({
-//   handleNotification: async () => ({
-//     shouldShowAlert: true,
-//     shouldPlaySound: false,
-//     shouldSetBadge: false,
-//   }),
-// });
+// Expo Splash Screen
+
+import * as SplashScreen from 'expo-splash-screen';
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
+
+  const [appIsReady, setAppIsReady] = useState(false);
+
   // Styles
   const [darkMode, setDarkMode] = useState(false);
   const [globalStyle, setGlobalStyle] = useState({});
-
-  // Expo Notifications
-  const [expoPushToken, setExpoPushToken] = useState();
 
   const darkModeStyle = {
     header: '#000',
@@ -259,7 +256,7 @@ export default function App() {
             // Table doesn't exist, create it
             dbSettings.transaction((tx) => {
               tx.executeSql(
-                'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY AUTOINCREMENT, currentTheme TEXT, fontSize TEXT, defaultSort TEXT, notifTime TEXT, dailyStreak NUMBER);',
+                'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY AUTOINCREMENT, currentTheme TEXT, fontSize TEXT, defaultSort TEXT, notifTime TEXT, dailyStreak NUMBER, dailyStreakDate TEXT);',
                 [],
                 (_, result) => { 
                   console.log('Table Settings: created successfully'); 
@@ -295,6 +292,7 @@ export default function App() {
           }
           //console.log(dataArray)
           handleGlobalStyle(dataArray[0].currentTheme);
+          setAppIsReady(true);
           //console.log("Settings are fetched")
         
         },
@@ -309,8 +307,8 @@ export default function App() {
     console.log("insert called")
     dbSettings.transaction((tx) => {
       tx.executeSql(
-      'INSERT INTO settings (currentTheme, fontSize, defaultSort, notifTime, dailyStreak) VALUES (?, ?, ?, ?, ?);',
-      ["light", "16", "modifiedDate", "6", 0],
+      'INSERT INTO settings (currentTheme, fontSize, defaultSort, notifTime, dailyStreak, dailyStreakDate) VALUES (?, ?, ?, ?, ?, ?);',
+      ["light", "16", "modifiedDate", "6", 0, "none"],
       (tx, results) => {
         handleGlobalStyle("light");
         console.log("Success default Settings are SET!!!");
@@ -411,26 +409,33 @@ export default function App() {
 
 
   // for push notifications
-  useEffect(() => {
-    scheduleNotifications();
+  // useEffect(() => {
+  //   scheduleNotifications();
 
-    // Set up an interval to schedule notifications every day
-    const intervalId = setInterval(() => {
-      scheduleNotifications();
-    }, 24 * 60 * 60 * 1000); // Schedule notifications every 24 hours
+  //   // Set up an interval to schedule notifications every day
+  //   const intervalId = setInterval(() => {
+  //     scheduleNotifications();
+  //   }, 24 * 60 * 60 * 1000); // Schedule notifications every 24 hours
 
-    // Clear the interval when the component is unmounted
-    return () => clearInterval(intervalId);
-  }, []);
+  //   // Clear the interval when the component is unmounted
+  //   return () => clearInterval(intervalId);
+  // }, []);
 
-  useEffect(() => {
-    registerForPushNotificationsAsync();
+  // useEffect(() => {
+  //   registerForPushNotificationsAsync();
 
-    // Handle notifications when the app is open
-    Notifications.addNotificationReceivedListener(handleNotification);
-  }, []);
+  //   // Handle notifications when the app is open
+  //   Notifications.addNotificationReceivedListener(handleNotification);
+  // }, []);
   
+  //for splash screen
+  useEffect(() => {
+    if(appIsReady){
+      SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
 
+  //for settings DB initialization
   useEffect(() => {
     setupSettingsDatabase();
   }, []);

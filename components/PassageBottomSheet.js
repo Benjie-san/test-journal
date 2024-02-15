@@ -23,11 +23,10 @@ const TranslationModal = ({visible, handleModal, handleTranslation, globalStyle}
   return(
       <>
         <Modal
-			animationIn="fadeIn"
-			animationOut="fadeOut"
 			onBackdropPress={() => handleModal(false)}
 			onBackButtonPress={() => handleModal(false)}
 			isVisible={visible}
+			style={styles.flex}
 		>
             <View style={[styles.picker, {backgroundColor: globalStyle.verseModal}]}>
 				{
@@ -157,19 +156,23 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, v
 			<View style={[styles.modalContent, {backgroundColor: globalStyle?.verseModal}]}>
 				
 				<View style={styles.center}>
-					<TouchableOpacity onPress={()=>handleModal(false)}>
-						<Entypo name={"chevron-thin-down"} size={22} color={globalStyle.color}/>
-					</TouchableOpacity>
-					<View style={[styles.header, ]} >
-						<Text style={[{color: globalStyle?.color, fontSize: 17, fontWeight: 'bold'}]} >
-							{scripture !== '' ? scripture : "Set Scripture first"}
-						</Text>
-						{scripture !== '' ? (
-							<TouchableOpacity onPress={ ()=> handleTranslationPickerModal(true)  } style={[styles.headerBtn, ] } > 
-								<Text style={[ {color: globalStyle?.color, fontSize: 17}]}>{currentTranslation}</Text>
-							</TouchableOpacity>
-						) : null }
 					
+					<View style={[styles.header,]} >
+						<View style={{flexDirection: 'row', alignItems: 'center', flex: 1,}}>
+							<Text style={[{color: globalStyle?.color, fontSize: 17, fontWeight: 'bold'}]} >
+								{scripture !== '' ? scripture : "Set Scripture first"}
+							</Text>
+							{scripture !== '' ? (
+								<TouchableOpacity onPress={ ()=> handleTranslationPickerModal(true)  } style={[styles.headerBtn, ] } > 
+									<Text style={[ {color: globalStyle?.settingsColor, fontSize: 17}]}>{currentTranslation}</Text>
+								</TouchableOpacity>
+							) : null }
+						</View>
+				
+					
+						<TouchableOpacity style={[styles.border, {height: 45, padding: 10, }]} onPress={()=>handleModal(false)}>
+							<Text style={[ {color: globalStyle?.color, fontSize: 17}]}>Close</Text>
+						</TouchableOpacity>
 
 					</View>
 

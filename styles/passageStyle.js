@@ -1,6 +1,11 @@
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
+	flex:{
+		flex:1,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
 	modal: {
 		justifyContent: "flex-end",
 		margin: 0,
@@ -33,11 +38,11 @@ const styles = StyleSheet.create({
 	header:{
 		flexDirection: 'row',
 		alignItems: 'center',
-		justifyContent: 'center',
-	
+		justifyContent: 'space-between',
 		width: '100%',
-		height: 50,
+		height: 60,
 		gap: 5,
+		padding: 15,
 	},
 	headerBtn:{
 		padding: 10,
@@ -53,8 +58,7 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 		padding: 10,
 		paddingVertical: 10,
-		top: 60,
-		left: 180,
+		
 	},
 	verseView:{
 		padding: 10,

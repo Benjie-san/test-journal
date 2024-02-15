@@ -20,7 +20,7 @@ import { Entypo } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 
-const dbSettings = SQLite.openDatabase("settings.db");
+const dbSettings = SQLite.openDatabase("settings4.db");
 const db = SQLite.openDatabase('_journal_database.db');
 
 const AddModal = ({visible, type, handleModal, globalStyle}) => {
@@ -78,19 +78,7 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
   );
 }
 
-// const HomeScreen = () => (
-//   <View style={styles.flex}>
-//     <Text>HomeScreen</Text>
-//   </View>
-// );
-
-// const SettingScreen = () => (
-//   <View style={styles.flex}>
-//     <Text>SettingScreen</Text>
-//   </View>
-// );
-
-export default function Home({navigation, route, darkMode, handleDarkMode, globalStyle}) {
+export default function Home({navigation, globalStyle}) {
 
   // import for data
 
@@ -114,12 +102,11 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   const [sermonCount, setSermonCount] = useState(0);
   const sortButtonCount = [allCount, journalCount, sermonCount, opmCount];
 
-
   //for dates
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const todayDate = new Date();
   const today ={
-    day:todayDate.getDate(),
+    day: todayDate.getDate(),
     month: months[todayDate.getMonth()],
     year: todayDate.getFullYear(),
   };
@@ -134,11 +121,12 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
 
   //FUNCTIONS FOR DAILY STREAK
   const [streakCount, setStreakCount] = useState(0); 
+  const [streakDate, setStreakDate] = useState();
 
   const fetchStreakCount = () =>{
     dbSettings.transaction((tx) => {
       tx.executeSql(
-      'SELECT dailyStreak FROM settings WHERE id = ?',
+      'SELECT dailyStreak, dailyStreakDate FROM settings WHERE id = ?',
       [1],
       (_, result) => {
           const rows = result.rows;
@@ -149,7 +137,10 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
           
           }
           setStreakCount(dataArray[0].dailyStreak);
+          setStreakDate(dataArray[0].dailyStreakDate);  
+        
           console.log("Daily Streak Fetched");
+          
         },
         (_, error) => {
           console.error('Error querying data:', error);
@@ -158,16 +149,17 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
     });
   };
 
-  const updateStreakCount = () =>{
+  const updateStreakCount = (count, date) =>{
     dbSettings.transaction((tx) => {
       tx.executeSql(
-        'UPDATE settings SET dailyStreak = ? WHERE id = ?;',
-        [streakCount, 1],
+        'UPDATE settings SET dailyStreak = ?, dailyStreakDate = ? WHERE id = ?;',
+        [count, date, 1],
         (_, result) => {
           console.log('Data SETTINGS:dailyStreak updated successfully');
+          fetchStreakCount();
         },
         (_, error) => {
-          console.error('Error updating SETTINGS data:', error);
+          console.error('Error updating SETTINGS:dailyStreak data:', error);
         }
         );
     });
@@ -188,6 +180,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
 
     });
   }
+
   const openDisplayEntry = (item) => {
     navigation.navigate("DisplayEntry", {
       entry: item,
@@ -414,6 +407,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
           } else {
             console.log('Table entries: already exists');
             fetchTodayVerse();
+            fetchStreakCount();
           }
         },
 
@@ -438,49 +432,27 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
   };
 
 
-  const formatLastModified = (timestamp) => {
-    const lastModifiedTime = new Date(timestamp);
-    const now = new Date();
-
-    // Calculate the difference in milliseconds
-    const timeDifference = now - lastModifiedTime;
-
-    // Convert milliseconds to seconds, hours, or days as needed
-    const seconds = Math.floor(timeDifference / 1000);
-    const minutes = Math.floor(timeDifference / (1000 * 60));
-    const hours = Math.floor(timeDifference / (1000 * 60 * 60));
-    const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-
-    // Choose the appropriate format based on the time difference
-    if (seconds < 60) {
-      return `${seconds} seconds ago`;
-    } 
-    else if (minutes < 60) {
-      return `${minutes} minutes ago`;
-    } 
-    else if (hours < 24) {
-      return `${hours} hours ago`;
-    } else {
-      return `${days} days ago`;
-    }
-  };
-
   // USE EFFECTS
   
   //for checking if the entry today is created
   useEffect(() => {
-    if(notesId.includes(todayVerse?.id)){
-      setStreakCount(streakCount+1);
-      updateStreakCount();
-      console.log(streakCount);
+  
+    const prevDate = new Date(streakDate).getDate();
+    if( today.day - prevDate == 1 || streakDate == "none" ){
+      if(notesId.includes(todayVerse?.id)){
+        console.log("called????")
+        updateStreakCount(streakCount + 1, Date.now());
+      }
     }
-    fetchStreakCount();
-
-  }, [streakCount]);
+    else if(today.day - prevDate > 2){
+      console.log("called?")
+      setStreakCount(0);
+    }
+    
+  }, [streakCount, streakDate, notesId, updateStreakCount, today.day]);
 
 
   useEffect(() => {
-    //openBrpDatabase()
     setupEntriesDatabase();
 
   }, []);
@@ -520,7 +492,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
         </TouchableOpacity>
       ),
     });
-  }, [navigation]);
+  }, [navigation, streakCount]);
 
   return (
   <>
@@ -555,7 +527,7 @@ export default function Home({navigation, route, darkMode, handleDarkMode, globa
       </View>
     </View>
 
-    <TopBar globalStyle={globalStyle} notes={notes} notesJournal={notesJournal} notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount} fetchAllData={fetchAllData} fetchData={fetchData} formatLastModified={formatLastModified} />
+    <TopBar globalStyle={globalStyle} notes={notes} notesJournal={notesJournal} notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount}  />
     
     <Navbar onPressAddEntry={handleVisibleAddModal} />
 

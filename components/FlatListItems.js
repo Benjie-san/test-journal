@@ -1,5 +1,5 @@
 import React, {memo} from 'react';
-import { TouchableOpacity, Text, StyleSheet} from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, View} from 'react-native';
 
 
 const FlatListItems = ({item, globalStyle, handleDisplayEntryFetch}) => {
@@ -19,17 +19,18 @@ const FlatListItems = ({item, globalStyle, handleDisplayEntryFetch}) => {
     
         // Choose the appropriate format based on the time difference
         if (seconds < 60) {
-            return `${seconds} seconds ago`;
+            
+            return `${seconds} ${seconds == 1 ? 'second' : 'seconds'} ago`;
         } 
         else if (minutes < 60) {
-            return `${minutes} minutes ago`;
+            return `${minutes} ${minutes == 1 ? 'minute' : 'minutes'} ago`;
         } 
         else if (hours < 24) {
-            return `${hours} hours ago`;
+            return `${hours} ${hours == 1 ? 'hour' : 'hours'} ago`;
         } else {
-            return `${days} days ago`;
+            return `${days} ${days == 1 ? 'day' : 'days'} ago`;
         }
-        };
+    };
         
 
     return (
@@ -39,9 +40,9 @@ const FlatListItems = ({item, globalStyle, handleDisplayEntryFetch}) => {
             onPress={ ()=> handleDisplayEntryFetch(item) }
         >
     
-            <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden'}}>{item.title}</Text>
-    
-            <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden'}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+            <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden', flex: 1}}>{item.title}</Text>
+
+            <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
         </TouchableOpacity>
         )
 

@@ -6,7 +6,7 @@ import FlatListItems from './FlatListItems';
 
 const Tab = createMaterialTopTabNavigator();
 
-const FlatListComponent = ({notes, noteListLoading, globalStyle, formatLastModified,handleDisplayEntryFetch }) => (
+const FlatListComponent = ({notes, noteListLoading, globalStyle,handleDisplayEntryFetch }) => (
   <View style={styles.flex}>
     {noteListLoading ? <ActivityIndicator style={styles.flex} size={'large'}/> :
     (<View style={[ styles.notelist, {backgroundColor: globalStyle?.bgBody}]}>
@@ -17,6 +17,7 @@ const FlatListComponent = ({notes, noteListLoading, globalStyle, formatLastModif
             style={{width: '100%'}}
             data={ notes } 
             keyExtractor={(item, index) => index.toString()}
+            showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
               <FlatListItems item={item} handleDisplayEntryFetch={handleDisplayEntryFetch} globalStyle={globalStyle}/>
             )}
@@ -27,10 +28,10 @@ const FlatListComponent = ({notes, noteListLoading, globalStyle, formatLastModif
   </View>
 );
 
-const AllEntries = ({notes, noteListLoading, globalStyle, handleDisplayEntryFetch, formatLastModified, }) => {
+const AllEntries = ({notes, noteListLoading, globalStyle, handleDisplayEntryFetch, }) => {
 
   return(  
-    <FlatListComponent notes={notes} noteListLoading={noteListLoading} globalStyle={globalStyle} handleDisplayEntryFetch={handleDisplayEntryFetch} formatLastModified={formatLastModified} />
+    <FlatListComponent notes={notes} noteListLoading={noteListLoading} globalStyle={globalStyle} handleDisplayEntryFetch={handleDisplayEntryFetch}  />
   );
 
 };
@@ -38,14 +39,14 @@ const AllEntries = ({notes, noteListLoading, globalStyle, handleDisplayEntryFetc
 const JournalEntries = ({notesJournal, noteListLoading, globalStyle, handleDisplayEntryFetch, formatLastModified, }) => {
 
   return(
-    <FlatListComponent notes={notesJournal} noteListLoading={noteListLoading} globalStyle={globalStyle} handleDisplayEntryFetch={handleDisplayEntryFetch} formatLastModified={formatLastModified} />
+    <FlatListComponent notes={notesJournal} noteListLoading={noteListLoading} globalStyle={globalStyle} handleDisplayEntryFetch={handleDisplayEntryFetch} />
   );
 };
   
-const OPMEntries = ({notesOPM, noteListLoading, globalStyle, handleDisplayEntryFetch, formatLastModified, }) => {
+const OPMEntries = ({notesOPM, noteListLoading, globalStyle, handleDisplayEntryFetch, }) => {
   
   return(
-    <FlatListComponent notes={notesOPM} noteListLoading={noteListLoading} globalStyle={globalStyle} handleDisplayEntryFetch={handleDisplayEntryFetch} formatLastModified={formatLastModified} />
+    <FlatListComponent notes={notesOPM} noteListLoading={noteListLoading} globalStyle={globalStyle} handleDisplayEntryFetch={handleDisplayEntryFetch} />
   );
 };
 
@@ -63,13 +64,13 @@ const SortBtn = ({name, count, focused, globalStyle}) => (
   </View>
 );
 
-const TopBar = ({ globalStyle, notes, notesJournal, notesOPM, noteListLoading, handleDisplayEntryFetch, sortButtonCount, formatLastModified}) => {
+const TopBar = ({ globalStyle, notes, notesJournal, notesOPM, noteListLoading, handleDisplayEntryFetch, sortButtonCount}) => {
 
-  const RenderAll = () => <AllEntries globalStyle={globalStyle} notes={notes} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} formatLastModified={formatLastModified}/>
+  const RenderAll = () => <AllEntries globalStyle={globalStyle} notes={notes} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} />
 
-  const RenderJournal = () => <JournalEntries globalStyle={globalStyle} notesJournal={notesJournal} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount[1]} formatLastModified={formatLastModified} />
+  const RenderJournal = () => <JournalEntries globalStyle={globalStyle} notesJournal={notesJournal} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount[1]}  />
 
-  const RenderOPM = () => <OPMEntries globalStyle={globalStyle}  notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount[2]} formatLastModified={formatLastModified}  />
+  const RenderOPM = () => <OPMEntries globalStyle={globalStyle}  notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount[2]}   />
   
 
   return (
