@@ -262,7 +262,7 @@ return(
 
 export default function Entry({navigation, route, globalStyle }){
 
-const {entry, verse, entryType, index, itemId} = route.params;
+const {entryId, verse, entryType, index, itemId, state} = route.params;
 const isFocused = useIsFocused();
 //for showing modals
 const [dateModalVisible, setDateModalVisible] = useState(false);
@@ -285,9 +285,9 @@ const [month, setMonth] = useState("");
 const [day, setDay] = useState("");
 const [passage, setPassage] = useState(""); 
 
-const [currentEntry, setCurrentEntry] = useState(entry);
+const [currentEntry, setCurrentEntry] = useState();
 
-const [currentState, setCurrentState] = useState("add");
+const [currentState, setCurrentState] = useState(state);
 const [entriesId, setEntriesId] = useState([]);
 
 //for system buttons
@@ -565,8 +565,6 @@ const setItems = () =>{
     setPrayer(currentEntry?.prayer);
     setType(currentEntry?.type);
     setStatus(currentEntry?.status);
-    setMonth(currentEntry?.month);
-    setDay(currentEntry?.day);
 }
 
 const checker = () =>{
@@ -619,11 +617,25 @@ useEffect(() => {
 
 
 useEffect(() => {
-
     if(entryType == 'journal'){
         setScripture(verse);
     }
 }, [verse, scripture]);
+
+useEffect(() => {
+    const interval = setTimeout(() => {
+        if(currentState == "update"){
+            fetchEntry(entryId);
+            setItems();
+        }
+    }, 2000)
+
+    return () => {
+    clearTimeout(interval)
+    }
+
+}, [currentState, currentEntry])
+
 
 useEffect(() => {
     if(alertModalVisible == true){

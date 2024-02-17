@@ -186,13 +186,14 @@ export default function Home({navigation, globalStyle}) {
       entryType: type,
       index: months.indexOf(todayVerse?.month),
       itemId: todayVerse?.id,
-
+      state: 'add',
     });
   }
 
   const openDisplayEntry = (item) => {
-    navigation.navigate("DisplayEntry", {
-      entry: item,
+    navigation.navigate("Entry", {
+      entryId: item.dataId,
+      state: 'update',
     });
   }
 

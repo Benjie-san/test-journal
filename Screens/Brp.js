@@ -64,19 +64,21 @@ const ExpandableComponent = ({onRef, item, index, navigation, globalStyle}) =>{
    
    const isFocused = useIsFocused();
 
-   const openAddEntry = (type, scripture, id, index) => {
-      navigation.navigate("AddEntry", {
+   const openAddEntry = (type, scripture, id, index, state) => {
+      navigation.navigate("Entry", {
          verse: scripture,
          entryType: type,
          index: index,
          itemId: id,
          status: '#fff',
+         state: 'add',
       });
    }
 
-   const openDisplayEntry = (item) => {
-      navigation.navigate("DisplayEntry", {
-         entry: item,
+   const openDisplayEntry = (itemData) => {
+      navigation.navigate("Entry", {
+         entryId: itemData.dataId,
+         state:'update'
       });
    }
 
@@ -85,7 +87,7 @@ const ExpandableComponent = ({onRef, item, index, navigation, globalStyle}) =>{
    const handleItemPress = (item) => {
       const type = item.verse !== 'Sermon Notes' ? 'journal':'sermon';
       const scripture = item.verse !=='Sermon Notes' ? item.verse: '';
-      console.log(idArray.includes(item.id))
+      // console.log(idArray.includes(item.id))
       if( idArray.includes(item.id) ){             
          fetchCurrentEntry(item.id);
    

@@ -133,6 +133,20 @@ export default function App() {
         }}
       />
 
+      <HomeStack.Screen
+        name="BRP"
+        options={{
+          headerTitle: "Bible Reading Plan",
+          headerStyle: {
+            backgroundColor: globalStyle?.bgHeader,
+          },
+          headerTitleStyle:{
+            color: globalStyle?.color,
+          }
+        }}
+        component={RenderBrp}
+      />
+
       <HomeStack.Screen   
         name="Entry"
         component={RenderEntry}
@@ -150,13 +164,15 @@ export default function App() {
           headerTintColor: globalStyle?.color,
       }}
       />
+      
     </HomeStack.Navigator>
   );
 
   const StackBrp = () => (
     <BrpStack.Navigator>
 
-      <BrpStack.Screen
+      <HomeStack.Screen
+        name="BRP"
         options={{
           headerTitle: "Bible Reading Plan",
           headerStyle: {
@@ -166,7 +182,6 @@ export default function App() {
             color: globalStyle?.color,
           }
         }}
-        name="BrpStack"
         component={RenderBrp}
       />
 
@@ -477,7 +492,7 @@ export default function App() {
             }}
           />
 
-          <Tab.Screen
+          {/* <Tab.Screen
             component={StackBrp}
             name="BRP"
             options={() => ({
@@ -512,7 +527,8 @@ export default function App() {
               },
               tabBarHideOnKeyboard: true,
             })}
-          />
+          /> */}
+          
           <Tab.Screen
             component={StackSearch}
             name="Search"
