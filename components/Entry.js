@@ -12,6 +12,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AlertModal from './AlertModal';
 import styles from '../styles/entryStyle';
 import { useIsFocused } from '@react-navigation/native';
+const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 const BackConfirmationModal = ({visible, handleModal, globalStyle, updateEntry, }) => {
 
@@ -271,7 +272,7 @@ const [menuVisible, setMenuVisible] = useState(false);
 const [id, setId] = useState(0);
 const [dataId, setDataId] = useState(0);
 
-const [date, setDate] = useState("");
+const [date, setDate] = useState(new Date().toDateString());
 const [title, setTitle] = useState("");
 const [scripture, setScripture] = useState("");
 const [observation, setObservation] = useState("");
@@ -287,6 +288,7 @@ const [passage, setPassage] = useState("");
 const [currentEntry, setCurrentEntry] = useState(entry);
 
 const [currentState, setCurrentState] = useState("add");
+const [entriesId, setEntriesId] = useState([]);
 
 //for system buttons
 const appState = useRef(AppState.currentState);
@@ -332,14 +334,21 @@ const [alertModalVisible, setAlertModalVisible] = useState(false);
 const [message, setMessage] = useState("");
 
 const handleAlertModalVisible = (item) =>{
-
-    if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer){   
+    if(currentState == "add"){
+        setMessage("Entry Saved");
+        setAlertModalVisible(item);
+    } else if (currentState == "update"){
+        if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer){   
         setMessage("Entry Updated");
         setAlertModalVisible(item);
-    } else if(currentEntry?.status !== status){
-        setMessage(status === "#8CFF31" ? "Marked as done" : "Unmarked as done" );
-        setAlertModalVisible(item);
+        }
     }
+    else if(currentEntry?.status !== status){
+            setMessage(status === "#8CFF31" ? "Marked as done" : "Unmarked as done" );
+            setAlertModalVisible(item);
+    }
+
+
 }
 
 
@@ -411,7 +420,7 @@ const cleanStates = () =>{
     setStatus("");
 }
 
-const handleDelete = () => {
+const deleteEntry = () => {
 
     if(type == "opm"){
         db.transaction((tx) => {
@@ -462,7 +471,6 @@ const updateEntry = () => {
             );
         });
     }else{
-        console.log(application);
         db.transaction((tx) => {
             tx.executeSql(
             'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ? WHERE dataId = ?;',
@@ -478,33 +486,6 @@ const updateEntry = () => {
     }
 }
 
-const handleEntry = () => {
-    if(currentState == "add"){
-        saveEntry();
-    }else{
-        updateEntry();
-    }
-    
-    handleAlertModalVisible(true);
-}
-
-// gets the item from present data
-
-const setItems = () =>{
-    setId(currentEntry?.id);
-    setDataId(currentEntry?.dataId);
-    setDate(currentEntry?.date);
-    setTitle(currentEntry?.title);
-    setScripture(currentEntry?.scripture);
-    setQuestion(currentEntry?.question);
-    setObservation(currentEntry?.observation);
-    setApplication(currentEntry?.application);
-    setPrayer(currentEntry?.prayer);
-    setType(currentEntry?.type);
-    setStatus(currentEntry?.status);
-    setMonth(currentEntry?.month);
-    setDay(currentEntry?.day);
-}
 const saveEntry = () => {
     // adding entry to db
     let isEmpty = [date, title, question, observation, application, prayer];
@@ -517,6 +498,7 @@ const saveEntry = () => {
             [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), itemId, months[index]],
             (tx, results) => {
                 console.log("Success added entry to DB!!!");
+                setMessage("Entry Saved");
                 setCurrentState("update");
             },
             (error) => {
@@ -525,13 +507,16 @@ const saveEntry = () => {
             }
             );
         });
-    }else{
+    }
+    else{
         db.transaction((tx) => {
             tx.executeSql(
             'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-            [date, title, question, scripture, observation, application, prayer,  '#8CFF31', type, Date.now(), null, months[index]],
+            [date, title, question, scripture, observation, application, prayer,  '#8CFF31', type, Date.now(), id, months[index]],
             (tx, results) => {
             console.log("Success!!!");
+                setMessage("Entry Saved");
+                setCurrentState("update");
             },
             (error) => {
             // Handle error
@@ -540,36 +525,114 @@ const saveEntry = () => {
             );
         });
     }
+    }
+    if(entryType == "journal"){
+            fetchEntry(itemId);
+        }else{
+            fetchEntry(id);
+    }
 }
+
+const fetchEntry = (id) =>{
+    db.transaction((tx) => {
+        tx.executeSql(
+            "SELECT * FROM entries WHERE dataId = ?;",
+        [id],
+            (_, result) => {
+                const rows = result.rows;
+                let dataArray = [];
+                for (let i = 0; i < rows.length; i++) {
+                    const item = rows.item(i);
+                    dataArray.push(item);
+                }
+                setCurrentEntry(...dataArray);
+                console.log("work?");
+            },
+            (_, error) => {
+                console.log("fetch error: ", error)
+            }
+        );
+    });
 }
+
+const setItems = () =>{
+    setDate(currentEntry?.date);
+    setTitle(currentEntry?.title);
+    setScripture(currentEntry?.scripture);
+    setQuestion(currentEntry?.question);
+    setObservation(currentEntry?.observation);
+    setApplication(currentEntry?.application);
+    setPrayer(currentEntry?.prayer);
+    setType(currentEntry?.type);
+    setStatus(currentEntry?.status);
+    setMonth(currentEntry?.month);
+    setDay(currentEntry?.day);
+}
+
+const checker = () =>{
+    idChecker();
+    let num = "opm"+Math.floor(Math.random() * 300);
+    if(!entriesId.includes(num)){
+        return setId(num);
+    }else{
+        return checker();
+    }
+}
+
+const idChecker = () =>{
+    db.transaction((tx) => {
+        tx.executeSql(
+            "SELECT * FROM entries;",
+        [],
+            (_, result) => {
+                const rows = result.rows;
+                let dataArray2 = [];
+                for (let i = 0; i < rows.length; i++) {
+                    const item = rows.item(i);
+                    dataArray2.push(item.dataId);
+                }
+                setEntriesId(dataArray2);
+            
+            },
+            (_, error) => {
+                console.log("id checker error: " + error)
+            }
+        );
+    });
+}
+
+const handleEntry = () => {
+    if(currentState == "add"){
+        saveEntry();
+
+    }else{
+        updateEntry();
+    }
+    handleAlertModalVisible(true);
+}
+
 
 useEffect(() => {
-if(entryType == 'journal'){
-    setScripture(verse);
-}
-}, [verse, scripture]);
+    idChecker();
+    checker();
+}, [])
 
-useEffect(() => { 
-    if(currentState == "update"){
-        setItems();
+
+useEffect(() => {
+
+    if(entryType == 'journal'){
+        setScripture(verse);
     }
-    
-}, [currentEntry, currentState]);
+}, [verse, scripture]);
 
 useEffect(() => {
     if(alertModalVisible == true){
-        console.log("work??")
         const interval = setTimeout(() => {
             // After 3 seconds set the show value to false
             handleAlertModalVisible(false);
-            currentEntry.date = date;
-            currentEntry.scripture = scripture;
-            currentEntry.title = title;
-            currentEntry.question = question;
-            currentEntry.observation = observation;
-            currentEntry.application = application;
-            currentEntry.prayer = prayer;
-            currentEntry.status = status;
+            if(currentState == "update"){
+                setItems();
+            }
         }, 1000)
 
         return () => {
@@ -577,7 +640,7 @@ useEffect(() => {
         }
     }
 
-}, [alertModalVisible, date, title, question, scripture, observation, application, prayer, status, currentEntry ])
+}, [alertModalVisible, currentEntry, currentState ])
 
 
 //for drawer when pressed
@@ -741,7 +804,7 @@ return (
 
         <BackConfirmationModal message={message} visible={backConfirmVisible} handleModal={handleBackConfirmModal}  updateEntry={updateEntry} globalStyle={globalStyle}  />
     
-        <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={handleDelete} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={entryType}  globalStyle={globalStyle} updateEntry={updateEntry} />
+        <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={deleteEntry} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={entryType}  globalStyle={globalStyle} updateEntry={updateEntry} />
         
     </>
 )
