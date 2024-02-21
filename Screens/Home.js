@@ -171,29 +171,27 @@ export default function Home({navigation, globalStyle}) {
     navigation.navigate("BRP");
   }
 
-  const openAddEntry = (type, scripture) => {
-    navigation.navigate("AddEntry", {
-      verse: scripture,
-      entryType: type,
-      index: months.indexOf(todayVerse?.month),
-      itemId: todayVerse?.id,
-
-    });
-  }
   const openEntry = (type, scripture) => {
-    navigation.navigate("Entry", {
-      verse: scripture,
-      entryType: type,
-      index: months.indexOf(todayVerse?.month),
-      itemId: todayVerse?.id,
-      state: 'add',
+    navigation.navigate("Home", {
+      screen: 'Entry',
+      params: {
+        verse: scripture,
+        entryType: type,
+        index: months.indexOf(todayVerse?.month),
+        itemId: todayVerse?.id,
+        state: 'add',
+      },
     });
   }
 
   const openDisplayEntry = (item) => {
-    navigation.navigate("Entry", {
-      entryId: item.dataId,
-      state: 'update',
+    navigation.navigate("Home", {
+      screen: 'Entry',
+      params: {
+        entryId: item.dataId,
+        entryType: item.type,
+        state: 'update',
+      },
     });
   }
 
@@ -202,12 +200,12 @@ export default function Home({navigation, globalStyle}) {
 
   // when add write button is clicked
   const handleAddButton = (item) => {
+
     if(item == "today"){
-      setScripture(todayVerse.verse);
       if(todayVerse.verse == "Sermon Notes"){
         openEntry("sermon", "");
       }else{
-        openEntry("journal", scripture);
+        openEntry("journal", todayVerse.verse);
       }
 
     } 
@@ -323,7 +321,7 @@ export default function Home({navigation, globalStyle}) {
   };
 
   const fetchAllData = () => {
-    console.log("Fetched All Data")
+
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT * FROM entries ORDER BY modifiedDate DESC;",
@@ -343,7 +341,7 @@ export default function Home({navigation, globalStyle}) {
           setNotes(dataArray);
           setNotesId(dataArray2);
           setNoteListLoading(false);
-
+          console.log("Fetched All Data")
         },
         (_, error) => {
           console.error('Error querying data:', error);
@@ -365,6 +363,7 @@ export default function Home({navigation, globalStyle}) {
               dataArray.push(item);
             }
             setTodayVerse(...dataArray);
+            
             setVerseLoading(false);
           },
           (_, error) => {
@@ -374,6 +373,7 @@ export default function Home({navigation, globalStyle}) {
       })
     });
   };
+
 
   async function openBrpDatabase() {
     if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
@@ -450,12 +450,10 @@ export default function Home({navigation, globalStyle}) {
     const prevDate = new Date(streakDate).getDate();
     if( today.day - prevDate == 1 || streakDate == "none" ){
       if(notesId.includes(todayVerse?.id)){
-        console.log("called????")
         updateStreakCount(streakCount + 1, Date.now());
       }
     }
     else if(today.day - prevDate > 2){
-      console.log("called?")
       setStreakCount(0);
     }
     
@@ -545,7 +543,6 @@ export default function Home({navigation, globalStyle}) {
 
     {/*modal for displaying add entry*/}
     <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal}  globalStyle={globalStyle}/>
-
 
     </>
   )

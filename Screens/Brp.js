@@ -24,8 +24,8 @@ const today ={
    day:todayDate.getDate(),
    month: months[todayDate.getMonth()],
    year: todayDate.getFullYear(),
-}
-;
+};
+
 let content = Object.keys(data).map( (key, index) =>
    (
       {
@@ -48,7 +48,6 @@ async function openBrpDatabase() {
    return SQLite.openDatabase("brpDatabase.db");
 }
 
-
 const ExpandableComponent = ({onRef, item, index, navigation, globalStyle}) =>{
    
    //states for showing it
@@ -64,23 +63,30 @@ const ExpandableComponent = ({onRef, item, index, navigation, globalStyle}) =>{
    
    const isFocused = useIsFocused();
 
-   const openAddEntry = (type, scripture, id, index, state) => {
-      navigation.navigate("Entry", {
+   const openAddEntry = (type, scripture, id, index) => {
+      navigation.navigate("Home", {
+      screen: 'Entry',
+      params: {
          verse: scripture,
          entryType: type,
+         itemId: id, 
          index: index,
-         itemId: id,
-         status: '#fff',
          state: 'add',
+      },
       });
    }
-
-   const openDisplayEntry = (itemData) => {
-      navigation.navigate("Entry", {
-         entryId: itemData.dataId,
-         state:'update'
+   
+   const openDisplayEntry = (item) => {
+      navigation.navigate("Home", {
+      screen: 'Entry',
+      params: {
+         entryId: item.dataId,
+         entryType: item.type,
+         state: 'update',
+      },
       });
    }
+   
 
    //state for loading
 
@@ -234,7 +240,7 @@ const ExpandableComponent = ({onRef, item, index, navigation, globalStyle}) =>{
          </TouchableOpacity>
          <Animated.View style={animatedStyle}>
       
-            <View onLayout={onLayout} style={{position: 'absolute', width: '100%', padding:10}}>
+            <View onLayout={onLayout} style={{position: 'absolute', width: '100%', paddingLeft:5, paddingRight:5}}>
 
                {
                   currentMonthEntries.map((item, key) => (
@@ -271,7 +277,6 @@ export default function Brp({navigation, globalStyle}){
    const [listData, setListData] = useState(content); // state that populates the items from data
 
    const flatListRef = useRef(null);
- 
 
    return (
    <>
@@ -330,7 +335,7 @@ const styles = StyleSheet.create({
       boderBottomWidth: 1,
    },
    dailyEntry:{
-      padding: 16,
+      padding: 10,
       height: 55,
       justifyContent: "space-between",
       flexDirection: "row",

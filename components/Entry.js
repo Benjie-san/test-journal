@@ -274,7 +274,7 @@ const [dataId, setDataId] = useState(0);
 
 const [date, setDate] = useState(new Date().toDateString());
 const [title, setTitle] = useState("");
-const [scripture, setScripture] = useState("");
+const [scripture, setScripture] = useState(verse);
 const [observation, setObservation] = useState("");
 const [application, setApplication] = useState("");
 const [prayer, setPrayer] = useState("");
@@ -336,23 +336,17 @@ const [alertModalVisible, setAlertModalVisible] = useState(false);
 const [message, setMessage] = useState("");
 
 const handleAlertModalVisible = (item) =>{
-    if(currentState == "add"){
+
+    if (currentState == "add"){
         setMessage("Entry Saved");
-        setAlertModalVisible(item);
-    } else if (currentState == "update"){
-        if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer){   
+        
+    } 
+    if (currentState == "update"){
         setMessage("Entry Updated");
-        setAlertModalVisible(item);
-        }
+        
     }
-    else if(currentEntry?.status !== status){
-            setMessage(status === "#8CFF31" ? "Marked as done" : "Unmarked as done" );
-            setAlertModalVisible(item);
-    }
-
-
+    setAlertModalVisible(item);
 }
-
 
 // HANDLE FUNCTIONS
 const handleDateModal = () => {
@@ -423,69 +417,37 @@ const cleanStates = () =>{
 }
 
 const deleteEntry = () => {
-
-    if(type == "opm"){
-        db.transaction((tx) => {
-            tx.executeSql(
-            `DELETE FROM entries WHERE id = ?;`,
-            [id],
-            (_, result) => {
-            console.log('Data deleted successfully');
-            },
-            (_, error) => {
-            console.error('Error deleting data:', error);
-            }
-            );
-        });
-    }else{
-        db.transaction((tx) => {
-            tx.executeSql(
-            `DELETE FROM entries WHERE dataId = ?;`,
-            [dataId],
-            (_, result) => {
-            console.log('Data deleted successfully');
-            },
-            (_, error) => {
-            console.error('Error deleting data:', error);
-            }
-            );
-        });
-    }
-    if(route.name == "Home"){
-        fetchAllData();
-    }
+    db.transaction((tx) => {
+        tx.executeSql(
+        `DELETE FROM entries WHERE dataId = ?;`,
+        [dataId],
+        (_, result) => {
+        console.log('Data deleted successfully');
+        },
+        (_, error) => {
+        console.error('Error deleting data:', error);
+        }
+        );
+    });
+    
 }
 
 //updating the entry
 const updateEntry = () => {
-    
-    if(type=='opm'){
-        db.transaction((tx) => {
-            tx.executeSql(
-            'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ? WHERE id = ?;',
-            [date, title, question, scripture, observation, application, prayer, status, Date.now(), id ],
-            (_, result) => {
+    db.transaction((tx) => {
+        tx.executeSql(
+        'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ? WHERE dataId = ?;',
+        [date, title, question, scripture, observation, application, prayer, status, Date.now(), dataId ],
+        (_, result) => {
             console.log('Data updated successfully');
-            },
-            (_, error) => {
+            fetchEntry(dataId);         
+        },
+        (_, error) => {
             console.error('Error updating data:', error);
-            }
-            );
-        });
-    }else{
-        db.transaction((tx) => {
-            tx.executeSql(
-            'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ? WHERE dataId = ?;',
-            [date, title, question, scripture, observation, application, prayer, status, Date.now(), dataId ],
-            (_, result) => {
-            console.log('Data updated successfully');
-            },
-            (_, error) => {
-            console.error('Error updating data:', error);
-            }
-            );
-        });
-    }
+        }
+        );
+    });
+
 }
 
 const saveEntry = () => {
@@ -493,46 +455,42 @@ const saveEntry = () => {
     let isEmpty = [date, title, question, observation, application, prayer];
     if(!isEmpty.every((item)=>item=="")){
 
-    if(type=="journal" || type == "sermon"){
-        db.transaction((tx) => {
-            tx.executeSql(
-            'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-            [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), itemId, months[index]],
-            (tx, results) => {
-                console.log("Success added entry to DB!!!");
-                setMessage("Entry Saved");
-                setCurrentState("update");
-            },
-            (error) => {
-            // Handle error
-            console.log(error);
-            }
-            );
-        });
+        if(type=="journal" || type == "sermon"){
+            db.transaction((tx) => {
+                tx.executeSql(
+                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), itemId, months[index]],
+                (tx, results) => {
+                    console.log("Success added entry to DB!!!");
+                    fetchEntry(itemId);
+                    setCurrentState("update");
+                },
+                (error) => {
+                // Handle error
+                console.log(error);
+                }
+                );
+            });
+        }
+        else{
+            db.transaction((tx) => {
+                tx.executeSql(
+                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                [date, title, question, scripture, observation, application, prayer,  '#8CFF31', type, Date.now(), dataId, months[index]],
+                (tx, results) => {
+                console.log("Success!!!");
+                    fetchEntry(dataId);
+                    setCurrentState("update");
+                },
+                (error) => {
+                // Handle error
+                console.log(error);
+                }
+                );
+            });
+        }
     }
-    else{
-        db.transaction((tx) => {
-            tx.executeSql(
-            'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-            [date, title, question, scripture, observation, application, prayer,  '#8CFF31', type, Date.now(), id, months[index]],
-            (tx, results) => {
-            console.log("Success!!!");
-                setMessage("Entry Saved");
-                setCurrentState("update");
-            },
-            (error) => {
-            // Handle error
-            console.log(error);
-            }
-            );
-        });
-    }
-    }
-    if(entryType == "journal"){
-            fetchEntry(itemId);
-        }else{
-            fetchEntry(id);
-    }
+
 }
 
 const fetchEntry = (id) =>{
@@ -547,8 +505,8 @@ const fetchEntry = (id) =>{
                     const item = rows.item(i);
                     dataArray.push(item);
                 }
-                setCurrentEntry(...dataArray);
                 setEntryLoading(true);
+                setItems(...dataArray);
             },
             (_, error) => {
                 console.log("fetch error: ", error)
@@ -557,7 +515,9 @@ const fetchEntry = (id) =>{
     });
 }
 
-const setItems = () =>{
+const setItems = (currentEntry) => {
+    setDataId(currentEntry?.dataId);
+    setId(currentEntry?.id);
     setDate(currentEntry?.date);
     setTitle(currentEntry?.title);
     setScripture(currentEntry?.scripture);
@@ -573,7 +533,7 @@ const checker = () =>{
     idChecker();
     let num = "opm"+Math.floor(Math.random() * 300);
     if(!entriesId.includes(num)){
-        return setId(num);
+        return setDataId(num);
     }else{
         return checker();
     }
@@ -604,8 +564,8 @@ const idChecker = () =>{
 const handleEntry = () => {
     if(currentState == "add"){
         saveEntry();
-
-    }else{
+    }
+    else{
         updateEntry();
     }
     handleAlertModalVisible(true);
@@ -619,37 +579,29 @@ useEffect(() => {
 
 
 useEffect(() => {
-    if(entryType == 'journal'){
-        setScripture(verse);
-    }
-}, [verse, scripture]);
-
-useEffect(() => {
     const interval = setTimeout(() => {
         if(entryLoading == false){
             if(currentState == "update"){
                 fetchEntry(entryId);
-                setItems();
+            }else{
+                setEntryLoading(true);
             }
+            
         }
         
-    }, 2000)
+    }, 1000)
 
     return () => {
     clearTimeout(interval)
     }
 
-}, [currentState, currentEntry, entryLoading])
+}, [currentState, entryLoading, fetchEntry]);
 
 
 useEffect(() => {
     if(alertModalVisible == true){
         const interval = setTimeout(() => {
-            // After 3 seconds set the show value to false
             handleAlertModalVisible(false);
-            if(currentState == "update"){
-                setItems();
-            }
         }, 1000)
 
         return () => {
@@ -657,45 +609,42 @@ useEffect(() => {
         }
     }
 
-}, [alertModalVisible, currentEntry, currentState ])
+}, [alertModalVisible ]);
 
 
 //for drawer when pressed
-useEffect(() => {
-    const subscription = AppState.addEventListener('change', nextAppState => {
+// useEffect(() => {
+//     const subscription = AppState.addEventListener('change', nextAppState => {
 
-    if (appState.current.match(/inactive|background/) &&
-    nextAppState === 'active') {
-        return;
-    }else{
-        if(isFocused === true){
-            updateEntry();
-            currentEntry.date = date;
-            currentEntry.scripture = scripture;
-            currentEntry.title = title;
-            currentEntry.question = question;
-            currentEntry.observation = observation;
-            currentEntry.application = application;
-            currentEntry.prayer = prayer;
-            currentEntry.status = status;
-        }
-    }
+//     if (appState.current.match(/inactive|background/) &&
+//     nextAppState === 'active') {
+//         return;
+//     }else{
+//         if(isFocused === true){
+//             if(currentState == "add"){
+//                 saveEntry();
+//             }else{
+//                 updateEntry();
+//             }
+        
+//         }
+//     }
 
-    appState.current = nextAppState;
-    setAppCurrentState(appState.current);
-    });
+//     appState.current = nextAppState;
+//     setAppCurrentState(appState.current);
+//     });
 
-    return () => {
-    subscription.remove();
-    };
-}, [isFocused, date, title, question, scripture, observation, application, prayer, status, currentEntry]);
+//     return () => {
+//     subscription.remove();
+//     };
+// }, [isFocused ]);
 
 //HEADER
 useEffect(() => {
     navigation.setOptions({
         headerStyle: {backgroundColor: globalStyle?.bgHeader},
         headerTitle: () => (
-            <Text style={{fontSize: 20, color:globalStyle?.color}}>{type == "sermon" ? "Sermon Note" : type == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
+            <Text style={{fontSize: 20, color:globalStyle?.color}}>{entryType == "sermon" ? "Sermon Note" : entryType == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
         ),
         headerRight: () => (
 
@@ -716,7 +665,7 @@ useEffect(() => {
         ),
         
     });
-}, [navigation, type, handleEntry, currentState]);
+}, [navigation, entryType, handleEntry, currentState]);
 
 
 return (

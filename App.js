@@ -131,7 +131,7 @@ export default function App() {
             color: globalStyle?.color,
           }
         }}
-      />
+      />  
 
       <HomeStack.Screen
         name="BRP"
@@ -142,7 +142,8 @@ export default function App() {
           },
           headerTitleStyle:{
             color: globalStyle?.color,
-          }
+          },
+          animation:'slide_from_right',
         }}
         component={RenderBrp}
       />
@@ -164,47 +165,33 @@ export default function App() {
           headerTintColor: globalStyle?.color,
       }}
       />
-      
+
     </HomeStack.Navigator>
   );
 
-  const StackBrp = () => (
-    <BrpStack.Navigator>
+  // const StackBrp = () => (
+  //   <BrpStack.Navigator>
 
-      <HomeStack.Screen
-        name="BRP"
-        options={{
-          headerTitle: "Bible Reading Plan",
-          headerStyle: {
-            backgroundColor: globalStyle?.bgHeader,
-          },
-          headerTitleStyle:{
-            color: globalStyle?.color,
-          }
-        }}
-        component={RenderBrp}
-      />
+  //     <BrpStack.Screen   
+  //       name="AddEntry"
+  //       component={RenderAddEntry}
+  //       options={{ 
+  //         animation:'slide_from_right',
+  //         headerTintColor: globalStyle?.color,
+  //     }}
+  //     />
 
-      <BrpStack.Screen   
-        name="AddEntry"
-        component={RenderAddEntry}
-        options={{ 
-          animation:'slide_from_right',
-          headerTintColor: globalStyle?.color,
-      }}
-      />
+  //     <BrpStack.Screen   
+  //       name="DisplayEntry"
+  //       component={RenderDisplayEntry}
+  //       options={{ 
+  //         animation:'slide_from_right',
+  //         headerTintColor: globalStyle?.color,
+  //     }}
+  //     />
 
-      <BrpStack.Screen   
-        name="DisplayEntry"
-        component={RenderDisplayEntry}
-        options={{ 
-          animation:'slide_from_right',
-          headerTintColor: globalStyle?.color,
-      }}
-      />
-
-    </BrpStack.Navigator>
-  );
+  //   </BrpStack.Navigator>
+  // );
 
   const StackSearch = () => (
     <SearchStack.Navigator>
@@ -491,43 +478,6 @@ export default function App() {
               tabBarHideOnKeyboard: true,
             }}
           />
-
-          {/* <Tab.Screen
-            component={StackBrp}
-            name="BRP"
-            options={() => ({
-              headerTitle: "Bible Reading Plan",
-              title: "Bible Reading Plan",
-              tabBarLabel: "BRP",
-              headerLeft: () => (
-                <Pressable
-                  title="BrpBackButton"
-                  onPress={() => handleBRPBackButton()}
-                >
-                  <Ionicons
-                    name="chevron-back-sharp"
-                    size={30}
-                    color="1d9bf0"
-                  />
-                </Pressable>
-              ),
-
-              tabBarIcon: ({ focused }) => {
-                return (
-                  <View
-                    style={{ alignItems: "center", justifyContent: "center" }}
-                  >
-                    <Ionicons
-                      name={focused ? "md-book" : "md-book-outline"}
-                      size={24}
-                      color="#1d9bf0"
-                    />
-                  </View>
-                );
-              },
-              tabBarHideOnKeyboard: true,
-            })}
-          /> */}
           
           <Tab.Screen
             component={StackSearch}

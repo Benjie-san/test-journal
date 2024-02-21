@@ -58,7 +58,7 @@ const TranslationModal = ({visible, handleModal, handleTranslation, globalStyle}
   );
 }
 
-export default function PassageBottomSheet({globalStyle, visible, handleModal, verse, scripture, type, handlePassage}) {	
+export default function PassageBottomSheet({globalStyle, visible, handleModal, scripture, handlePassage}) {	
 	
 	const [fetchedVerse, setFetchedVerse] = useState([]);
 	const [verseNumber, setVerseNumber] = useState([]);
@@ -86,7 +86,7 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, v
 		let verseTextResult = [];
 		let verseNumberResult = []
 		let passage = [];
-		if(scripture != ''){
+		if(scripture !== '' && scripture !== undefined && scripture !== null){
 			let checkVerse = scripture.split(":");
 			if( checkVerse[0] !== scripture ){
 
