@@ -12,8 +12,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Home, Brp, Search, More } from "./Screens/index"; // all of the screens
 
 import Settings from "./components/Settings";
-import AddEntry from './components/AddEntry';
-import DisplayEntry from "./components/DisplayEntry";
+import Archive from "./components/Archive";
+import Trash from './components/Trash'
 import Entry from './components/Entry';
 
 //icon imports
@@ -91,12 +91,7 @@ export default function App() {
   const RenderHome = (props) => (
     <Home {...props} darkMode={darkMode} handleDarkMode={handleDarkMode} globalStyle={globalStyle} />
   );
-    const RenderAddEntry = (props) => (
-      <AddEntry {...props} globalStyle={globalStyle}  />
-    )
-    const RenderDisplayEntry = (props) => (
-      <DisplayEntry {...props} globalStyle={globalStyle}  />
-    )
+  
     const RenderEntry = (props) => (
       <Entry {...props} globalStyle={globalStyle}  />
     );
@@ -111,6 +106,12 @@ export default function App() {
 
     const RenderSettings = (props) => (
       <Settings {...props} darkMode={darkMode} globalStyle={globalStyle} handleDarkMode={handleDarkMode} />
+    );
+    const RenderArchive = (props) => (
+      <Archive {...props}  globalStyle={globalStyle} />
+    );
+    const RenderTrash = (props) => (
+      <Trash {...props}  globalStyle={globalStyle} />
     );
 
 
@@ -161,29 +162,6 @@ export default function App() {
     </HomeStack.Navigator>
   );
 
-  // const StackBrp = () => (
-  //   <BrpStack.Navigator>
-
-  //     <BrpStack.Screen   
-  //       name="AddEntry"
-  //       component={RenderAddEntry}
-  //       options={{ 
-  //         animation:'slide_from_right',
-  //         headerTintColor: globalStyle?.color,
-  //     }}
-  //     />
-
-  //     <BrpStack.Screen   
-  //       name="DisplayEntry"
-  //       component={RenderDisplayEntry}
-  //       options={{ 
-  //         animation:'slide_from_right',
-  //         headerTintColor: globalStyle?.color,
-  //     }}
-  //     />
-
-  //   </BrpStack.Navigator>
-  // );
 
   const StackSearch = () => (
     <SearchStack.Navigator>
@@ -207,6 +185,7 @@ export default function App() {
 
   const StackMore = () => (
     <MoreStack.Navigator >
+
       <MoreStack.Screen
         name="MoreStack"
         component={RenderMore}
@@ -235,7 +214,46 @@ export default function App() {
           headerTintColor: globalStyle?.color,
           animation:'slide_from_right',
         }}
+      />
+      <MoreStack.Screen
+        name="Archive"
+        component={RenderArchive}
+        options={{
+          headerTitle: "Settings",
+          headerStyle: {
+            backgroundColor: globalStyle?.bgHeader,
+          },
+          headerTitleStyle:{
+            color: globalStyle?.color,
+          },
+          headerTintColor: globalStyle?.color,
+          animation:'slide_from_right',
+        }}
         
+      />
+      <MoreStack.Screen
+        name="Trash"
+        component={RenderTrash}
+        options={{
+          headerTitle: "Settings",
+          headerStyle: {
+            backgroundColor: globalStyle?.bgHeader,
+          },
+          headerTitleStyle:{
+            color: globalStyle?.color,
+          },
+          headerTintColor: globalStyle?.color,
+          animation:'slide_from_right',
+        }}
+      />
+
+      <MoreStack.Screen   
+        name="MoreEntry"
+        component={RenderEntry}
+        options={{ 
+          animation:'slide_from_right',
+          headerTintColor: globalStyle?.color,
+      }}
       />
     </MoreStack.Navigator>
   );

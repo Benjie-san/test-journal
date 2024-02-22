@@ -10,18 +10,24 @@ export default function More({darkMode, handleDarkMode, globalStyle, navigation}
   const handleOpenSettings = () =>{
     navigation.navigate("Settings");
   }
+  const handleOpenArchive = () =>{
+    navigation.navigate("Archive");
+  }
+  const handleOpenTrash = () =>{
+    navigation.navigate("Trash");
+  }
 
   return (
     <>
         <View style={[styles.container, {backgroundColor: globalStyle?.bgBody}]}>
 
           <View style={styles.moreViewRow} >
-            <TouchableOpacity style={styles.moreBtn} >
+            <TouchableOpacity style={styles.moreBtn} onPress={ ()=> handleOpenArchive() } >
                 <Feather name="archive" size={28}  color={globalStyle?.color} />
                 <Text style={{fontSize: globalStyle.fontSize, color: globalStyle.color}} >Archive</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.moreBtn}>
+            <TouchableOpacity style={styles.moreBtn} onPress={ ()=> handleOpenTrash() }>
                 <Feather name="trash" size={28}  color={globalStyle?.color} />
                 <Text style={{fontSize: globalStyle.fontSize, color: globalStyle.color}} >Trash</Text>
             </TouchableOpacity>
