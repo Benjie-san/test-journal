@@ -157,14 +157,6 @@ export default function App() {
       }}
       />
 
-      <HomeStack.Screen   
-        name="DisplayEntry"
-        component={RenderDisplayEntry}
-        options={{ 
-          animation:'slide_from_right',
-          headerTintColor: globalStyle?.color,
-      }}
-      />
 
     </HomeStack.Navigator>
   );
@@ -196,18 +188,20 @@ export default function App() {
   const StackSearch = () => (
     <SearchStack.Navigator>
       <SearchStack.Screen
-        options={{
-          headerTitle: "Search",
-          headerStyle: {
-            backgroundColor: globalStyle?.bgHeader,
-          },
-          headerTitleStyle:{
-            color: globalStyle?.color,
-          }
-        }}
         name="SearchStack"
         component={RenderSearch}
       />
+
+      
+      <SearchStack.Screen   
+        name="SearchEntry"
+        component={RenderEntry}
+        options={{ 
+          animation:'slide_from_right',
+          headerTintColor: globalStyle?.color,
+      }}
+      />
+
     </SearchStack.Navigator>
   );
 

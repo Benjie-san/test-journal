@@ -1,30 +1,33 @@
-import { StyleSheet, Text, View, TextInput, FlatList, Pressable, Image, TouchableOpacity } from 'react-native'
-import React,{useState} from 'react'
+import { StyleSheet, Text, View, TextInput, FlatList, Pressable, Image, TouchableOpacity, Dimensions } from 'react-native'
+import React,{useState, useLayoutEffect} from 'react'
 const db = SQLite.openDatabase('_journal_database.db');
 import * as SQLite from 'expo-sqlite';
-import DisplayEntry from '../components/DisplayEntry';
-import Modal from "react-native-modal";
-import Ionicons from '@expo/vector-icons/Ionicons';
 
+const SearchBar = ({searchItem, globalStyle, handleTextChange}) => {
+   return(
+      <View style={{width: Dimensions.get('window').width-30, flexDirection: 'row', alignItems: 'center', backgroundColor: globalStyle.bgHeader}}>
 
-export default function Search({visible, handleModal, globalStyle, fetchAllData, route}) {
+         <TextInput autoFocus={true} style={[{fontSize: 20, color: globalStyle?.color, }]} placeholderTextColor="#cccccc" placeholder='Search...' onChangeText={(text)=> handleTextChange(text)} value={searchItem}/>
+      
+      </View>
+   );
+};
+
+export default function Search({navigation, globalStyle}) {
    const [searchItem, setSearchItem] = useState("");
    const [searchedResult, setsSearchedResult] = useState([]);
-   const [displayEntryVisible, setDisplayEntryVisible] = useState(false)
-   const [currentEntry, setCurrentEntry] = useState([]);
 
-   const handleDisplayEntryModal =  (item) =>{
-      setDisplayEntryVisible(item);
-      handleModal(false)
+   const openDisplayEntry = (item) => {
+      navigation.navigate("Search", {
+         screen: 'SearchEntry',
+         params: {
+            entryId: item.dataId,
+            entryType: item.type,
+            state: 'update',
+         },
+      });
    }
 
-   const handleCurrentEntry = (item) =>{
-      setCurrentEntry(item);
-   }
-
-   const handleType = (item) => {
-      setType(item)
-   }
 
    const handleTextChange = (text) =>{
       setSearchItem(text)
@@ -52,57 +55,56 @@ export default function Search({visible, handleModal, globalStyle, fetchAllData,
       });
    };
 
-   const handleDisplayEntryFetch = (id) =>{
-      db.transaction((tx) => {
-         tx.executeSql(
-            "SELECT * FROM entries WHERE dataId = ? ;",
-            [id],
-            (_, result) => {
-               const rows = result.rows;
-               const dataArray = [];
-               for (let i = 0; i < rows.length; i++) {
-                  const item = rows.item(i);
-                  dataArray.push(item);
-               }
-               setCurrentEntry(...dataArray);
-            },
-            (_, error) => {
-               alert("No Entry yet")
-               console.error('Error querying data:', error);
-            }
-         );
+   const formatLastModified = (timestamp) => {
+         const lastModifiedTime = new Date(timestamp);
+         const now = new Date();
+   
+         // Calculate the difference in milliseconds
+         const timeDifference = now - lastModifiedTime;
+   
+         // Convert milliseconds to seconds, hours, or days as needed
+         const seconds = Math.floor(timeDifference / 1000);
+         const minutes = Math.floor(timeDifference / (1000 * 60));
+         const hours = Math.floor(timeDifference / (1000 * 60 * 60));
+         const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+   
+         // Choose the appropriate format based on the time difference
+         if (seconds < 60) {
+            
+            return `${seconds} ${seconds == 1 ? 'second' : 'seconds'} ago`;
+         } 
+         else if (minutes < 60) {
+            return `${minutes} ${minutes == 1 ? 'minute' : 'minutes'} ago`;
+         } 
+         else if (hours < 24) {
+            return `${hours} ${hours == 1 ? 'hour' : 'hours'} ago`;
+         } else {
+            return `${days} ${days == 1 ? 'day' : 'days'} ago`;
+         }
+   };
+
+   //HEADER
+   useLayoutEffect(() => {
+      navigation.setOptions({
+         headerStyle: {
+            backgroundColor: globalStyle?.bgHeader,
+            
+         },
+         headerTitleStyle:{
+            color: globalStyle?.color,
+         },
+         headerTitle: ()=> <SearchBar searchItem={searchItem} handleTextChange={handleTextChange} globalStyle={globalStyle} /> ,
+
+      
       });
-   handleDisplayEntryModal(true);
-   }
+   }, [navigation, handleTextChange]);
+
 
    return (
       <>
-      {/* <Modal 
-         isVisible={visible}
-         animationIn="slideInRight"
-         animationOut="slideOutRight"
-         hasBackdrop={true}
-         avoidKeyboard={false}
-         propagateSwipe
-         onBackButtonPress={ ()=> handleModal() }
-         onBackdropPress={ () => handleModal() }
-         style={{
-            flex:1, 
-            margin: 0, 
-            top: 0,
-            right: 0,
-            position: 'absolute',
-            width: "80%",
-            height: "100%",
-         }}
-      > */}
+
          <View style={styles.container}>
-            <View style={{flexDirection: 'row', alignItems: 'center', padding: 12, gap: 10,  borderBottomColor: '#cccccc', borderBottomWidth:1 , backgroundColor: globalStyle.bgHeader}}>
-               <TouchableOpacity  onPress={ () => handleModal() } styles={[{width: 30, height: 30}]}>
-                  <Ionicons name="arrow-back-outline" size={30} color={globalStyle.color}/>
-               </TouchableOpacity>
-               <TextInput style={[{width: '85%', fontSize: 20, color: globalStyle.color, }]} placeholderTextColor={globalStyle.color} placeholder='Search...' onChangeText={(text)=> handleTextChange(text)} value={searchItem}/>
-            </View>
+
             <View style={[styles.searchedlist, {backgroundColor: globalStyle.bgBody}]}>
             {searchedResult.length === 0 ? (
                <Text style={{fontSize: 30, paddingBottom: 150}}></Text>
@@ -111,26 +113,26 @@ export default function Search({visible, handleModal, globalStyle, fetchAllData,
                   <FlatList
                   style={{width: '100%'}}
                   data={searchedResult}
+                  contentInsetAdjustmentBehavior="automatic"
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={({ item }) => (
                   
-                     <TouchableOpacity style={[styles.entry, {backgroundColor: globalStyle.noteList, borderColor: globalStyle.borderColor, borderWidth:1}]} onPress={ ()=> handleDisplayEntryFetch(item.dataId) }>
-                        <Text style={{color: globalStyle.color}}>{`${item.title}`}</Text>
-                        <Text style={{color: globalStyle.color}}>{`${item.scripture}`}</Text>
-                        <View style={[styles.border, {width: 30, height: 30, backgroundColor: item.status}]}></View>
+                     <TouchableOpacity
+                        style={ [styles.entry, {backgroundColor: globalStyle?.noteList, elevation: 2, gap: 5}] }
+                        onPress={ ()=> openDisplayEntry(item) }
+                     >
+                        <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden', flex: 1}}>{item.title}</Text>
+
+                        <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
 
                      </TouchableOpacity>
                   )}
                /> 
                </>        
             )}
-         </View>
+            </View>
 
-
          </View>
-      {/* </Modal> */}
-      {/*For displaying the component*/}
-      <DisplayEntry visible={displayEntryVisible} handleModal={handleDisplayEntryModal} currentEntry={currentEntry} handleEntry={handleCurrentEntry} handleType={handleType} globalStyle={globalStyle} fetchAllData={fetchAllData} route={route}/>
       </>
    )
 }

@@ -7,150 +7,124 @@ import Feather from '@expo/vector-icons/Feather';
 import * as SQLite from 'expo-sqlite';
 const db = SQLite.openDatabase('_journal_database.db');
 import PassageBottomSheet from './PassageBottomSheet';
-import { Entypo } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
 import AlertModal from './AlertModal';
 import styles from '../styles/entryStyle';
 import { useIsFocused } from '@react-navigation/native';
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-const BackConfirmationModal = ({visible, handleModal, globalStyle, updateEntry, }) => {
+const DeleteConfirmationModal = ({visible, handleType, handleModal, globalStyle}) => {
 
-const handleSave = () =>{
-    handleModal(false);
-}
-const handleClose = () =>{
-    handleModal(false);
-}
-return (
-<>
-    <Modal
-    isVisible={visible}
-    coverScreen={true}
-    style={{ flex: 1, margin: 0 }}
-    animationIn="fadeIn"
-    animationOut="fadeOut"
-    onBackdropPress={() => handleModal(false)}
-    onBackButtonPress={handleModal}
-    >
-        <View style={[styles.flex]}>
+    const handleDelete = () =>{
+        handleType("trash");
+        handleModal(false);
+    }
+    return (
+        <>
+            <Modal
+            isVisible={visible}
+            style={{flex:1, margin: 0}}
+        
+            animationIn="fadeIn"
+            animationOut="fadeOut"
+            onBackdropPress={() => handleModal(false)}
+            onBackButtonPress={() => handleModal(false)}
+            animated
+            backdropTransitionOutTiming={0}
+            hideModalContentWhileAnimating
+            >
+
             <View
-            style={{
-                backgroundColor: globalStyle?.bgBody,
-                width: "50%",
-                height: "20%",
-                padding: 20,
-                borderRadius: 10,
-                alignItems: "center",
-                flexDirection: "column",
-                justifyContent: "center",
-                borderColor: globalStyle?.borderColor,
-                borderWidth: 1,
-            }}
+                style={[styles.flex]}
             >
-            <Text style={{ textAlign: "center", color: globalStyle?.color }}>
-                Are you sure want to exit?
-            </Text>
+                <View style={[styles.confirmationModal,{backgroundColor: globalStyle?.bgBody, borderColor: globalStyle?.borderColor,}]}>
+
+                <Text style={{alignSelf:'flex-start', color: globalStyle?.color, fontSize: 17, fontWeight: 'bold', padding: 5,}}>Delete</Text>
+                <Text style={{alignSelf:'flex-start', color: globalStyle?.color, padding: 5,}}>Are you sure want to move the entry to trash?</Text>
+                <View style={{
+                    marginTop: 10,
+                    alignSelf:'flex-end',
+                    flexDirection:'row',
+                    
+                    }}
+                >
+                    <TouchableOpacity style={[styles.deleteButtons]} onPress={() => handleModal(false)}>
+                        <Text style={{ color: globalStyle?.color}}>Cancel</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity  style={[styles.deleteButtons,]} onPress={() => handleDelete()}>
+                        <Text style={{color: 'red'}}>Delete</Text>
+                    </TouchableOpacity>
+                </View>
+                </View>
+            </View>
+            </Modal>
+        </>
+    );
+}
+
+const ArchiveConfirmationModal = ({visible, handleType, handleModal, globalStyle}) => {
+
+    const handleArchive = () =>{
+        handleType("archive");
+        handleModal(false);
+    }
+    return (
+        <>
+            <Modal
+            isVisible={visible}
+            coverScreen={true} 
+            style={{flex:1, margin: 0}}
+            animationIn="fadeIn"
+            animationOut="fadeOut"
+            onBackdropPress={() => handleModal(false)}
+            onBackButtonPress={() => handleModal(false)}
+            animated
+            backdropTransitionOutTiming={0}
+            hideModalContentWhileAnimating
+            >
+
             <View
-            style={{
-                margin: 5,
-                alignItems: "center",
-                flexDirection: "row",
-                }}
+                style={[styles.flex]}
             >
-            <TouchableOpacity
-                style={[
-                    styles.deleteButtons,
-                    {
-                    borderColor: globalStyle?.borderColor,
-                    borderWidth: 1,
-                    backgroundColor: globalStyle?.bgHeader,
-                    },
-                ]}
-                onPress={()=>handleModal(false)}
-            >
-                <Text style={{ color: globalStyle?.color }}>NO</Text>
-            </TouchableOpacity>
+                <View style={[styles.confirmationModal,{backgroundColor: globalStyle?.bgBody, borderColor: globalStyle?.borderColor,}]}>
 
-            <TouchableOpacity
-                style={[
-                styles.deleteButtons,
-                    {
-                    backgroundColor: "red",
-                    borderColor: globalStyle?.borderColor,
-                    borderWidth: 1,
-                    },
-                ]}
-                onPress={() => handleClose()}
-            >
-            <Text style={{ color: "white" }}>YES</Text>
-            </TouchableOpacity>
+                <Text style={{alignSelf:'flex-start', color: globalStyle?.color, fontSize: 17, fontWeight: 'bold', padding: 5,}}>Archive</Text>
+                <Text style={{alignSelf:'flex-start', color: globalStyle?.color, padding: 5,}}>Are you sure want to move the entry to archive?</Text>
+                <View style={{
+                    marginTop: 10,
+                    alignSelf:'flex-end',
+                    flexDirection:'row',
+                    }}
+                >
+                    <TouchableOpacity style={[styles.deleteButtons]} onPress={() => handleModal(false)}>
+                        <Text style={{ color: globalStyle?.color}}>Cancel</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity  style={[styles.deleteButtons,]} onPress={() => handleArchive()}>
+                        <Text style={{color: globalStyle.settingsColor}}>Archive</Text>
+                    </TouchableOpacity>
+                </View>
+                </View>
             </View>
-            </View>
-            </View>
-        </Modal>
-    </>
-);
+            </Modal>
+        </>
+    );
 }
 
-const DeleteConfirmationModal = ({visible, deleteEntry, handleModal, globalStyle}) => {
 
-const handleDelete = () =>{
-    deleteEntry();
-    handleModal();
-}
-return (
-    <>
-        <Modal
-        isVisible={visible}
-        coverScreen={true} 
-        style={{flex:1, margin: 0}}
-        animationIn="fadeIn"
-        animationOut="fadeOut"
-        onBackdropPress={() => handleModal()}
-        onBackButtonPress={handleModal}
-        >
+const MenuModal = ({visible, handleCloseModal, deleteEntry, status, entry, type, handleStatus, globalStyle, handleType}) => {
 
-        <View
-            style={[styles.flex]}
-        >
-            <View style={{
-            backgroundColor: globalStyle?.bgBody, 
-            width: "50%", 
-            height:"20%",
-            padding: 20,
-            borderRadius: 10,
-            alignItems:'center',
-            flexDirection:'column',
-            justifyContent:"center",
-            borderColor: globalStyle?.borderColor,
-            borderWidth: 1,
-            }}>
-
-            <Text style={{textAlign: 'center', color: globalStyle?.color}}>Are you sure want to delete this Enrty?</Text>
-            <View style={{
-            margin:5,
-            alignItems:'center',
-            flexDirection:'row'}}>
-            <TouchableOpacity style={[styles.deleteButtons,{ borderColor: globalStyle?.borderColor, borderWidth: 1, backgroundColor: globalStyle?.bgHeader}]} onPress={handleModal}>
-                <Text style={{ color: globalStyle?.color}} >Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity  style={[styles.deleteButtons, {backgroundColor: 'red', borderColor: globalStyle?.borderColor,  borderWidth: 1,}]} onPress={() => handleDelete()}>
-                <Text style={{color: 'white'}}>Delete</Text>
-            </TouchableOpacity>
-            </View>
-            </View>
-        </View>
-        </Modal>
-    </>
-);
-}
-
-const MenuModal = ({visible, handleCloseModal, deleteEntry, status, entry, type, handleStatus, globalStyle}) => {
 const [deleteModal, setDeleteModal] = useState(false);
+const [archiveModal, setArchiveModal] = useState(false);
 
-const handleDeleteModal = () => {
-    setDeleteModal(!deleteModal);
+
+const handleDeleteModal = (item) => {
+    setDeleteModal(item);
+} 
+
+const handleArchiveModal = (item) => {
+    setArchiveModal(item);
 } 
 
 const onShare = async () => {
@@ -162,6 +136,7 @@ const onShare = async () => {
     } else if(type == "sermon"){
         message =  `Date:\n${entry.date}\n\nText:\n${entry.scripture}\n\nTheme:\n${entry.title}\n\nQuestion:\n${entry.question}\n\nSermon Points:\n${entry.observation}\n\nRecommendations:\n${entry.application}\n\nReflection:\n${entry.prayer}\n\n`
     }
+
     try {
         const result = await Share.share({
         message: message,
@@ -182,7 +157,10 @@ const onShare = async () => {
 
 const handlePressBtn = (item) =>{
     if(item == "Delete"){
-        handleDeleteModal();
+        handleDeleteModal(true);
+    }
+    else if(item == "Archive"){
+        handleArchiveModal(true);
     }
     else if(item == "#fff"){
         handleStatus("#8CFF31");
@@ -200,13 +178,13 @@ const handlePressBtn = (item) =>{
 return(
     <>
         <Modal 
-        isVisible={visible}
-        style={{margin: 0}}
-        animationIn="fadeIn"
-        animationOut="fadeOut"
-        onBackButtonPress={handleCloseModal}
-        onBackdropPress={handleCloseModal}
-        backdropOpacity={0}
+            isVisible={visible}
+            style={{margin: 0}}
+            animationIn="fadeIn"
+            animationOut="fadeOut"
+            onBackButtonPress={handleCloseModal}
+            onBackdropPress={handleCloseModal}
+            backdropOpacity={0}
         >
         <View style={{flex: 1}} >
             <View style={[styles.menuPopup, {backgroundColor: globalStyle?.bgHeader}]} >
@@ -222,7 +200,8 @@ return(
             </TouchableOpacity>
 
             <TouchableOpacity 
-            style={styles.menuItems}  
+                onPress={() => handlePressBtn("Archive")} 
+                style={styles.menuItems}  
             > 
                 <View style={{flexDirection: 'row', alignItems: "center", gap: 10,}}>
                     <Feather name="archive" size={20} color={globalStyle?.color} />        
@@ -255,7 +234,9 @@ return(
         </View>
         </Modal>
 
-        <DeleteConfirmationModal visible={deleteModal} deleteEntry={deleteEntry} handleModal={handleDeleteModal}  globalStyle={globalStyle} />
+        <DeleteConfirmationModal visible={deleteModal} handleType={handleType} handleModal={handleDeleteModal} globalStyle={globalStyle} />
+        <ArchiveConfirmationModal visible={archiveModal} handleType={handleType} handleModal={handleArchiveModal} globalStyle={globalStyle} />
+
     </>
 );
 }
@@ -405,6 +386,10 @@ const handleStatus = (item) =>{
     handleAlertModalVisible(true);
 }
 
+const handleType = (item) =>{
+    setType(item);
+}
+
 const cleanStates = () =>{
     setDate("");
     setTitle("");
@@ -423,6 +408,7 @@ const deleteEntry = () => {
         [dataId],
         (_, result) => {
         console.log('Data deleted successfully');
+        navigation.navigate("HomeStack");
         },
         (_, error) => {
         console.error('Error deleting data:', error);
@@ -586,9 +572,7 @@ useEffect(() => {
             }else{
                 setEntryLoading(true);
             }
-            
-        }
-        
+        }       
     }, 1000)
 
     return () => {
@@ -613,31 +597,31 @@ useEffect(() => {
 
 
 //for drawer when pressed
-// useEffect(() => {
-//     const subscription = AppState.addEventListener('change', nextAppState => {
+useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
 
-//     if (appState.current.match(/inactive|background/) &&
-//     nextAppState === 'active') {
-//         return;
-//     }else{
-//         if(isFocused === true){
-//             if(currentState == "add"){
-//                 saveEntry();
-//             }else{
-//                 updateEntry();
-//             }
+    if (appState.current.match(/inactive|background/) &&
+    nextAppState === 'active') {
+        return;
+    }else{
+        if(isFocused === true){
+            if(currentState == "add"){
+                saveEntry();
+            }else{
+                updateEntry();
+            }
         
-//         }
-//     }
+        }
+    }
 
-//     appState.current = nextAppState;
-//     setAppCurrentState(appState.current);
-//     });
+    appState.current = nextAppState;
+    setAppCurrentState(appState.current);
+    });
 
-//     return () => {
-//     subscription.remove();
-//     };
-// }, [isFocused ]);
+    return () => {
+    subscription.remove();
+    };
+}, [isFocused, currentState, saveEntry, updateEntry]);
 
 //HEADER
 useEffect(() => {
@@ -744,12 +728,13 @@ return (
     
                         <View style={[styles.flex,{paddingTop: 20,}]}>
                             <TouchableOpacity 
-                            style={[styles.border, {  backgroundColor: globalStyle?.bgHeader, borderColor: globalStyle?.borderColor ,alignItems: 'center', justifyContent: 'space-evenly', flexDirection: 'column', padding: 10, gap: 5, width: 200 }]} 
+                            style={[styles.border, {  backgroundColor: globalStyle?.bgHeader, borderColor: globalStyle?.borderColor ,alignItems: 'center', justifyContent: 'space-evenly', flexDirection: 'row', padding: 10, gap: 5, width: 100,elevation: 5 }]} 
                             onPress={ () => handlePassageVisible(true) }
                             >
-    
-                            <Entypo name="chevron-thin-up" size={24} color={globalStyle?.color} />
-                            
+                            {/* <Entypo name="chevron-thin-up" size={24} color={globalStyle?.color} /> */}
+                            <FontAwesome5 name="bible" size={24} color={globalStyle?.color} />
+                            <Text style={{color:globalStyle?.color , fontSize: globalStyle?.fontSize}}>Bible</Text>
+          
                             </TouchableOpacity>
                         </View>
     
@@ -772,9 +757,9 @@ return (
 
         </View>
 
-        <BackConfirmationModal message={message} visible={backConfirmVisible} handleModal={handleBackConfirmModal}  updateEntry={updateEntry} globalStyle={globalStyle}  />
+        {/* <BackConfirmationModal message={message} visible={backConfirmVisible} handleModal={handleBackConfirmModal}  updateEntry={updateEntry} globalStyle={globalStyle}  /> */}
     
-        <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={deleteEntry} id={id} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={entryType}  globalStyle={globalStyle} updateEntry={updateEntry} />
+        <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={deleteEntry} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={entryType}  globalStyle={globalStyle} handleType={handleType} />
         
     </>
 )

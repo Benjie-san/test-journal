@@ -31,7 +31,6 @@ const FlatListItems = ({item, globalStyle, handleDisplayEntryFetch}) => {
             return `${days} ${days == 1 ? 'day' : 'days'} ago`;
         }
     };
-        
 
     return (
 
@@ -44,7 +43,7 @@ const FlatListItems = ({item, globalStyle, handleDisplayEntryFetch}) => {
 
             <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
         </TouchableOpacity>
-        )
+    )
 
 }
 

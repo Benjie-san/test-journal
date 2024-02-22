@@ -20,13 +20,18 @@ const TranslationModal = ({visible, handleModal, handleTranslation, globalStyle}
 		handleModal(false);
 	}
 
-  return(
-      <>
+	return(
+    <>
         <Modal
 			onBackdropPress={() => handleModal(false)}
 			onBackButtonPress={() => handleModal(false)}
+			animationIn="fadeIn"
+            animationOut="fadeOut"			
 			isVisible={visible}
 			style={styles.flex}
+			animated
+            backdropTransitionOutTiming={0}
+            hideModalContentWhileAnimating
 		>
             <View style={[styles.picker, {backgroundColor: globalStyle.verseModal}]}>
 				{
@@ -150,7 +155,9 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, s
 			animationInTiming={900}
 			animationOutTiming={500}
 			backdropTransitionInTiming={1000}
-			backdropTransitionOutTiming={500}
+			backdropTransitionOutTiming={1000}
+			animated
+            hideModalContentWhileAnimating
 			style={styles.modal}
 		>
 			<View style={[styles.modalContent, {backgroundColor: globalStyle?.verseModal}]}>

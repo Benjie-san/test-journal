@@ -103,9 +103,7 @@ menuItems:{
    borderBottomWidth: 1,
 },
 deleteButtons:{
-   padding: 15,
-   borderRadius: 10,
-   margin: 5,
+   padding: 10,
 },
 editModeContainer:{
    width: "100%", 
@@ -126,6 +124,17 @@ containerHeadline: {
    fontWeight: '600',
    padding: 20,
 },
+confirmationModal:{
+   width: "60%", 
+   height:"20%",
+   padding: 20,
+   borderRadius: 10,
+   alignItems:'center',
+   flexDirection:'column',
+   justifyContent:"center",
+   borderWidth: 1,
+},
+
 });
 
 export default styles;

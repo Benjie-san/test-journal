@@ -39,6 +39,9 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
         onBackButtonPress={handleModal}
         onBackdropPress={handleModal}
         backdropOpacity={0.5}
+        animated
+        backdropTransitionOutTiming={0}
+        hideModalContentWhileAnimating
       >
       
         <View style={{
