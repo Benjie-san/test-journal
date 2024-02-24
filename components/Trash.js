@@ -49,7 +49,7 @@ export default function Trash({navigation, globalStyle}) {
     const fetchEntry = () => {
         db.transaction((tx) => {
             tx.executeSql(
-                'SELECT * FROM entries WHERE type = ?',
+                'SELECT * FROM entries WHERE settingState = ? ORDER BY modifiedDate DESC',
                 ["trash"],
                 (_, result) => {
                 const rows = result.rows;

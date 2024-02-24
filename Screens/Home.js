@@ -235,8 +235,8 @@ export default function Home({navigation, globalStyle}) {
   const getJournalCount = (type = "journal") => {
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM entries  WHERE type = ? ORDER BY modifiedDate DESC;",
-        [type],
+        "SELECT * FROM entries  WHERE type = ? AND settingState = ?;",
+        [type, "normal"],
         (_, result) => {
           const rows = result.rows;
           setJournalCount(rows.length);
@@ -251,8 +251,8 @@ export default function Home({navigation, globalStyle}) {
   const getOpmCount = (type = "opm") => {
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM entries  WHERE type = ? ORDER BY modifiedDate DESC;",
-        [type],
+        "SELECT * FROM entries WHERE type = ? AND settingState = ?;",
+        [type, "normal"],
         (_, result) => {
           const rows = result.rows;
           setOpmCount(rows.length);
@@ -267,8 +267,8 @@ export default function Home({navigation, globalStyle}) {
   const getSermonCount = (type = "sermon") => {
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM entries  WHERE type = ? ORDER BY modifiedDate DESC;",
-        [type],
+        "SELECT * FROM entries  WHERE type = ? AND settingState = ?;",
+        [type, "normal"],
         (_, result) => {
           const rows = result.rows;
           setSermonCount(rows.length);
@@ -284,8 +284,8 @@ export default function Home({navigation, globalStyle}) {
     if(type == "journal"){
       db.transaction((tx) => {
         tx.executeSql(
-          "SELECT * FROM entries WHERE type = ? OR type = ? ORDER BY modifiedDate DESC;",
-          ["journal", "sermon"],
+          "SELECT * FROM entries WHERE settingState = ? AND type = ? OR type = ? ORDER BY modifiedDate DESC;",
+          [ "normal", "journal", "sermon"],
           (_, result) => {
             const rows = result.rows;
             const dataArray = [];
@@ -304,8 +304,8 @@ export default function Home({navigation, globalStyle}) {
     } else{
       db.transaction((tx) => {
         tx.executeSql(
-          "SELECT * FROM entries WHERE type = ? ORDER BY modifiedDate DESC;",
-          ["opm"],
+          "SELECT * FROM entries WHERE type = ? AND settingState = ? ORDER BY modifiedDate DESC;",
+          ["opm", "normal"],
           (_, result) => {
             const rows = result.rows;
             const dataArray = [];
@@ -327,8 +327,8 @@ export default function Home({navigation, globalStyle}) {
 
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM entries ORDER BY modifiedDate DESC;",
-        [],
+        "SELECT * FROM entries WHERE settingState = ? ORDER BY modifiedDate DESC;",
+        ["normal"],
         (txObj, result) => {
           const rows = result.rows;
           const dataArray = [];
@@ -406,7 +406,7 @@ export default function Home({navigation, globalStyle}) {
             // Table doesn't exist, create it
             db.transaction((tx) => {
               tx.executeSql(
-                'CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, title TEXT, question TEXT, scripture TEXT, observation TEXT, application TEXT, prayer TEXT, status TEXT, type TEXT, modifiedDate TEXT, dataId INTEGER, month TEXT);',
+                'CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, title TEXT, question TEXT, scripture TEXT, observation TEXT, application TEXT, prayer TEXT, status TEXT, type TEXT, modifiedDate TEXT, dataId TEXT, month TEXT, settingState TEXT);',
                 [],
                 (_, result) => {
                   console.log('Table entries: created successfully');
@@ -527,7 +527,7 @@ export default function Home({navigation, globalStyle}) {
               <Text style={{fontSize: 18, color: "#fff",  paddingRight: 5}}>Entry Added</Text>
           </Pressable>)
           :
-          (  <TouchableOpacity onPress={ ()=>handleAddButton("today")}
+          (  <TouchableOpacity onPress={ () => handleAddButton("today")}
         style={[styles.addEntryShortcut, { paddingRight: 10}]}>
             <AntDesign name="plus" size={20} color="white" />
             <Text style={{fontSize: 18, color: "#fff", paddingRight: 5}}>Add Entry</Text>

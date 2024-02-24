@@ -2,178 +2,120 @@ import { Text, View, TextInput, Pressable, TouchableOpacity, ScrollView, Keyboar
 import React, {useState, useEffect, useRef} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
+import * as SQLite from 'expo-sqlite';
+
+// Icons
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
-import * as SQLite from 'expo-sqlite';
-const db = SQLite.openDatabase('_journal_database.db');
-import PassageBottomSheet from './PassageBottomSheet';
 import { FontAwesome5 } from '@expo/vector-icons';
-import AlertModal from './AlertModal';
-import styles from '../styles/entryStyle';
+import { MaterialIcons } from '@expo/vector-icons';
+
+// Navigation
 import { useIsFocused } from '@react-navigation/native';
+
+//Component Imports
+import PassageBottomSheet from './PassageBottomSheet';
+import AlertModal from './AlertModal';
+import ConfirmationModal from './ConfirmationModal';
+import styles from '../styles/entryStyle';
+
+const db = SQLite.openDatabase('_journal_database.db');
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-const DeleteConfirmationModal = ({visible, handleType, handleModal, globalStyle}) => {
+const MenuModal = ({visible, handleCloseModal, status, entry, type, handleStatus, globalStyle, handleSettingState, settingState}) => {
 
-    const handleDelete = () =>{
-        handleType("trash");
-        handleModal(false);
-    }
-    return (
-        <>
-            <Modal
-            isVisible={visible}
-            style={{flex:1, margin: 0}}
-        
-            animationIn="fadeIn"
-            animationOut="fadeOut"
-            onBackdropPress={() => handleModal(false)}
-            onBackButtonPress={() => handleModal(false)}
-            animated
-            backdropTransitionOutTiming={0}
-            hideModalContentWhileAnimating
-            >
+    const [confirmationModal, setConfirmationModal] = useState(false);
+    const [confirmationTitle, setConfirmationTitle] = useState("");
+    const [confirmationMessage, setConfirmationMessage] = useState("");
 
-            <View
-                style={[styles.flex]}
-            >
-                <View style={[styles.confirmationModal,{backgroundColor: globalStyle?.bgBody, borderColor: globalStyle?.borderColor,}]}>
-
-                <Text style={{alignSelf:'flex-start', color: globalStyle?.color, fontSize: 17, fontWeight: 'bold', padding: 5,}}>Delete</Text>
-                <Text style={{alignSelf:'flex-start', color: globalStyle?.color, padding: 5,}}>Are you sure want to move the entry to trash?</Text>
-                <View style={{
-                    marginTop: 10,
-                    alignSelf:'flex-end',
-                    flexDirection:'row',
-                    
-                    }}
-                >
-                    <TouchableOpacity style={[styles.deleteButtons]} onPress={() => handleModal(false)}>
-                        <Text style={{ color: globalStyle?.color}}>Cancel</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity  style={[styles.deleteButtons,]} onPress={() => handleDelete()}>
-                        <Text style={{color: 'red'}}>Delete</Text>
-                    </TouchableOpacity>
-                </View>
-                </View>
-            </View>
-            </Modal>
-        </>
-    );
-}
-
-const ArchiveConfirmationModal = ({visible, handleType, handleModal, globalStyle}) => {
-
-    const handleArchive = () =>{
-        handleType("archive");
-        handleModal(false);
-    }
-    return (
-        <>
-            <Modal
-            isVisible={visible}
-            coverScreen={true} 
-            style={{flex:1, margin: 0}}
-            animationIn="fadeIn"
-            animationOut="fadeOut"
-            onBackdropPress={() => handleModal(false)}
-            onBackButtonPress={() => handleModal(false)}
-            animated
-            backdropTransitionOutTiming={0}
-            hideModalContentWhileAnimating
-            >
-
-            <View
-                style={[styles.flex]}
-            >
-                <View style={[styles.confirmationModal,{backgroundColor: globalStyle?.bgBody, borderColor: globalStyle?.borderColor,}]}>
-
-                <Text style={{alignSelf:'flex-start', color: globalStyle?.color, fontSize: 17, fontWeight: 'bold', padding: 5,}}>Archive</Text>
-                <Text style={{alignSelf:'flex-start', color: globalStyle?.color, padding: 5,}}>Are you sure want to move the entry to archive?</Text>
-                <View style={{
-                    marginTop: 10,
-                    alignSelf:'flex-end',
-                    flexDirection:'row',
-                    }}
-                >
-                    <TouchableOpacity style={[styles.deleteButtons]} onPress={() => handleModal(false)}>
-                        <Text style={{ color: globalStyle?.color}}>Cancel</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity  style={[styles.deleteButtons,]} onPress={() => handleArchive()}>
-                        <Text style={{color: globalStyle.settingsColor}}>Archive</Text>
-                    </TouchableOpacity>
-                </View>
-                </View>
-            </View>
-            </Modal>
-        </>
-    );
-}
-
-
-const MenuModal = ({visible, handleCloseModal, deleteEntry, status, entry, type, handleStatus, globalStyle, handleType}) => {
-
-const [deleteModal, setDeleteModal] = useState(false);
-const [archiveModal, setArchiveModal] = useState(false);
-
-
-const handleDeleteModal = (item) => {
-    setDeleteModal(item);
-} 
-
-const handleArchiveModal = (item) => {
-    setArchiveModal(item);
-} 
-
-const onShare = async () => {
-    let message = "";
-    if(type == "journal"){
-        message =  `Date:\n${entry.date}\n\nScripture:\n${entry.scripture}\n\n${entry.passage.toString()}\n\nTitle:\n${entry.title}\n\nObservation:\n${entry.observation}\n\nApplication:\n${entry.application}\n\nPrayer:\n${entry.prayer}\n`
-    }else if(type == "opm"){
-        message =  `Date:\n${entry.date}\n\nOPM Passage:\n${entry.scripture}\n\nTheme:\n${entry.title}\n\nQuestion:\n${entry.question}\n\nKey Points:\n${entry.observation}\n\nRecommendations:\n${entry.application}\n\nReflection/Realization:\n${entry.prayer}\n\n`
-    } else if(type == "sermon"){
-        message =  `Date:\n${entry.date}\n\nText:\n${entry.scripture}\n\nTheme:\n${entry.title}\n\nQuestion:\n${entry.question}\n\nSermon Points:\n${entry.observation}\n\nRecommendations:\n${entry.application}\n\nReflection:\n${entry.prayer}\n\n`
-    }
-
-    try {
-        const result = await Share.share({
-        message: message,
-        });
-        if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-            // shared with activity type of result.activityType
-        } else {
-            // shared
+    const handleTrashModal = (item) => {
+        setConfirmationModal(item);
+        if(item == true){
+            if(settingState == "trash"){
+                setConfirmationTitle("Restore");
+                setConfirmationMessage("Are you sure want to restore the entry from trash?");
+    
+            }else{
+                setConfirmationTitle("Trash");
+                setConfirmationMessage("Are you sure want to move the entry to trash?");
+    
+            }
         }
-        } else if (result.action === Share.dismissedAction) {
-        // dismissed
+    } 
+
+    const handleArchiveModal = (item) => {
+        setConfirmationModal(item);
+        if(item == true){
+            if(settingState == "archive"){
+                setConfirmationTitle("Unarchive");
+                setConfirmationMessage("Are you sure want to remove the entry from archive?");
+            }else{
+                setConfirmationTitle("Archive");
+                setConfirmationMessage("Are you sure want to move the entry to archive?");
+            }
         }
-    } catch (error) {
-        Alert.alert(error.message);
-    }
-};
+    
+    } 
 
-const handlePressBtn = (item) =>{
-    if(item == "Delete"){
-        handleDeleteModal(true);
-    }
-    else if(item == "Archive"){
-        handleArchiveModal(true);
-    }
-    else if(item == "#fff"){
-        handleStatus("#8CFF31");
-    }
-    else if(item == "#8CFF31"){
-        handleStatus("#fff");
-    }
-    else if(item == "Share"){
-        onShare();
-    }
+    const handleDeleteModal = (item) => {
+        setConfirmationModal(item);
+        if(item == true){
+            setConfirmationTitle("Delete");
+            setConfirmationMessage("Are you sure want to permanently delete the entry?");
+        }
 
-    handleCloseModal();
-}
+    } 
+
+    const onShare = async () => {
+        let message = "";
+        if(type == "journal"){
+            message =  `Date:\n${entry.date}\n\nScripture:\n${entry.scripture}\n\n${entry.passage.toString()}\n\nTitle:\n${entry.title}\n\nObservation:\n${entry.observation}\n\nApplication:\n${entry.application}\n\nPrayer:\n${entry.prayer}\n`
+        }else if(type == "opm"){
+            message =  `Date:\n${entry.date}\n\nOPM Passage:\n${entry.scripture}\n\nTheme:\n${entry.title}\n\nQuestion:\n${entry.question}\n\nKey Points:\n${entry.observation}\n\nRecommendations:\n${entry.application}\n\nReflection/Realization:\n${entry.prayer}\n\n`
+        } else if(type == "sermon"){
+            message =  `Date:\n${entry.date}\n\nText:\n${entry.scripture}\n\nTheme:\n${entry.title}\n\nQuestion:\n${entry.question}\n\nSermon Points:\n${entry.observation}\n\nRecommendations:\n${entry.application}\n\nReflection:\n${entry.prayer}\n\n`
+        }
+
+        try {
+            const result = await Share.share({
+            message: message,
+            });
+            if (result.action === Share.sharedAction) {
+            if (result.activityType) {
+                // shared with activity type of result.activityType
+            } else {
+                // shared
+            }
+            } else if (result.action === Share.dismissedAction) {
+            // dismissed
+            }
+        } catch (error) {
+            Alert.alert(error.message);
+        }
+    };
+
+    const handlePressBtn = (item) =>{
+        if(item == "Delete"){
+            handleDeleteModal(true);
+        }
+        else if(item == "Archive"){
+            handleArchiveModal(true);
+        }
+        else if(item == "Trash"){
+            handleTrashModal(true);
+        }
+        else if(item == "#fff"){
+            handleStatus("#8CFF31");
+        }
+        else if(item == "#8CFF31"){
+            handleStatus("#fff");
+        }
+        else if(item == "Share"){
+            onShare();
+        }
+
+        handleCloseModal();
+    }
 
 return(
     <>
@@ -205,19 +147,35 @@ return(
             > 
                 <View style={{flexDirection: 'row', alignItems: "center", gap: 10,}}>
                     <Feather name="archive" size={20} color={globalStyle?.color} />        
-                    <Text style={{fontSize: 18, color: globalStyle?.color}}>Archive</Text>
+                    <Text style={{fontSize: 18, color: globalStyle?.color}}>{settingState == "archive" ? "Unarchive" : "Archive"}</Text>
                 </View>
             </TouchableOpacity>
 
             <TouchableOpacity 
             style={styles.menuItems}  
-            onPress={() => handlePressBtn("Delete")} 
+            onPress={() => handlePressBtn("Trash")} 
             > 
-            <View  style={{flexDirection: 'row', alignItems: "center", gap: 10,}}>   
-                <Feather name="trash" size={20} color="#FA5252" />               
-                <Text style={{color: '#FA5252', fontSize: 18}}>Delete</Text>
+            <View  style={{flexDirection: 'row', alignItems: "center", gap: 10,}}> 
+                {settingState == "trash" ? 
+                (    <MaterialIcons name="restore" size={24} color={globalStyle?.color} />) 
+                :
+                ( <Feather name="trash" size={20} color={globalStyle?.color} /> )}
+                <Text style={{color:  globalStyle?.color, fontSize: 18}}>{settingState == "trash" ? "Restore" : "Trash"}</Text>
             </View>
             </TouchableOpacity>
+
+            {settingState == "trash" ? (
+                <TouchableOpacity 
+                    style={styles.menuItems}  
+                    onPress={() => handlePressBtn("Delete")} 
+                > 
+                <View  style={{flexDirection: 'row', alignItems: "center", gap: 10,}}>   
+                    <Feather name="trash" size={20} color="#FA5252" />          
+                    <Text style={{color: '#FA5252', fontSize: 18}}>Delete</Text>
+                </View>
+                </TouchableOpacity>
+
+            ) : null }
 
             <TouchableOpacity 
                 style={[styles.menuItems, {borderBottomColor: 'transparent'}]}  
@@ -229,13 +187,21 @@ return(
                 </View>
             </TouchableOpacity>
 
-
             </View>
         </View>
         </Modal>
 
-        <DeleteConfirmationModal visible={deleteModal} handleType={handleType} handleModal={handleDeleteModal} globalStyle={globalStyle} />
-        <ArchiveConfirmationModal visible={archiveModal} handleType={handleType} handleModal={handleArchiveModal} globalStyle={globalStyle} />
+        {/* Modals */}
+
+        {/*Trash*/}
+        <ConfirmationModal visible={confirmationModal} title={confirmationTitle} message={confirmationMessage} settingState="trash" handleSettingState={handleSettingState} handleModal={handleTrashModal} globalStyle={globalStyle} />
+        
+        {/*Delete*/}
+        <ConfirmationModal visible={confirmationModal} title={confirmationTitle} message={confirmationMessage} settingState="delete" handleSettingState={handleSettingState} handleModal={handleDeleteModal} globalStyle={globalStyle} />
+        
+        {/*Archive*/}
+        <ConfirmationModal visible={confirmationModal} title={confirmationTitle} message={confirmationMessage} settingState="archive" handleSettingState={handleSettingState} handleModal={handleArchiveModal} globalStyle={globalStyle} />
+
 
     </>
 );
@@ -269,6 +235,8 @@ const [passage, setPassage] = useState("");
 const [currentEntry, setCurrentEntry] = useState();
 
 const [currentState, setCurrentState] = useState(state);
+const [settingState, setSettingState] = useState("");
+
 const [entriesId, setEntriesId] = useState([]);
 
 const [entryLoading, setEntryLoading] = useState(false);
@@ -300,7 +268,6 @@ const handleBackConfirmModal = (item) =>{
     }
 
 }
-
 
 const handlePassage = (item) => {
     setPassage(item);
@@ -386,19 +353,13 @@ const handleStatus = (item) =>{
     handleAlertModalVisible(true);
 }
 
-const handleType = (item) =>{
-    setType(item);
-}
-
-const cleanStates = () =>{
-    setDate("");
-    setTitle("");
-    setQuestion("");
-    setScripture("");
-    setObservation("");
-    setApplication("");
-    setPrayer("");
-    setStatus("");
+const handleSettingState = (item) =>{
+    if(item == "Delete"){
+        deleteEntry();
+    }else if(item == "Trash" || item == "Archive"){
+        setSettingState(item.toLowerCase());
+        handleEntry();
+    }
 }
 
 const deleteEntry = () => {
@@ -407,8 +368,8 @@ const deleteEntry = () => {
         `DELETE FROM entries WHERE dataId = ?;`,
         [dataId],
         (_, result) => {
-        console.log('Data deleted successfully');
-        navigation.navigate("HomeStack");
+            console.log('Data deleted successfully');
+            navigation.navigate("HomeStack");
         },
         (_, error) => {
         console.error('Error deleting data:', error);
@@ -417,13 +378,12 @@ const deleteEntry = () => {
     });
     
 }
-
 //updating the entry
 const updateEntry = () => {
     db.transaction((tx) => {
         tx.executeSql(
-        'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ? WHERE dataId = ?;',
-        [date, title, question, scripture, observation, application, prayer, status, Date.now(), dataId ],
+        'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ?, settingState = ? WHERE dataId = ?;',
+        [date, title, question, scripture, observation, application, prayer, status, Date.now(), settingState, dataId ],
         (_, result) => {
             console.log('Data updated successfully');
             fetchEntry(dataId);         
@@ -444,8 +404,8 @@ const saveEntry = () => {
         if(type=="journal" || type == "sermon"){
             db.transaction((tx) => {
                 tx.executeSql(
-                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-                [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), itemId, months[index]],
+                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, settingState) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), itemId, months[index], "normal"],
                 (tx, results) => {
                     console.log("Success added entry to DB!!!");
                     fetchEntry(itemId);
@@ -461,8 +421,8 @@ const saveEntry = () => {
         else{
             db.transaction((tx) => {
                 tx.executeSql(
-                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-                [date, title, question, scripture, observation, application, prayer,  '#8CFF31', type, Date.now(), dataId, months[index]],
+                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, settingState) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                [date, title, question, scripture, observation, application, prayer,  '#8CFF31', type, Date.now(), dataId, months[index], "normal"],
                 (tx, results) => {
                 console.log("Success!!!");
                     fetchEntry(dataId);
@@ -513,6 +473,7 @@ const setItems = (currentEntry) => {
     setPrayer(currentEntry?.prayer);
     setType(currentEntry?.type);
     setStatus(currentEntry?.status);
+    setSettingState(currentEntry?.settingState);
 }
 
 const checker = () =>{
@@ -559,8 +520,10 @@ const handleEntry = () => {
 
 
 useEffect(() => {
-    idChecker();
-    checker();
+    if(currentState == "opm"){
+        idChecker();
+        checker();
+    }
 }, [])
 
 
@@ -759,7 +722,7 @@ return (
 
         {/* <BackConfirmationModal message={message} visible={backConfirmVisible} handleModal={handleBackConfirmModal}  updateEntry={updateEntry} globalStyle={globalStyle}  /> */}
     
-        <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={deleteEntry} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={entryType}  globalStyle={globalStyle} handleType={handleType} />
+        <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={deleteEntry} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={entryType}  globalStyle={globalStyle} handleSettingState={handleSettingState}  settingState={settingState}/>
         
     </>
 )
