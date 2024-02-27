@@ -6,7 +6,7 @@ import FlatListItems from './FlatListItems';
 
 const Tab = createMaterialTopTabNavigator();
 
-const FlatListComponent = ({notes, noteListLoading, globalStyle,handleDisplayEntryFetch }) => (
+const FlatListComponent = ({notes, noteListLoading, globalStyle, handleDisplayEntryFetch }) => (
   <View style={styles.flex}>
     {noteListLoading ? <ActivityIndicator style={styles.flex} size={'large'}/> :
     (<View style={[ styles.notelist, {backgroundColor: globalStyle?.bgBody}]}>
@@ -17,6 +17,7 @@ const FlatListComponent = ({notes, noteListLoading, globalStyle,handleDisplayEnt
             style={{width: '100%'}}
             data={ notes } 
             keyExtractor={(item, index) => index.toString()}
+            showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
               <FlatListItems item={item} handleDisplayEntryFetch={handleDisplayEntryFetch} globalStyle={globalStyle}/>
@@ -29,22 +30,19 @@ const FlatListComponent = ({notes, noteListLoading, globalStyle,handleDisplayEnt
 );
 
 const AllEntries = ({notes, noteListLoading, globalStyle, handleDisplayEntryFetch, }) => {
-
-  return(  
+  return( 
     <FlatListComponent notes={notes} noteListLoading={noteListLoading} globalStyle={globalStyle} handleDisplayEntryFetch={handleDisplayEntryFetch}  />
   );
 
 };
 
-const JournalEntries = ({notesJournal, noteListLoading, globalStyle, handleDisplayEntryFetch, formatLastModified, }) => {
-
+const JournalEntries = ({notesJournal, noteListLoading, globalStyle, handleDisplayEntryFetch, }) => {
   return(
     <FlatListComponent notes={notesJournal} noteListLoading={noteListLoading} globalStyle={globalStyle} handleDisplayEntryFetch={handleDisplayEntryFetch} />
   );
 };
   
 const OPMEntries = ({notesOPM, noteListLoading, globalStyle, handleDisplayEntryFetch, }) => {
-  
   return(
     <FlatListComponent notes={notesOPM} noteListLoading={noteListLoading} globalStyle={globalStyle} handleDisplayEntryFetch={handleDisplayEntryFetch} />
   );
@@ -68,9 +66,9 @@ const TopBar = ({ globalStyle, notes, notesJournal, notesOPM, noteListLoading, h
 
   const RenderAll = () => <AllEntries globalStyle={globalStyle} notes={notes} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} />
 
-  const RenderJournal = () => <JournalEntries globalStyle={globalStyle} notesJournal={notesJournal} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount[1]}  />
+  const RenderJournal = () => <JournalEntries globalStyle={globalStyle} notesJournal={notesJournal} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch}  />
 
-  const RenderOPM = () => <OPMEntries globalStyle={globalStyle}  notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount[2]}   />
+  const RenderOPM = () => <OPMEntries globalStyle={globalStyle}  notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch}  />
   
 
   return (
@@ -104,7 +102,7 @@ const TopBar = ({ globalStyle, notes, notesJournal, notesOPM, noteListLoading, h
           component={RenderJournal} 
           options={{
               tabBarIcon: ({ focused })=>{
-                return( < SortBtn name="Journal" count={sortButtonCount[1] + sortButtonCount[2]} focused={focused} globalStyle={globalStyle} /> )
+                return( < SortBtn name="Journal" count={sortButtonCount[1]} focused={focused} globalStyle={globalStyle} /> )
               },
           }}
         />
@@ -113,7 +111,7 @@ const TopBar = ({ globalStyle, notes, notesJournal, notesOPM, noteListLoading, h
           component={RenderOPM} 
           options={{
               tabBarIcon: ({ focused })=>{
-                return( < SortBtn name="OPM" count={sortButtonCount[3]} focused={focused} globalStyle={globalStyle} /> )
+                return( < SortBtn name="OPM" count={sortButtonCount[2]} focused={focused} globalStyle={globalStyle} /> )
               },
           }}
         />

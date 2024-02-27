@@ -261,6 +261,8 @@ const entryToBeShared = {
 
 const [backConfirmVisible, setBackConfirmVisible] = useState(false);
 
+const [disableSave, setDisableSave] = useState(false);
+
 const handleBackConfirmModal = (item) =>{
 
     if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
@@ -343,7 +345,7 @@ const handleChangeText = (text, valueFor) =>{
     }
 }
 
-
+// showing the menu modal
 const handleMenuVisible = ()=>{
     setMenuVisible(!menuVisible);
 }
@@ -357,11 +359,43 @@ const handleSettingState = (item) =>{
     if(item == "Delete"){
         deleteEntry();
     }else if(item == "Trash" || item == "Archive"){
-        setSettingState(item.toLowerCase());
-        handleEntry();
+        db.transaction((tx) => {
+            tx.executeSql(
+            'UPDATE entries SET settingState = ? WHERE dataId = ?;',
+            [item.toLowerCase(), dataId],
+            (_, result) => {
+                console.log('Data updated successfully');
+                fetchEntry(dataId);         
+                setDisableSave(false);
+            },
+            (_, error) => {
+                console.error('Error updating data:', error);
+            }
+            );
+        });
+        navigation.pop();
+
+    }
+    else if(item == "Restore" || item == "Unarchive"){
+        db.transaction((tx) => {
+            tx.executeSql(
+            'UPDATE entries SET settingState = ? WHERE dataId = ?;',
+            ["normal", dataId],
+            (_, result) => {
+                console.log('Data updated successfully');
+                fetchEntry(dataId);         
+                setDisableSave(false);
+            },
+            (_, error) => {
+                console.error('Error updating data:', error);
+            }
+            );
+        });
+        navigation.pop();
     }
 }
 
+//deleting entry
 const deleteEntry = () => {
     db.transaction((tx) => {
         tx.executeSql(
@@ -369,7 +403,7 @@ const deleteEntry = () => {
         [dataId],
         (_, result) => {
             console.log('Data deleted successfully');
-            navigation.navigate("HomeStack");
+            navigation.pop();
         },
         (_, error) => {
         console.error('Error deleting data:', error);
@@ -387,6 +421,7 @@ const updateEntry = () => {
         (_, result) => {
             console.log('Data updated successfully');
             fetchEntry(dataId);         
+            setDisableSave(false);
         },
         (_, error) => {
             console.error('Error updating data:', error);
@@ -396,6 +431,7 @@ const updateEntry = () => {
 
 }
 
+//saving entry
 const saveEntry = () => {
     // adding entry to db
     let isEmpty = [date, title, question, observation, application, prayer];
@@ -410,6 +446,7 @@ const saveEntry = () => {
                     console.log("Success added entry to DB!!!");
                     fetchEntry(itemId);
                     setCurrentState("update");
+                    setDisableSave(false);
                 },
                 (error) => {
                 // Handle error
@@ -427,6 +464,8 @@ const saveEntry = () => {
                 console.log("Success!!!");
                     fetchEntry(dataId);
                     setCurrentState("update");
+                    setDisableSave(false);
+
                 },
                 (error) => {
                 // Handle error
@@ -439,6 +478,7 @@ const saveEntry = () => {
 
 }
 
+//fetching the entry
 const fetchEntry = (id) =>{
     db.transaction((tx) => {
         tx.executeSql(
@@ -509,15 +549,18 @@ const idChecker = () =>{
 }
 
 const handleEntry = () => {
+    setDisableSave(true);
     if(currentState == "add"){
         saveEntry();
     }
     else{
-        updateEntry();
+        if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){  
+            updateEntry();
+        }
     }
     handleAlertModalVisible(true);
+    
 }
-
 
 useEffect(() => {
     if(currentState == "opm"){
@@ -525,7 +568,6 @@ useEffect(() => {
         checker();
     }
 }, [])
-
 
 useEffect(() => {
     const interval = setTimeout(() => {
@@ -596,9 +638,9 @@ useEffect(() => {
         headerRight: () => (
 
             <View style={{flexDirection: 'row', alignItems: "center", gap:10}}>
-                <TouchableOpacity onPress={ () => handleEntry()}>
+                <TouchableOpacity disable={disableSave} onPress={ () => handleEntry()}>
                     {/* <MaterialCommunityIcons name="content-save-edit-outline" size={30} color={globalStyle?.color}/> */}
-                    <Text style={{color: globalStyle?.settingsColor}} > SAVE </Text>
+                    <Text style={{color: globalStyle?.settingsColor}}>SAVE</Text>
                 </TouchableOpacity>
 
                 {currentState == "update" ? (

@@ -3,6 +3,7 @@ import React,{useState, useLayoutEffect} from 'react'
 const db = SQLite.openDatabase('_journal_database.db');
 import * as SQLite from 'expo-sqlite';
 
+
 const SearchBar = ({searchItem, globalStyle, handleTextChange}) => {
    return(
       <View style={{width: Dimensions.get('window').width-30, flexDirection: 'row', alignItems: 'center', backgroundColor: globalStyle.bgHeader}}>

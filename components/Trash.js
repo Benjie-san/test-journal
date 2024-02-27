@@ -2,10 +2,12 @@ import { StyleSheet, Text, View, TextInput, FlatList, Pressable, Image, Touchabl
 import React,{useState, useLayoutEffect, useEffect} from 'react'
 const db = SQLite.openDatabase('_journal_database.db');
 import * as SQLite from 'expo-sqlite';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function Trash({navigation, globalStyle}) {
 
     const [trashEntries, setTrashEntries] = useState([]);
+    const isFocused = useIsFocused();
 
     const openDisplayEntry = (item) => {
         navigation.navigate("More", {
@@ -85,8 +87,10 @@ export default function Trash({navigation, globalStyle}) {
     }, [navigation]);
 
     useEffect(() => {
-        fetchEntry();
-    }, [])
+        if(isFocused){
+            fetchEntry();
+        }
+    }, [isFocused])
     
 
     return (

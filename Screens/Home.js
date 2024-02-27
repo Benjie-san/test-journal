@@ -1,6 +1,6 @@
 //import for react stuffs
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, Pressable, ActivityIndicator, Platform } from 'react-native';
-import React, {useEffect, useState, useRef, useCallback} from 'react';
+import React, {useEffect, useState} from 'react';
 import Modal from "react-native-modal";
 import {Asset} from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
@@ -9,9 +9,6 @@ import { useIsFocused } from '@react-navigation/native';
 
 // import for components
 import Navbar from '../components/Navbar';
-import AddEntry from '../components/AddEntry';
-import DisplayEntry from '../components/DisplayEntry';
-
 import TopBar from '../components/TopBar';
 
 //import vector-icons
@@ -84,7 +81,6 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
 export default function Home({navigation, globalStyle}) {
 
   // import for data
-
   const [notes, setNotes] = useState([]);// showing all the data
   const [notesJournal, setNotesJournal] = useState([]);// showing all the data
   const [notesOPM, setNotesOPM] = useState([]);// showing all the data
@@ -93,17 +89,11 @@ export default function Home({navigation, globalStyle}) {
 
   const isFocused = useIsFocused();
 
-  //states for passing props in the modals
-
-  const [scripture, setScripture] = useState("");
-
-
   //states for sorting
   const [allCount, setAllCount] = useState(0);
   const [journalCount, setJournalCount] = useState(0);
   const [opmCount, setOpmCount] = useState(0);
-  const [sermonCount, setSermonCount] = useState(0);
-  const sortButtonCount = [allCount, journalCount, sermonCount, opmCount];
+  const sortButtonCount = [allCount, journalCount, opmCount];
 
   //for dates
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -232,54 +222,6 @@ export default function Home({navigation, globalStyle}) {
     openDisplayEntry(item);
   }
 
-  const getJournalCount = (type = "journal") => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM entries  WHERE type = ? AND settingState = ?;",
-        [type, "normal"],
-        (_, result) => {
-          const rows = result.rows;
-          setJournalCount(rows.length);
-        },
-        (_, error) => {
-          console.error('Error querying data:', error);
-        }
-      );
-    });
-  }
-
-  const getOpmCount = (type = "opm") => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM entries WHERE type = ? AND settingState = ?;",
-        [type, "normal"],
-        (_, result) => {
-          const rows = result.rows;
-          setOpmCount(rows.length);
-        },
-        (_, error) => {
-          console.error('Error querying data:', error);
-        }
-      );
-    });
-  }
-
-  const getSermonCount = (type = "sermon") => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM entries  WHERE type = ? AND settingState = ?;",
-        [type, "normal"],
-        (_, result) => {
-          const rows = result.rows;
-          setSermonCount(rows.length);
-        },
-        (_, error) => {
-          console.error('Error querying data:', error);
-        }
-      );
-    });
-  }
-
   const fetchData = (type) => {
     if(type == "journal"){
       db.transaction((tx) => {
@@ -288,6 +230,7 @@ export default function Home({navigation, globalStyle}) {
           [ "normal", "journal", "sermon"],
           (_, result) => {
             const rows = result.rows;
+            setJournalCount(rows.length);
             const dataArray = [];
             for (let i = 0; i < rows.length; i++) {
               const item = rows.item(i);
@@ -308,6 +251,7 @@ export default function Home({navigation, globalStyle}) {
           ["opm", "normal"],
           (_, result) => {
             const rows = result.rows;
+            setOpmCount(rows.length);
             const dataArray = [];
             for (let i = 0; i < rows.length; i++) {
               const item = rows.item(i);
@@ -324,7 +268,6 @@ export default function Home({navigation, globalStyle}) {
   };
 
   const fetchAllData = () => {
-
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT * FROM entries WHERE settingState = ? ORDER BY modifiedDate DESC;",
@@ -473,9 +416,6 @@ export default function Home({navigation, globalStyle}) {
       fetchAllData();
       fetchData("journal");
       fetchData("opm");
-      getJournalCount();
-      getOpmCount();
-      getSermonCount();
     }
   }, [isFocused]);
 
