@@ -19,7 +19,6 @@ const FlatListItems = ({item, globalStyle, handleDisplayEntryFetch}) => {
     
         // Choose the appropriate format based on the time difference
         if (seconds < 60) {
-            
             return `${seconds} ${seconds == 1 ? 'second' : 'seconds'} ago`;
         } 
         else if (minutes < 60) {
@@ -39,9 +38,9 @@ const FlatListItems = ({item, globalStyle, handleDisplayEntryFetch}) => {
             onPress={ ()=> handleDisplayEntryFetch(item) }
         >
     
-            <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden', flex: 1}}>{item.title}</Text>
+            <Text style={{color: globalStyle?.color, fontSize: 16, overflow:'hidden', flex: 1}}>{item.title}</Text>
 
-            <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+            <Text style={{color: globalStyle?.color, fontSize: 16, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
         </TouchableOpacity>
     )
 

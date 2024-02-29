@@ -13,7 +13,7 @@ const AlertModal = ({visible, message, globalStyle}) =>{
          backdropOpacity={0}
       >
          <View style={{backgroundColor: globalStyle?.bgBody, padding: 10, borderRadius: 10, borderWidth:1, borderColor: globalStyle?.borderColor, elevation: 5}}>
-            <Text style={{color: globalStyle?.color}}>{message}</Text>
+            <Text style={{color: globalStyle?.color, fontSize: globalStyle?.fontSize}}>{message}</Text>
          </View>
       </Modal>
    );

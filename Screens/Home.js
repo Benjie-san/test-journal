@@ -50,10 +50,11 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
             alignItems:'left',
             flexDirection:'column',
             justifyContent:"center",
+            width: '70%',
         }} >
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
             <MaterialIcons name="post-add" size={28} color={globalStyle?.color} />           
-            <Text style={{fontSize: 25,  color: globalStyle?.color, }}>Add</Text>
+            <Text style={{fontSize: globalStyle?.fontSize + 8,  color: globalStyle?.color, }}>Add</Text>
           </View>
           
           <TouchableOpacity 
@@ -61,7 +62,7 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
             style={[styles.btn, {alignItems: "left", backgroundColor: globalStyle?.bgBody, flexDirection: 'row', gap: 5}]}
           >
             <Entypo name="book" size={26} color={globalStyle?.color} />
-            <Text style={{fontSize: 18, color: globalStyle?.color, textAlign:'right'}}>Journal Entry/Sermon Notes</Text>
+            <Text style={{fontSize: globalStyle?.fontSize+2, color: globalStyle?.color, textAlign:'right'}}>Journal Entry</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -69,7 +70,7 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
             style={[styles.btn, {alignItems: "left", flexDirection: 'row', gap: 10, backgroundColor: globalStyle?.bgBody}]}
           >
             <Entypo name="open-book" size={26} color={globalStyle?.color} />
-            <Text style={{fontSize: 18,  color: globalStyle?.color,}}>OPM Reflection</Text>
+            <Text style={{fontSize: globalStyle?.fontSize+2,  color: globalStyle?.color,}}>OPM Reflection</Text>
           </TouchableOpacity>
 
         </View>
@@ -115,6 +116,9 @@ export default function Home({navigation, globalStyle}) {
   //FUNCTIONS FOR DAILY STREAK
   const [streakCount, setStreakCount] = useState(0); 
   const [streakDate, setStreakDate] = useState();
+
+  const customFontSize = globalStyle.fontSize;
+
 
   const fetchStreakCount = () =>{
     dbSettings.transaction((tx) => {
@@ -281,7 +285,7 @@ export default function Home({navigation, globalStyle}) {
           for (let i = 0; i < rows.length; i++) {
             const item = rows.item(i);
             dataArray.push(item);
-            dataArray2.push(item.dataId);
+            dataArray2.push(parseInt(item.dataId));
 
           }
           setNotes(dataArray);
@@ -437,7 +441,7 @@ export default function Home({navigation, globalStyle}) {
           <FontAwesome5 name="fire" size={20} color={globalStyle?.borderColor}
           />
           <Text
-            style={{ fontSize: 20,fontWeight: "bold", color: globalStyle?.borderColor,}}
+            style={{ fontSize: 20, fontWeight: "bold", color: globalStyle?.borderColor,}}
           >{streakCount}
           </Text>
         </TouchableOpacity>
@@ -445,6 +449,7 @@ export default function Home({navigation, globalStyle}) {
     });
   }, [navigation, streakCount]);
 
+  
   return (
   <>
     {/*MAIN VIEW*/}
@@ -456,7 +461,7 @@ export default function Home({navigation, globalStyle}) {
           <View style={[{flexDirection: 'column'}]}>
             <Text style={{fontSize: 20, fontWeight: 'bold', color: globalStyle?.color,}}>Today's Passage</Text>
             <Text style={{fontSize: 19, color:  globalStyle?.color}}>{todayVerse.verse}</Text>
-            <Text style={{fontSize: 18 , color: globalStyle?.color}}>{today.month + " " + today.day}</Text>
+            <Text style={{fontSize: customFontSize, color: globalStyle?.color}}>{today.month + " " + today.day}</Text>
           </View>
 
         ) }
@@ -464,14 +469,13 @@ export default function Home({navigation, globalStyle}) {
         { notesId.includes(todayVerse?.id) ?
           (<Pressable disabled style={[styles.addEntryShortcut,]}>
               <AntDesign name="check" size={20} color="white" />
-              <Text style={{fontSize: 18, color: "#fff",  paddingRight: 5}}>Entry Added</Text>
+              <Text style={{fontSize: 18, color: "#ffffff",  paddingRight: 5}}>Entry Added</Text>
           </Pressable>)
           :
           (  <TouchableOpacity onPress={ () => handleAddButton("today")}
         style={[styles.addEntryShortcut, { paddingRight: 10}]}>
             <AntDesign name="plus" size={20} color="white" />
-            <Text style={{fontSize: 18, color: "#fff", paddingRight: 5}}>Add Entry</Text>
-
+            <Text style={{fontSize: 18, color: "#ffffff", paddingRight: 5}}>Add Entry</Text>
           </TouchableOpacity>)
         }
 

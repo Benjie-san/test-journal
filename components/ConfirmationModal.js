@@ -27,10 +27,10 @@ const ConfirmationModal = ({visible, title, message, settingState, handleSetting
             >
                 <View style={[styles.confirmationModal,{backgroundColor: globalStyle?.bgBody, borderColor: globalStyle?.borderColor,}]}>
 
-                <Text style={{alignSelf:'flex-start', color: globalStyle?.color, fontSize: 17, fontWeight: 'bold', padding: 5,}}>
+                <Text style={{fontSize: globalStyle?.fontSize, alignSelf:'flex-start', color: globalStyle?.color, fontSize: 17, fontWeight: 'bold', padding: 5,}}>
                     {title}
                 </Text>
-                <Text style={{alignSelf:'flex-start', color: globalStyle?.color, padding: 5,}}>
+                <Text style={{fontSize: globalStyle?.fontSize, alignSelf:'flex-start', color: globalStyle?.color, padding: 5,}}>
                     {/* Are you sure want to move the entry to trash? */}
                     {message}
                 </Text>
@@ -42,11 +42,11 @@ const ConfirmationModal = ({visible, title, message, settingState, handleSetting
                     }}
                 >
                     <TouchableOpacity style={[styles.deleteButtons]} onPress={() => handleModal(false)}>
-                        <Text style={{ color: globalStyle?.color}}>Cancel</Text>
+                        <Text style={{ color: globalStyle?.color, fontSize: globalStyle?.fontSize}}>Cancel</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity  style={[styles.deleteButtons,]} onPress={() => handleFunction()}>
-                        <Text style={{color: title === "Delete" ? "red" : globalStyle.settingsColor}}>Confirm</Text>
+                        <Text style={{color: title === "Delete" ? "red" : globalStyle.settingsColor, fontSize: globalStyle?.fontSize}}>Confirm</Text>
                     </TouchableOpacity>
                 </View>
                 </View>

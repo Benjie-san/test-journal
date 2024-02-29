@@ -1,7 +1,9 @@
 import { StyleSheet, Text, TouchableOpacity, View, LayoutAnimation, Dimensions, UIManager, FlatList, } from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import Entypo from '@expo/vector-icons/Entypo'; 
-import data from '../constants/2023.json' 
+//import data from '../constants/2023.json';
+import data from '../constants/2024.json';
+
 import AddEntry from '../components/AddEntry';
 import DisplayEntry from '../components/DisplayEntry';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -14,7 +16,6 @@ import {Asset} from 'expo-asset';
 
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 
-
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const theme2024 =["SYSTEMS IMPROVEMENT", "SYSTEMS IMPROVEMENT", "MACRO-EVANGELISM","MACRO-EVANGELISM", 'ACCOUNT SETTLEMENT', 'ACCOUNT SETTLEMENT', "RELATIONAL DISCIPLESHIP", "RELATIONAL DISCIPLESHIP", "TRAINING-CENTERED", "TRAINING-CENTERED", "CHURCH", "CHURCH"];
@@ -25,15 +26,6 @@ const today ={
    month: months[todayDate.getMonth()],
    year: todayDate.getFullYear(),
 };
-
-let content = Object.keys(data).map( (key, index) =>
-   (
-      {
-      isExpanded: false,
-      category_name: Object.keys(data)[index],
-      }
-   )
-);
 
 async function openBrpDatabase() {
    if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
@@ -143,9 +135,9 @@ const ExpandableComponent = ({onRef, item, index, navigation, globalStyle}) =>{
                for (let i = 0; i < rows.length; i++) {
                   const item = rows.item(i);
                   dataArray.push(item);
-                  dataArray2.push(item.dataId);
+                  dataArray2.push(parseInt(item.dataId));
                   if(item.status == '#8CFF31'){
-                     dataArray4.push(item.dataId);
+                     dataArray4.push(parseInt(item.dataId));
                   }
                }
                setIdArray(dataArray2);
@@ -158,6 +150,7 @@ const ExpandableComponent = ({onRef, item, index, navigation, globalStyle}) =>{
          );
       });
    }
+
 
    const fetchCurrentEntry = (id) =>{
    
@@ -204,7 +197,6 @@ const ExpandableComponent = ({onRef, item, index, navigation, globalStyle}) =>{
          overflow: 'hidden'
       }
    });
-
    
    const getThatDay = (item)=>{
       //const day = new Date();
@@ -273,6 +265,15 @@ const ExpandableComponent = ({onRef, item, index, navigation, globalStyle}) =>{
 }
 
 export default function Brp({navigation, globalStyle}){
+
+   let content = Object.keys(data).map( (key, index) =>
+   (
+      {
+      isExpanded: false,
+      category_name: Object.keys(data)[index],
+      }
+   )
+   );
 
    const [listData, setListData] = useState(content); // state that populates the items from data
 

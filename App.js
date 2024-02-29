@@ -23,7 +23,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as SQLite from 'expo-sqlite';
 
 //for DB of settings
-const dbSettings = SQLite.openDatabase("settings4.db");
+const dbSettings = SQLite.openDatabase("settings3.db");
 
 //init of stack navs
 const Tab = createMaterialBottomTabNavigator();
@@ -37,27 +37,17 @@ const MoreStack = createNativeStackNavigator();
 import * as SplashScreen from 'expo-splash-screen';
 SplashScreen.preventAutoHideAsync();
 
+const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
 export default function App() {
 
   const [appIsReady, setAppIsReady] = useState(false);
-
   // Styles
   const [darkMode, setDarkMode] = useState(false);
   const [globalStyle, setGlobalStyle] = useState({});
+  const [fontSize, setFontSize] = useState();
+  const [fontSizeName, setFontSizeName] = useState();
 
-  const darkModeStyle = {
-    header: '#000',
-    bgHeader: "#111315",
-    bgBody: "#30353C",
-    noteList: "#111315",
-    color: "#fff",
-    borderColor: "#fff",
-    input: "#000",
-    verseModal: "#212A3E",
-    fontSize: 16,
-    settingsColor: '#1d9bf0',
-    name: 'Dark',
-  };
 
   const lightModeStyles = {
     header: '#fff',
@@ -68,9 +58,26 @@ export default function App() {
     borderColor: "#cccccc",
     input: "#bfbfbf",
     verseModal: "#fff",
-    fontSize: 16,
     settingsColor: '#1d9bf0',
-    name: 'Light',
+    themeName: 'Light',
+    fontSize: fontSize,
+    fontSizeName: fontSizeName,
+
+  };
+
+  const darkModeStyle = {
+    header: '#000',
+    bgHeader: "#111315",
+    bgBody: "#30353C",
+    noteList: "#111315",
+    color: "#fff",
+    borderColor: "#fff",
+    input: "#000",
+    verseModal: "#212A3E",
+    fontSize: fontSize,
+    settingsColor: '#1d9bf0',
+    themeName: 'Dark',
+    fontSizeName: fontSizeName,
   };
 
   const handleGlobalStyle = (mode) => {
@@ -82,9 +89,28 @@ export default function App() {
   };
 
   const handleDarkMode = (darkMode) => {
-    updateSettingsDb(darkMode);
+    updateTheme(darkMode);
     fetchDefaultSettings();
   };
+
+  const changeFontSize = (item) =>{
+    setFontSizeName(item);
+    if(item.toLowerCase() == "small"){
+      setFontSize(16);
+    } 
+    else if(item.toLowerCase() == "medium"){
+      setFontSize(18);
+    }
+    else if(item.toLowerCase() == "largre"){
+      setFontSize(20);
+    }
+    
+  }
+
+  const handleFontSize = (item) =>{
+    changeFontSize(item);
+    updateFontSize(item);
+  }
 
  // ===============================  RENDER SECTIONS ==============================================
 
@@ -105,7 +131,7 @@ export default function App() {
   );
 
     const RenderSettings = (props) => (
-      <Settings {...props} darkMode={darkMode} globalStyle={globalStyle} handleDarkMode={handleDarkMode} />
+      <Settings {...props} darkMode={darkMode} globalStyle={globalStyle} handleDarkMode={handleDarkMode} handleFontSize={handleFontSize} />
     );
     const RenderArchive = (props) => (
       <Archive {...props}  globalStyle={globalStyle} />
@@ -161,7 +187,6 @@ export default function App() {
 
     </HomeStack.Navigator>
   );
-
 
   const StackSearch = () => (
     <SearchStack.Navigator>
@@ -306,12 +331,12 @@ export default function App() {
           for (let i = 0; i < rows.length; i++) {
             const item = rows.item(i);
             dataArray.push(item);
-          
+        
           }
-          //console.log(dataArray)
           handleGlobalStyle(dataArray[0].currentTheme);
+          changeFontSize(dataArray[0].fontSize)
           setAppIsReady(true);
-          //console.log("Settings are fetched")
+          console.log("Settings are fetched")
         
         },
         (_, error) => {
@@ -326,7 +351,7 @@ export default function App() {
     dbSettings.transaction((tx) => {
       tx.executeSql(
       'INSERT INTO settings (currentTheme, fontSize, defaultSort, notifTime, dailyStreak, dailyStreakDate) VALUES (?, ?, ?, ?, ?, ?);',
-      ["light", "16", "modifiedDate", "6", 0, "none"],
+      ["light", "Small", "modifiedDate", "6", 0, "none"],
       (tx, results) => {
         handleGlobalStyle("light");
         console.log("Success default Settings are SET!!!");
@@ -339,17 +364,32 @@ export default function App() {
     });
   }
 
-  const updateSettingsDb = (theme) =>{
+  const updateTheme = (theme) =>{
     dbSettings.transaction((tx) => {
       tx.executeSql(
         'UPDATE settings SET currentTheme = ? WHERE id = ?;',
         [theme, 1],
         (_, result) => {
-          console.log('Data SETTINGS updated successfully');
+          console.log('Theme updated successfully');
           handleGlobalStyle(theme);
         },
         (_, error) => {
-          console.error('Error updating SETTINGS data:', error);
+          console.error('Error updating Theme:', error);
+        }
+        );
+    });
+  }
+  const updateFontSize = (fontSize) =>{
+    dbSettings.transaction((tx) => {
+      tx.executeSql(
+        'UPDATE settings SET fontSize = ? WHERE id = ?;',
+        [fontSize, 1],
+        (_, result) => {
+          console.log('FontSize updated successfully');
+  
+        },
+        (_, error) => {
+          console.error('Error updating FontSize:', error);
         }
         );
     });
@@ -417,7 +457,6 @@ export default function App() {
     //console.log(token);
   };
 
-  
   const handleNotification = (notification) => {
     // Handle the received notification
     console.log(notification);
@@ -445,6 +484,18 @@ export default function App() {
   //   // Handle notifications when the app is open
   //   Notifications.addNotificationReceivedListener(handleNotification);
   // }, []);
+  async function openBrpDatabase() {
+      if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
+        await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
+        }
+      else{
+        await FileSystem.downloadAsync(
+              Asset.fromModule(require('./assets/brpDatabase.db')).uri,
+              FileSystem.documentDirectory + 'SQLite/brpDatabase.db'
+        );
+      }
+      return SQLite.openDatabase("brpDatabase.db");
+  }
   
   //for splash screen
   useEffect(() => {

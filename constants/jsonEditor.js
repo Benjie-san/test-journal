@@ -30,27 +30,29 @@ const months = ["January","February","March","April","May","June","July","August
 
 const verseMonths = [month_0, month_1, month_2, month_3, month_4, month_5, month_6, month_7, month_8, month_9, month_10, month_11]
 
-// let newData2024 = {};
-// for(let i=0; i<months.length ;i++){
-//    let newArrMonth = [];
-//    let newVerseMonth = verseMonths[i].split(",");
-//    for(let j=0; j<newVerseMonth.length ;j++){
-//       let obj = {
-//          id: i,
-//          date: j+1,
-//          month: months[i],
-//          verse: newVerseMonth[j],
-//       }
-//       newArrMonth.push(obj);
-//       obj = {};
-//    }
-//    newData2024.push()
-// }
+let newData2024 = {};
+let x = 0;
+for(let i=0; i<months.length ;i++){
 
-// const newData = JSON.stringify(newData2024);
-// fs.writeFile("_2024.json", newData, function(err, result) {
-//    if(err) console.log('error', err);
-// });
+   let newArrMonth = [];
+   let newVerseMonth = verseMonths[i].split(",");
+   for(let j=0; j<newVerseMonth.length ;j++){
+      let obj = {
+         id: x++,
+         date: j+1,
+         month: months[i],
+         verse: newVerseMonth[j],
+      }
+      newArrMonth.push(obj);
+      obj = {};
+   }
+   newData2024[months[i]] = newArrMonth;
+}
+
+const newData = JSON.stringify(newData2024);
+fs.writeFile("2024.json", newData, function(err, result) {
+   if(err) console.log('error', err);
+});
 
 
 // // Read the JSON file
@@ -82,34 +84,34 @@ const verseMonths = [month_0, month_1, month_2, month_3, month_4, month_5, month
 // console.log(query);
 //====================================================================================
 
-let bibleVerses = [];
+// let bibleVerses = [];
 
 
-const data = JSON.parse(fs.readFileSync("./constants/asv.json"));
+// const data = JSON.parse(fs.readFileSync("./constants/asv.json"));
 
-let verse = "Psalm 95:1-11"
-let newArr = verse.split(":");
-let range = newArr[1].split("-")
-let book = newArr[0].slice(0, newArr[0].length-2).trim();
-let chapter = newArr[0].slice(newArr[0].length-2, newArr[0].length).trim();
-let start = range[0];
-let end = range[1];
+// let verse = "Psalm 95:1-11"
+// let newArr = verse.split(":");
+// let range = newArr[1].split("-")
+// let book = newArr[0].slice(0, newArr[0].length-2).trim();
+// let chapter = newArr[0].slice(newArr[0].length-2, newArr[0].length).trim();
+// let start = range[0];
+// let end = range[1];
 
-console.log(typeof chapter);
+// console.log(typeof chapter);
 
-const getVerse = (bookName, chapter, start, end)=>{
-   let verseResult = [];
-   data.verses.forEach(function (item) {
-      if(item.book_name === bookName && item.chapter === parseInt(chapter) ){
-         if(item.verse >= start && item.verse <= end){
-            verseResult.push(`${item.verse} ${item.text}`)
-         }   
-      }
-   });
-   return verseResult;
-}
+// const getVerse = (bookName, chapter, start, end)=>{
+//    let verseResult = [];
+//    data.verses.forEach(function (item) {
+//       if(item.book_name === bookName && item.chapter === parseInt(chapter) ){
+//          if(item.verse >= start && item.verse <= end){
+//             verseResult.push(`${item.verse} ${item.text}`)
+//          }   
+//       }
+//    });
+//    return verseResult;
+// }
 
-console.log( getVerse(book, chapter, start, end) )
+// console.log( getVerse(book, chapter, start, end) )
 
 
 // let range = [];

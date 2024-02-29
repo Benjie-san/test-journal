@@ -12,7 +12,10 @@ export default function SettingsModal({visible, handleModal, children, globalSty
       animationOut="fadeOut"
       onBackdropPress={() => handleModal(false)}
       onBackButtonPress={handleModal}
-      backdropOpacity={0.4}
+      backdropOpacity={0.5}
+      animated
+      backdropTransitionOutTiming={0}
+      hideModalContentWhileAnimating
     >
       <View style={styles.flex} >
         <View
@@ -41,9 +44,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   container:{
-    padding: 10,
     width: "70%", 
-    height:"20%",
     padding: 20,
     borderRadius: 10,
     flexDirection:'column',

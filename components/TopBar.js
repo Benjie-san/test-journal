@@ -50,8 +50,8 @@ const OPMEntries = ({notesOPM, noteListLoading, globalStyle, handleDisplayEntryF
 
 const SortBtn = ({name, count, focused, globalStyle}) => (
   <View style={[styles.sortingBtn]}>
-    <Text style={[styles.sortBtnText, {color: focused ? "#1d9bf0" : globalStyle?.color}]}>
-        {name}
+    <Text style={[{color: focused ? "#1d9bf0" : globalStyle?.color, fontSize: 15}]}>
+      {name}
     </Text>
 
     <View style={[styles.itemCount,{backgroundColor: focused ? "#1d9bf0" : '#808080'  }]}>

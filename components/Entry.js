@@ -263,6 +263,8 @@ const [backConfirmVisible, setBackConfirmVisible] = useState(false);
 
 const [disableSave, setDisableSave] = useState(false);
 
+const customFontSize = globalStyle.fontSize;
+
 const handleBackConfirmModal = (item) =>{
 
     if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
@@ -416,8 +418,8 @@ const deleteEntry = () => {
 const updateEntry = () => {
     db.transaction((tx) => {
         tx.executeSql(
-        'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ?, settingState = ? WHERE dataId = ?;',
-        [date, title, question, scripture, observation, application, prayer, status, Date.now(), settingState, dataId ],
+        'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ?, WHERE dataId = ?;',
+        [date, title, question, scripture, observation, application, prayer, status, Date.now(), parseInt(dataId) ],
         (_, result) => {
             console.log('Data updated successfully');
             fetchEntry(dataId);         
@@ -441,7 +443,7 @@ const saveEntry = () => {
             db.transaction((tx) => {
                 tx.executeSql(
                 'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, settingState) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-                [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), itemId, months[index], "normal"],
+                [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), parseInt(itemId), months[index], "normal"],
                 (tx, results) => {
                     console.log("Success added entry to DB!!!");
                     fetchEntry(itemId);
@@ -459,7 +461,7 @@ const saveEntry = () => {
             db.transaction((tx) => {
                 tx.executeSql(
                 'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, settingState) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-                [date, title, question, scripture, observation, application, prayer,  '#8CFF31', type, Date.now(), dataId, months[index], "normal"],
+                [date, title, question, scripture, observation, application, prayer,  '#8CFF31', type, Date.now(), Number(dataId), months[index], "normal"],
                 (tx, results) => {
                 console.log("Success!!!");
                     fetchEntry(dataId);
@@ -502,7 +504,7 @@ const fetchEntry = (id) =>{
 }
 
 const setItems = (currentEntry) => {
-    setDataId(currentEntry?.dataId);
+    setDataId(Number(currentEntry?.dataId));
     setId(currentEntry?.id);
     setDate(currentEntry?.date);
     setTitle(currentEntry?.title);
@@ -656,10 +658,8 @@ useEffect(() => {
     });
 }, [navigation, entryType, handleEntry, currentState]);
 
-
 return (
     <>
-
         <View style={{flex:1, margin: 0}} >
         
             {/*FORMS*/}
@@ -674,7 +674,7 @@ return (
                 
                         {/*DATE*/}
                         <View style={styles.inputSubContainer}>
-                            <Text  style={{color:globalStyle?.color,  fontSize: globalStyle?.fontSize}}>Date:</Text>
+                            <Text style={{color:globalStyle?.color,  fontSize: globalStyle?.fontSize}}>Date:</Text>
                             <Pressable style={styles.touchable} onPress={handleDateModal}>
                             <TextInput
                             style={{color: 'black', fontSize: globalStyle?.fontSize}}
