@@ -100,8 +100,8 @@ export default function App() {
     } 
     else if(item.toLowerCase() == "medium"){
       setFontSize(18);
-    }
-    else if(item.toLowerCase() == "largre"){
+   } 
+    else if(item.toLowerCase() == "large"){
       setFontSize(20);
     }
     
