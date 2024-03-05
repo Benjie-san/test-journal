@@ -1,11 +1,13 @@
 import { StyleSheet, Text, View, TextInput, FlatList, Pressable, Image, TouchableOpacity, Dimensions } from 'react-native'
 import React,{useState, useLayoutEffect, useEffect} from 'react'
-const db = SQLite.openDatabase('_journal_database.db');
 import * as SQLite from 'expo-sqlite';
 import { useIsFocused } from '@react-navigation/native';
+import {useTheme} from 'react-native-paper';
+const db = SQLite.openDatabase('_journal_database.db');
 
-export default function Trash({navigation, globalStyle}) {
 
+export default function Trash({navigation}) {
+    const theme = useTheme();
     const [trashEntries, setTrashEntries] = useState([]);
     const isFocused = useIsFocused();
 
@@ -74,15 +76,13 @@ export default function Trash({navigation, globalStyle}) {
     useLayoutEffect(() => {
         navigation.setOptions({
             headerStyle: {
-            backgroundColor: globalStyle?.bgHeader,
+                backgroundColor: theme.colors.primary,
             
             },
             headerTitleStyle:{
-            color: globalStyle?.color,
+                color: theme.colors.textColor,
             },
-            headerTitle: "Trash" ,
-
-        
+            headerTitle: "Trash" ,        
         });
     }, [navigation]);
 
@@ -98,9 +98,9 @@ export default function Trash({navigation, globalStyle}) {
 
             <View style={styles.container}>
 
-            <View style={[styles.searchedlist, {backgroundColor: globalStyle.bgBody}]}>
+            <View style={[styles.searchedlist, {backgroundColor: theme.colors.secondary}]}>
             {trashEntries.length === 0 ? (
-                <Text style={{fontSize: 30, paddingBottom: 150}}></Text>
+                <Text style={{fontSize:  theme.fonts.fontSize+14, paddingBottom: 150}}></Text>
             ) : (
                 <>
                     <FlatList
@@ -111,12 +111,12 @@ export default function Trash({navigation, globalStyle}) {
                         renderItem={({ item }) => (
                         
                         <TouchableOpacity
-                        style={ [styles.entry, {backgroundColor: globalStyle?.noteList, elevation: 2, gap: 5}] }
+                        style={ [styles.entry, {backgroundColor: theme.colors.primary, elevation: 2, gap: 5}] }
                         onPress={ ()=> openDisplayEntry(item) }
                         >
-                        <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden', flex: 1}}>{item.title}</Text>
+                        <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize-2, overflow:'hidden', flex: 1}}>{item.title}</Text>
 
-                        <Text style={{color: globalStyle?.color, fontSize: 14, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                        <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize-2, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
 
                         </TouchableOpacity>
                     )}

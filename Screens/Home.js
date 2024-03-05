@@ -6,6 +6,7 @@ import {Asset} from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 import * as SQLite from 'expo-sqlite';
 import { useIsFocused } from '@react-navigation/native';
+import { useTheme } from 'react-native-paper';
 
 // import for components
 import Navbar from '../components/Navbar';
@@ -20,7 +21,9 @@ import { FontAwesome5 } from '@expo/vector-icons';
 const dbSettings = SQLite.openDatabase("settings4.db");
 const db = SQLite.openDatabase('_journal_database.db');
 
-const AddModal = ({visible, type, handleModal, globalStyle}) => {
+const AddModal = ({visible, type, handleModal}) => {
+  const theme = useTheme();
+
   const handlePress = (item) =>{
     type(item);
     handleModal();
@@ -42,9 +45,9 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
       >
       
         <View style={{
-            backgroundColor: globalStyle?.bgHeader,
+            backgroundColor: theme.colors.primary,
             borderWidth: 1,
-            borderColor: globalStyle?.borderColor,
+            borderColor: theme.colors.borderColor,
             padding: 20,
             borderRadius: 10,
             alignItems:'left',
@@ -53,24 +56,24 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
             width: '70%',
         }} >
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
-            <MaterialIcons name="post-add" size={28} color={globalStyle?.color} />           
-            <Text style={{fontSize: globalStyle?.fontSize + 8,  color: globalStyle?.color, }}>Add</Text>
+            <MaterialIcons name="post-add" size={28} color={theme.colors.textColor} />           
+            <Text style={{fontSize: theme.fonts.fontSize+6,  color: theme.colors.textColor, }}>Add</Text>
           </View>
           
           <TouchableOpacity 
             onPress={() => handlePress()} 
-            style={[styles.btn, {alignItems: "left", backgroundColor: globalStyle?.bgBody, flexDirection: 'row', gap: 5}]}
+            style={[styles.btn, {alignItems: "left", backgroundColor: theme.colors.secondary, flexDirection: 'row', gap: 5}]}
           >
-            <Entypo name="book" size={26} color={globalStyle?.color} />
-            <Text style={{fontSize: globalStyle?.fontSize+2, color: globalStyle?.color, textAlign:'right'}}>Journal Entry</Text>
+            <Entypo name="book" size={26} color={theme.colors.textColor} />
+            <Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, textAlign:'right'}}>Journal Entry</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
             onPress={() => handlePress("opm")} 
-            style={[styles.btn, {alignItems: "left", flexDirection: 'row', gap: 10, backgroundColor: globalStyle?.bgBody}]}
+            style={[styles.btn, {alignItems: "left", flexDirection: 'row', gap: 10, backgroundColor:  theme.colors.secondary}]}
           >
-            <Entypo name="open-book" size={26} color={globalStyle?.color} />
-            <Text style={{fontSize: globalStyle?.fontSize+2,  color: globalStyle?.color,}}>OPM Reflection</Text>
+            <Entypo name="open-book" size={26} color={theme.colors.textColor} />
+            <Text style={{fontSize: theme.fonts.fontSize+2,  color: theme.colors.textColor,}}>OPM Reflection</Text>
           </TouchableOpacity>
 
         </View>
@@ -79,8 +82,8 @@ const AddModal = ({visible, type, handleModal, globalStyle}) => {
   );
 }
 
-export default function Home({navigation, globalStyle}) {
-
+export default function Home({navigation}) {
+  const theme = useTheme();
   // import for data
   const [notes, setNotes] = useState([]);// showing all the data
   const [notesJournal, setNotesJournal] = useState([]);// showing all the data
@@ -113,38 +116,36 @@ export default function Home({navigation, globalStyle}) {
   const [noteListLoading, setNoteListLoading] = useState(true);
   const [verseLoading, setVerseLoading] = useState(true);
 
-  //FUNCTIONS FOR DAILY STREAK
-  const [streakCount, setStreakCount] = useState(0); 
-  const [streakDate, setStreakDate] = useState();
-
-  const customFontSize = globalStyle.fontSize;
+  // //FUNCTIONS FOR DAILY STREAK
+  // const [streakCount, setStreakCount] = useState(0); 
+  // const [streakDate, setStreakDate] = useState();
 
 
-  const fetchStreakCount = () =>{
-    dbSettings.transaction((tx) => {
-      tx.executeSql(
-      'SELECT dailyStreak, dailyStreakDate FROM settings WHERE id = ?',
-      [1],
-      (_, result) => {
-          const rows = result.rows;
-          const dataArray = [];
-          for (let i = 0; i < rows.length; i++) {
-            const item = rows.item(i);
-            dataArray.push(item);
+  // const fetchStreakCount = () =>{
+  //   dbSettings.transaction((tx) => {
+  //     tx.executeSql(
+  //     'SELECT dailyStreak, dailyStreakDate FROM settings WHERE id = ?',
+  //     [1],
+  //     (_, result) => {
+  //         const rows = result.rows;
+  //         const dataArray = [];
+  //         for (let i = 0; i < rows.length; i++) {
+  //           const item = rows.item(i);
+  //           dataArray.push(item);
           
-          }
-          setStreakCount(dataArray[0].dailyStreak);
-          setStreakDate(dataArray[0].dailyStreakDate);  
+  //         }
+  //         setStreakCount(dataArray[0].dailyStreak);
+  //         setStreakDate(dataArray[0].dailyStreakDate);  
         
-          console.log("Daily Streak Fetched");
+  //         console.log("Daily Streak Fetched");
           
-        },
-        (_, error) => {
-          console.error('Error querying data:', error);
-        }
-      );
-    });
-  };
+  //       },
+  //       (_, error) => {
+  //         console.error('Error querying data:', error);
+  //       }
+  //     );
+  //   });
+  // };
 
   const updateStreakCount = (count, date) =>{
     dbSettings.transaction((tx) => {
@@ -367,7 +368,7 @@ export default function Home({navigation, globalStyle}) {
           } else {
             console.log('Table entries: already exists');
             fetchTodayVerse();
-            fetchStreakCount();
+            //fetchStreakCount();
           }
         },
 
@@ -395,19 +396,19 @@ export default function Home({navigation, globalStyle}) {
   // USE EFFECTS
   
   //for checking if the entry today is created
-  useEffect(() => {
+  // useEffect(() => {
   
-    const prevDate = new Date(streakDate).getDate();
-    if( today.day - prevDate == 1 || streakDate == "none" ){
-      if(notesId.includes(todayVerse?.id)){
-        updateStreakCount(streakCount + 1, Date.now());
-      }
-    }
-    else if(today.day - prevDate > 2){
-      setStreakCount(0);
-    }
+  //   const prevDate = new Date(streakDate).getDate();
+  //   if( today.day - prevDate == 1 || streakDate == "none" ){
+  //     if(notesId.includes(todayVerse?.id)){
+  //       updateStreakCount(streakCount + 1, Date.now());
+  //     }
+  //   }
+  //   else if(today.day - prevDate > 2){
+  //     setStreakCount(0);
+  //   }
     
-  }, [streakCount, streakDate, notesId, updateStreakCount, today.day]);
+  // }, [streakCount, streakDate, notesId, updateStreakCount, today.day]);
 
 
   useEffect(() => {
@@ -423,31 +424,31 @@ export default function Home({navigation, globalStyle}) {
     }
   }, [isFocused]);
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity
-          style={{
-            gap: 10,
-            alignItems: "center",
-            flexDirection: "row",
-            backgroundColor: globalStyle?.bgBody,
-            borderRadius: 20,
-            paddingLeft: 12,
-            paddingRight: 12,
-            padding: 5,
-          }}
-        >
-          <FontAwesome5 name="fire" size={20} color={globalStyle?.borderColor}
-          />
-          <Text
-            style={{ fontSize: 20, fontWeight: "bold", color: globalStyle?.borderColor,}}
-          >{streakCount}
-          </Text>
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation, streakCount]);
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     headerRight: () => (
+  //       <TouchableOpacity
+  //         style={{
+  //           gap: 10,
+  //           alignItems: "center",
+  //           flexDirection: "row",
+  //           backgroundColor: globalStyle?.bgBody,
+  //           borderRadius: 20,
+  //           paddingLeft: 12,
+  //           paddingRight: 12,
+  //           padding: 5,
+  //         }}
+  //       >
+  //         <FontAwesome5 name="fire" size={20} color={globalStyle?.borderColor}
+  //         />
+  //         <Text
+  //           style={{ fontSize: 20, fontWeight: "bold", color: globalStyle?.borderColor,}}
+  //         >{streakCount}
+  //         </Text>
+  //       </TouchableOpacity>
+  //     ),
+  //   });
+  // }, [navigation, streakCount]);
 
   
   return (
@@ -455,13 +456,13 @@ export default function Home({navigation, globalStyle}) {
     {/*MAIN VIEW*/}
     <View style={[styles.homeContainer]}>
       {/*Todays passage*/}
-      <View style={[styles.passageToday, {backgroundColor:globalStyle?.bgHeader,  borderTopColor: globalStyle.borderColor, borderTopWidth: 1}]}>
+      <View style={[styles.passageToday, {backgroundColor: theme.colors.primary,  borderTopColor: theme.colors.borderColor, borderTopWidth: 1}]}>
 
         { verseLoading ? <ActivityIndicator style={{width: '40%'}} /> : (
           <View style={[{flexDirection: 'column'}]}>
-            <Text style={{fontSize: 20, fontWeight: 'bold', color: globalStyle?.color,}}>Today's Passage</Text>
-            <Text style={{fontSize: 19, color:  globalStyle?.color}}>{todayVerse.verse}</Text>
-            <Text style={{fontSize: customFontSize, color: globalStyle?.color}}>{today.month + " " + today.day}</Text>
+            <Text style={{fontSize: theme.fonts.fontSize+4, fontWeight: 'bold', color: theme.colors.textColor,}}>Today's Passage</Text>
+            <Text style={{fontSize: theme.fonts.fontSize+3, color:  theme.colors.textColor}}>{todayVerse.verse}</Text>
+            <Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}}>{today.month + " " + today.day}</Text>
           </View>
 
         ) }
@@ -469,27 +470,27 @@ export default function Home({navigation, globalStyle}) {
         { notesId.includes(todayVerse?.id) ?
           (<Pressable disabled style={[styles.addEntryShortcut,]}>
               <AntDesign name="check" size={20} color="white" />
-              <Text style={{fontSize: 18, color: "#ffffff",  paddingRight: 5}}>Entry Added</Text>
+              <Text style={{fontSize: theme.fonts.fontSize+2, color: "#ffffff",  paddingRight: 5}}>Entry Added</Text>
           </Pressable>)
           :
           (  <TouchableOpacity onPress={ () => handleAddButton("today")}
-        style={[styles.addEntryShortcut, { paddingRight: 10}]}>
+        style={[styles.addEntryShortcut, { paddingRight: 10,}]}>
             <AntDesign name="plus" size={20} color="white" />
-            <Text style={{fontSize: 18, color: "#ffffff", paddingRight: 5}}>Add Entry</Text>
+            <Text style={{fontSize: theme.fonts.fontSize+2, color: "#ffffff", paddingRight: 5}}>Add Entry</Text>
           </TouchableOpacity>)
         }
 
       </View>
     </View>
 
-    <TopBar globalStyle={globalStyle} notes={notes} notesJournal={notesJournal} notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount}  />
+    <TopBar notes={notes} notesJournal={notesJournal} notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount}  />
     
     <Navbar onPressAddEntry={handleVisibleAddModal} />
 
     {/*MODALSS*/}
 
     {/*modal for displaying add entry*/}
-    <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal}  globalStyle={globalStyle}/>
+    <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal} />
 
     </>
   )

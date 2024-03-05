@@ -1,14 +1,7 @@
 import { StyleSheet, View, Pressable, Image, TouchableOpacity } from 'react-native';
 import React, {useState, useEffect} from 'react';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import Feather from '@expo/vector-icons/Feather'; 
 
-const Navbar = ({path, onPress, onPressAddEntry, isSelected, openBrp}) => {
-
-   const handlePress = () => {
-      openBrp();
-      onPress();
-   }
+const Navbar = ({ onPressAddEntry,}) => {
 
    return(
    <View style={[styles.navbar]}>

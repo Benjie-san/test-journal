@@ -65,7 +65,6 @@ const styles = StyleSheet.create({
 	},
 	verseText:{
 		textAlign: 'left',
-		fontSize: 16,
 	}
 });
 

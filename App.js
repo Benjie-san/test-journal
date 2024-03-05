@@ -3,289 +3,61 @@ import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import { Provider as PaperProvider,  MD3LightTheme as DefaultTheme,  } from 'react-native-paper'; //if there's no provider it returns an error
 
 //RN Navigation Imports
 import { NavigationContainer } from "@react-navigation/native";
-import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
-
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Home, Brp, Search, More } from "./Screens/index"; // all of the screens
-
-import Settings from "./components/Settings";
-import Archive from "./components/Archive";
-import Trash from './components/Trash'
-import Entry from './components/Entry';
-
-//icon imports
-import Ionicons from "@expo/vector-icons/Ionicons";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import * as SQLite from 'expo-sqlite';
 
 //for DB of settings
 const dbSettings = SQLite.openDatabase("settings3.db");
 
-//init of stack navs
-const Tab = createMaterialBottomTabNavigator();
-const HomeStack = createNativeStackNavigator();
-const BrpStack = createNativeStackNavigator();
-const SearchStack = createNativeStackNavigator();
-const MoreStack = createNativeStackNavigator();
-
 // Expo Splash Screen
 
 import * as SplashScreen from 'expo-splash-screen';
-SplashScreen.preventAutoHideAsync();
+import NavigationIndex from "./Screens/NavigationIndex";
 
-const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+import LightScheme from "./styles/lightScheme";
+import DarkScheme from "./styles/darkScheme";
+
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
 
   const [appIsReady, setAppIsReady] = useState(false);
   // Styles
-  const [darkMode, setDarkMode] = useState(false);
-  const [globalStyle, setGlobalStyle] = useState({});
-  const [fontSize, setFontSize] = useState();
-  const [fontSizeName, setFontSizeName] = useState();
+  const [theme, setTheme] = useState("light");
+  const [fontSize, setFontSize] = useState("small");
 
+  const customTheme = theme == "light" 
+    ? {
+        ...DefaultTheme,
+        colors: {...LightScheme,},
+        fonts:{ fontSize: fontSize == "small" ? 16 : fontSize == "medium" ? 18 : 20},
+        animation: { scale: 1.0, },
+      }
+    :  
+      {
+      ...DefaultTheme,
+      colors: {...DarkScheme,},
+      fonts:{ fontSize: 16,},
+      animation: { scale: 1.0, },
+      };
 
-  const lightModeStyles = {
-    header: '#fff',
-    bgHeader: "#fff",
-    bgBody: "#f2f2f2",
-    noteList: "#fff",
-    color: "#000",
-    borderColor: "#cccccc",
-    input: "#bfbfbf",
-    verseModal: "#fff",
-    settingsColor: '#1d9bf0',
-    themeName: 'Light',
-    fontSize: fontSize,
-    fontSizeName: fontSizeName,
-
-  };
-
-  const darkModeStyle = {
-    header: '#000',
-    bgHeader: "#111315",
-    bgBody: "#30353C",
-    noteList: "#111315",
-    color: "#fff",
-    borderColor: "#fff",
-    input: "#000",
-    verseModal: "#212A3E",
-    fontSize: fontSize,
-    settingsColor: '#1d9bf0',
-    themeName: 'Dark',
-    fontSizeName: fontSizeName,
-  };
-
-  const handleGlobalStyle = (mode) => {
-    if (mode == "dark") {
-      setGlobalStyle(darkModeStyle);
-    } else {
-      setGlobalStyle(lightModeStyles); //false then lightMode
-    }
-  };
-
-  const handleDarkMode = (darkMode) => {
-    updateTheme(darkMode);
+  
+  const handleTheme = (mode) => {
+    updateTheme(mode);
     fetchDefaultSettings();
   };
 
-  const changeFontSize = (item) =>{
-    setFontSizeName(item);
-    if(item.toLowerCase() == "small"){
-      setFontSize(16);
-    } 
-    else if(item.toLowerCase() == "medium"){
-      setFontSize(18);
-    }
-    else if(item.toLowerCase() == "largre"){
-      setFontSize(20);
-    }
-    
-  }
-
   const handleFontSize = (item) =>{
-    changeFontSize(item);
     updateFontSize(item);
+    fetchDefaultSettings();
   }
 
- // ===============================  RENDER SECTIONS ==============================================
-
-  const RenderHome = (props) => (
-    <Home {...props} darkMode={darkMode} handleDarkMode={handleDarkMode} globalStyle={globalStyle} />
-  );
-  
-    const RenderEntry = (props) => (
-      <Entry {...props} globalStyle={globalStyle}  />
-    );
-
-  const RenderBrp = (props) => <Brp {...props} globalStyle={globalStyle} />;
-
-  const RenderSearch = (props) => ( <Search {...props} globalStyle={globalStyle} />);
-
-  const RenderMore = (props) => (
-    <More {...props} globalStyle={globalStyle} handleDarkMode={handleDarkMode} />
-  );
-
-    const RenderSettings = (props) => (
-      <Settings {...props} darkMode={darkMode} globalStyle={globalStyle} handleDarkMode={handleDarkMode} handleFontSize={handleFontSize} />
-    );
-    const RenderArchive = (props) => (
-      <Archive {...props}  globalStyle={globalStyle} />
-    );
-    const RenderTrash = (props) => (
-      <Trash {...props}  globalStyle={globalStyle} />
-    );
-
-
-
- // ===============================  STACKS ==============================================
-  
-
-  const StackHome = () => (
-    <HomeStack.Navigator  >
-      <HomeStack.Screen   
-        name="HomeStack"
-        component={RenderHome}
-        options={{ headerTitle: "Journal 2024", headerTitleAlign: "left",
-          headerStyle: {
-            backgroundColor: globalStyle?.bgHeader,
-          },
-          headerTitleStyle:{
-            color: globalStyle?.color,
-          }
-        }}
-      />  
-
-      <HomeStack.Screen
-        name="BRP"
-        options={{
-          headerTitle: "Bible Reading Plan",
-          headerStyle: {
-            backgroundColor: globalStyle?.bgHeader,
-          },
-          headerTitleStyle:{
-            color: globalStyle?.color,
-          },
-          animation:'slide_from_right',
-        }}
-        component={RenderBrp}
-      />
-
-      <HomeStack.Screen   
-        name="Entry"
-        component={RenderEntry}
-        options={{ 
-          animation:'slide_from_right',
-          headerTintColor: globalStyle?.color,
-      }}
-      />
-
-
-    </HomeStack.Navigator>
-  );
-
-  const StackSearch = () => (
-    <SearchStack.Navigator>
-      <SearchStack.Screen
-        name="SearchStack"
-        component={RenderSearch}
-      />
-
-      
-      <SearchStack.Screen   
-        name="SearchEntry"
-        component={RenderEntry}
-        options={{ 
-          animation:'slide_from_right',
-          headerTintColor: globalStyle?.color,
-      }}
-      />
-
-    </SearchStack.Navigator>
-  );
-
-  const StackMore = () => (
-    <MoreStack.Navigator >
-
-      <MoreStack.Screen
-        name="MoreStack"
-        component={RenderMore}
-        options={{
-          headerTitle: "More",
-          headerStyle: {
-            backgroundColor: globalStyle?.bgHeader,
-          },
-          headerTitleStyle:{
-            color: globalStyle?.color,
-          },
-          animation:'slide_from_right',
-        }}
-      />
-      <MoreStack.Screen
-        name="Settings"
-        component={RenderSettings}
-        options={{
-          headerTitle: "Settings",
-          headerStyle: {
-            backgroundColor: globalStyle?.bgHeader,
-          },
-          headerTitleStyle:{
-            color: globalStyle?.color,
-          },
-          headerTintColor: globalStyle?.color,
-          animation:'slide_from_right',
-        }}
-      />
-      <MoreStack.Screen
-        name="Archive"
-        component={RenderArchive}
-        options={{
-          headerTitle: "Settings",
-          headerStyle: {
-            backgroundColor: globalStyle?.bgHeader,
-          },
-          headerTitleStyle:{
-            color: globalStyle?.color,
-          },
-          headerTintColor: globalStyle?.color,
-          animation:'slide_from_right',
-        }}
-        
-      />
-      <MoreStack.Screen
-        name="Trash"
-        component={RenderTrash}
-        options={{
-          headerTitle: "Settings",
-          headerStyle: {
-            backgroundColor: globalStyle?.bgHeader,
-          },
-          headerTitleStyle:{
-            color: globalStyle?.color,
-          },
-          headerTintColor: globalStyle?.color,
-          animation:'slide_from_right',
-        }}
-      />
-
-      <MoreStack.Screen   
-        name="MoreEntry"
-        component={RenderEntry}
-        options={{ 
-          animation:'slide_from_right',
-          headerTintColor: globalStyle?.color,
-      }}
-      />
-    </MoreStack.Navigator>
-  );
 
  // =================== DB FOR SETTINGS ==============================================
-
-
   const setupSettingsDatabase = () => {
     // Check if the table exists
     dbSettings.transaction((tx) => {
@@ -333,14 +105,14 @@ export default function App() {
             dataArray.push(item);
         
           }
-          handleGlobalStyle(dataArray[0].currentTheme);
-          changeFontSize(dataArray[0].fontSize)
+          setTheme(dataArray[0].currentTheme);
+          setFontSize(dataArray[0].fontSize)
           setAppIsReady(true);
           console.log("Settings are fetched")
         
         },
         (_, error) => {
-          console.error('Error querying data:', error);
+          console.error('Error Fetching Settings:', error);
         }
       );
     });
@@ -371,7 +143,7 @@ export default function App() {
         [theme, 1],
         (_, result) => {
           console.log('Theme updated successfully');
-          handleGlobalStyle(theme);
+          setTheme(theme);
         },
         (_, error) => {
           console.error('Error updating Theme:', error);
@@ -386,7 +158,7 @@ export default function App() {
         [fontSize, 1],
         (_, result) => {
           console.log('FontSize updated successfully');
-  
+          setFontSize(fontSize);  
         },
         (_, error) => {
           console.error('Error updating FontSize:', error);
@@ -395,107 +167,9 @@ export default function App() {
     });
   }
 
-  
-  // PUSH NOTIFICATION FUNCTIONS
-
-  const scheduleNotifications = async () => {
-    const morningNotificationTime = setNotificationTime(6, 0);
-    const eveningNotificationTime = setNotificationTime(13, 0);
-
-    // Schedule morning notification
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Good Morning!',
-        body: `Have you completed your journal passage for today?`,
-      },
-      trigger: { seconds: morningNotificationTime.hours * morningNotificationTime.minutes  },
-    });
-
-    // Schedule evening notification
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Good Evening',
-        body: `Have you finished your Journal today?`,
-      },
-      trigger: { seconds: eveningNotificationTime.hours * eveningNotificationTime.minutes },
-  
-    });
-  };
-
-  const setNotificationTime = (hours, minutes) => {
-    const now = new Date();
-    const notificationTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
-    const currentTime = now.getTime();
-    const notificationDateTime = notificationTime.getTime();
-
-    // If the notification time has already passed for today, schedule it for the same time tomorrow
-    const scheduledTime = notificationDateTime > currentTime ? notificationDateTime : notificationDateTime + 24 * 60 * 60 * 1000;
-
-    const scheduledDate = new Date(scheduledTime);
-
-    return {
-      hours: scheduledDate.getHours(),
-      minutes: scheduledDate.getMinutes(),
-    };
-  };
-
-  const registerForPushNotificationsAsync = async () => {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-
-    if (finalStatus !== 'granted') {
-      alert('Failed to get push token for push notification!');
-      return;
-    }
-
-    const token = (await Notifications.getExpoPushTokenAsync()).data;
-    //console.log(token);
-  };
-
-  const handleNotification = (notification) => {
-    // Handle the received notification
-    console.log(notification);
-  };
 
  // ===============================  USE EFFECTS ==============================================
 
-
-  // for push notifications
-  // useEffect(() => {
-  //   scheduleNotifications();
-
-  //   // Set up an interval to schedule notifications every day
-  //   const intervalId = setInterval(() => {
-  //     scheduleNotifications();
-  //   }, 24 * 60 * 60 * 1000); // Schedule notifications every 24 hours
-
-  //   // Clear the interval when the component is unmounted
-  //   return () => clearInterval(intervalId);
-  // }, []);
-
-  // useEffect(() => {
-  //   registerForPushNotificationsAsync();
-
-  //   // Handle notifications when the app is open
-  //   Notifications.addNotificationReceivedListener(handleNotification);
-  // }, []);
-  async function openBrpDatabase() {
-      if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
-        await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
-        }
-      else{
-        await FileSystem.downloadAsync(
-              Asset.fromModule(require('./assets/brpDatabase.db')).uri,
-              FileSystem.documentDirectory + 'SQLite/brpDatabase.db'
-        );
-      }
-      return SQLite.openDatabase("brpDatabase.db");
-  }
   
   //for splash screen
   useEffect(() => {
@@ -511,82 +185,13 @@ export default function App() {
 
   return (
     <>
-      <StatusBar style="light" backgroundColor={"#1a1a1a"} />
-      <NavigationContainer>
-        <Tab.Navigator
-          initialRouteName="Home"
-          activeColor="#1d9bf0"
-          barStyle={{ backgroundColor: globalStyle?.bgHeader }}
-          lazy
-        >
-          <Tab.Screen
-            component={StackHome}
-            name="Home"
-            options={{
-              tabBarLabel: "Home",
-              tabBarIcon: ({ focused }) => {
-                return (
-                  <View
-                    style={{ alignItems: "center", justifyContent: "center" }}
-                  >
-                    <Ionicons
-                      name={focused ? "md-home" : "md-home-outline"}
-                      size={24}
-                      color="#1d9bf0"
-                    />
-                  </View>
-                  // {color="#1d9bf0"}
-                );
-              },
-              tabBarHideOnKeyboard: true,
-            }}
-          />
-          
-          <Tab.Screen
-            component={StackSearch}
-            name="Search"
-            options={{
-              title: "Search",
-              tabBarIcon: ({ focused }) => {
-                return (
-                  <View
-                    style={{ alignItems: "center", justifyContent: "center" }}
-                  >
-                    <Ionicons
-                      name={focused ? "md-search" : "md-search-outline"}
-                      size={24}
-                      color="#1d9bf0"
-                    />
-                  </View>
-                );
-              },
-              tabBarHideOnKeyboard: true,
-            }}
-          />
 
-          <Tab.Screen
-            component={StackMore}
-            name="More"
-            options={{
-              title: "More",
-              tabBarIcon: ({ focused }) => {
-                return (
-                  <View
-                    style={{ alignItems: "center", justifyContent: "center" }}
-                  >
-                    <MaterialIcons
-                      name={focused ? "more" : "more-horiz"}
-                      size={24}
-                      color="#1d9bf0"
-                    />
-                  </View>
-                );
-              },
-              tabBarHideOnKeyboard: true,
-            }}
-          />
-        </Tab.Navigator>
-      </NavigationContainer>
+      <PaperProvider theme={customTheme}>
+      <StatusBar/>
+        <NavigationContainer  theme={customTheme}>
+          <NavigationIndex handleTheme={handleTheme} handleFontSize={handleFontSize} currentTheme={theme} currentFontSize={fontSize} />
+        </NavigationContainer>
+      </PaperProvider>
     </>
   );
 }

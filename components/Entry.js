@@ -4,6 +4,9 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
 import * as SQLite from 'expo-sqlite';
 
+import { useTheme } from 'react-native-paper';
+
+
 // Icons
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
@@ -22,8 +25,8 @@ import styles from '../styles/entryStyle';
 const db = SQLite.openDatabase('_journal_database.db');
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-const MenuModal = ({visible, handleCloseModal, status, entry, type, handleStatus, globalStyle, handleSettingState, settingState}) => {
-
+const MenuModal = ({visible, handleCloseModal, status, entry, type, handleStatus, handleSettingState, settingState}) => {
+    const theme = useTheme(); //for theme
     const [confirmationModal, setConfirmationModal] = useState(false);
     const [confirmationTitle, setConfirmationTitle] = useState("");
     const [confirmationMessage, setConfirmationMessage] = useState("");
@@ -63,7 +66,6 @@ const MenuModal = ({visible, handleCloseModal, status, entry, type, handleStatus
             setConfirmationTitle("Delete");
             setConfirmationMessage("Are you sure want to permanently delete the entry?");
         }
-
     } 
 
     const onShare = async () => {
@@ -129,15 +131,15 @@ return(
             backdropOpacity={0}
         >
         <View style={{flex: 1}} >
-            <View style={[styles.menuPopup, {backgroundColor: globalStyle?.bgHeader}]} >
+            <View style={[styles.menuPopup, {backgroundColor: theme.colors.primary}]} >
 
             <TouchableOpacity 
                 style={[styles.menuItems]}  
                 onPress={() => handlePressBtn(status)} 
             > 
             <View  style={{flexDirection: 'row', alignItems: "center", gap: 10,}}> 
-                <AntDesign name="checksquareo" size={20} color={globalStyle?.color} />        
-                <Text style={{fontSize: 18,  color: globalStyle?.color}}>{status === "#8CFF31" ? "Unmark as done" : "Mark as done"}</Text>
+                <AntDesign name="checksquareo" size={theme.fonts.fontSize+4} color={ theme.colors.textColor} />        
+                <Text style={{fontSize: theme.fonts.fontSize+2,  color:  theme.colors.textColor}}>{status === "#8CFF31" ? "Unmark as done" : "Mark as done"}</Text>
             </View>
             </TouchableOpacity>
 
@@ -146,8 +148,8 @@ return(
                 style={styles.menuItems}  
             > 
                 <View style={{flexDirection: 'row', alignItems: "center", gap: 10,}}>
-                    <Feather name="archive" size={20} color={globalStyle?.color} />        
-                    <Text style={{fontSize: 18, color: globalStyle?.color}}>{settingState == "archive" ? "Unarchive" : "Archive"}</Text>
+                    <Feather name="archive" size={theme.fonts.fontSize+4} color={theme.colors.textColor} />        
+                    <Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}}>{settingState == "archive" ? "Unarchive" : "Archive"}</Text>
                 </View>
             </TouchableOpacity>
 
@@ -157,10 +159,10 @@ return(
             > 
             <View  style={{flexDirection: 'row', alignItems: "center", gap: 10,}}> 
                 {settingState == "trash" ? 
-                (    <MaterialIcons name="restore" size={24} color={globalStyle?.color} />) 
+                (    <MaterialIcons name="restore" size={theme.fonts.fontSize+8} color={theme.colors.textColor} />) 
                 :
-                ( <Feather name="trash" size={20} color={globalStyle?.color} /> )}
-                <Text style={{color:  globalStyle?.color, fontSize: 18}}>{settingState == "trash" ? "Restore" : "Trash"}</Text>
+                ( <Feather name="trash" size={theme.fonts.fontSize+4} color={theme.colors.textColor} /> )}
+                <Text style={{color:  theme.colors.textColor, fontSize: theme.fonts.fontSize+2}}>{settingState == "trash" ? "Restore" : "Trash"}</Text>
             </View>
             </TouchableOpacity>
 
@@ -170,8 +172,8 @@ return(
                     onPress={() => handlePressBtn("Delete")} 
                 > 
                 <View  style={{flexDirection: 'row', alignItems: "center", gap: 10,}}>   
-                    <Feather name="trash" size={20} color="#FA5252" />          
-                    <Text style={{color: '#FA5252', fontSize: 18}}>Delete</Text>
+                    <Feather name="trash" size={theme.fonts.fontSize+4} color="#FA5252" />          
+                    <Text style={{color: '#FA5252', fontSize: theme.fonts.fontSize+2}}>Delete</Text>
                 </View>
                 </TouchableOpacity>
 
@@ -182,8 +184,8 @@ return(
                 onPress={() => handlePressBtn("Share")} 
             > 
                 <View style={{flexDirection: 'row', alignItems: "center", gap: 10,}}>
-                    <Feather name="share-2" size={20} color={globalStyle?.color} />        
-                    <Text style={{fontSize: 18, color: globalStyle?.color}}>Share</Text>
+                    <Feather name="share-2" size={theme.fonts.fontSize+4} color={theme.colors.textColor} />        
+                    <Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}}>Share</Text>
                 </View>
             </TouchableOpacity>
 
@@ -194,23 +196,24 @@ return(
         {/* Modals */}
 
         {/*Trash*/}
-        <ConfirmationModal visible={confirmationModal} title={confirmationTitle} message={confirmationMessage} settingState="trash" handleSettingState={handleSettingState} handleModal={handleTrashModal} globalStyle={globalStyle} />
+        <ConfirmationModal visible={confirmationModal} title={confirmationTitle} message={confirmationMessage} settingState="trash" handleSettingState={handleSettingState} handleModal={handleTrashModal}  />
         
         {/*Delete*/}
-        <ConfirmationModal visible={confirmationModal} title={confirmationTitle} message={confirmationMessage} settingState="delete" handleSettingState={handleSettingState} handleModal={handleDeleteModal} globalStyle={globalStyle} />
+        <ConfirmationModal visible={confirmationModal} title={confirmationTitle} message={confirmationMessage} settingState="delete" handleSettingState={handleSettingState} handleModal={handleDeleteModal}  />
         
         {/*Archive*/}
-        <ConfirmationModal visible={confirmationModal} title={confirmationTitle} message={confirmationMessage} settingState="archive" handleSettingState={handleSettingState} handleModal={handleArchiveModal} globalStyle={globalStyle} />
+        <ConfirmationModal visible={confirmationModal} title={confirmationTitle} message={confirmationMessage} settingState="archive" handleSettingState={handleSettingState} handleModal={handleArchiveModal}  />
 
 
     </>
 );
 }
 
-export default function Entry({navigation, route, globalStyle }){
+export default function Entry({navigation, route }){
+const theme = useTheme(); //for theme
+const isFocused = useIsFocused();
 
 const {entryId, verse, entryType, index, itemId, state} = route.params;
-const isFocused = useIsFocused();
 //for showing modals
 const [dateModalVisible, setDateModalVisible] = useState(false);
 const [menuVisible, setMenuVisible] = useState(false);
@@ -263,7 +266,6 @@ const [backConfirmVisible, setBackConfirmVisible] = useState(false);
 
 const [disableSave, setDisableSave] = useState(false);
 
-const customFontSize = globalStyle.fontSize;
 
 const handleBackConfirmModal = (item) =>{
 
@@ -633,21 +635,20 @@ useEffect(() => {
 //HEADER
 useEffect(() => {
     navigation.setOptions({
-        headerStyle: {backgroundColor: globalStyle?.bgHeader},
+        headerStyle: {backgroundColor: theme.colors.primary},
         headerTitle: () => (
-            <Text style={{fontSize: 20, color:globalStyle?.color}}>{entryType == "sermon" ? "Sermon Note" : entryType == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
+            <Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, fontWeight: 'bold'}}>{entryType == "sermon" ? "Sermon Note" : entryType == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
         ),
         headerRight: () => (
 
             <View style={{flexDirection: 'row', alignItems: "center", gap:10}}>
                 <TouchableOpacity disable={disableSave} onPress={ () => handleEntry()}>
-                    {/* <MaterialCommunityIcons name="content-save-edit-outline" size={30} color={globalStyle?.color}/> */}
-                    <Text style={{color: globalStyle?.settingsColor}}>SAVE</Text>
+                    <Text style={{color: theme.colors.altColor}}>SAVE</Text>
                 </TouchableOpacity>
 
                 {currentState == "update" ? (
                     <TouchableOpacity onPress={() => handleMenuVisible()}>
-                        <Feather name="more-vertical" size={25} color={globalStyle?.color} />
+                        <Feather name="more-vertical" size={25} color={theme.colors.textColor} />
                     </TouchableOpacity>
                 ) : null}
             
@@ -664,7 +665,7 @@ return (
         
             {/*FORMS*/}
             { entryLoading ? (
-                <View style={[styles.modal, {backgroundColor: globalStyle?.bgBody,}]}>
+                <View style={[styles.modal, {backgroundColor: theme.colors.secondary,}]}>
 
                 <ScrollView style={{flex: 1}} >
     
@@ -674,13 +675,13 @@ return (
                 
                         {/*DATE*/}
                         <View style={styles.inputSubContainer}>
-                            <Text style={{color:globalStyle?.color,  fontSize: globalStyle?.fontSize}}>Date:</Text>
+                            <Text style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>Date:</Text>
                             <Pressable style={styles.touchable} onPress={handleDateModal}>
                             <TextInput
-                            style={{color: 'black', fontSize: globalStyle?.fontSize}}
-                            value={date}
-                            onChangeText={handleChangeDate}
-                            editable={false}
+                                style={{color:  theme.colors.textColor, fontSize: theme.fonts.fontSize}}
+                                value={date}
+                                onChangeText={handleChangeDate}
+                                editable={false}
                             />
                             </Pressable>
                         </View>
@@ -690,9 +691,9 @@ return (
     
                         {/*SCRIPTURE*/}
                         <View style={styles.inputSubContainer}>
-                            <Text  style={{color:globalStyle?.color,  fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }</Text>
+                            <Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }</Text>
     
-                            <TextInput style={[styles.touchable, { fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
+                            <TextInput style={[styles.touchable, { fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
     
                         </View>
     
@@ -700,45 +701,44 @@ return (
     
                     {/*TITLE*/}
                     <View style={styles.inputContainer}>
-                        <Text  style={{color:globalStyle?.color,  fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
-                        <TextInput style={[styles.input, {minHeight: 50, fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
+                        <Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
+                        <TextInput style={[styles.input, {minHeight: 50, fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
                     </View>
     
                     {/*QUESTION*/}
                     { entryType != "journal" ?
                         (
                             <View style={styles.inputContainer}>
-                            <Text  style={{color:globalStyle?.color, fontSize: globalStyle?.fontSize}}>Question:</Text>
-                            <TextInput style={[styles.input, {minHeight: 50, fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "question") } value={question} multiline={true} />
+                            <Text  style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize}}>Question:</Text>
+                            <TextInput style={[styles.input, {minHeight: 50, fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "question") } value={question} multiline={true} />
                             </View>
                         ) : null
                     }
     
                     {/*OBSERVATION*/}
                     <View style={styles.inputContainer}>
-                        <Text  style={{color:globalStyle?.color,  fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
-                        <TextInput style={[styles.input, { fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "observation") } value={observation}  multiline={true} />
+                        <Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
+                        <TextInput style={[styles.input, { fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "observation") } value={observation}  multiline={true} />
                     </View>
     
                     {/*APPLICATION*/}
                     <View style={styles.inputContainer}>
-                        <Text  style={{color:globalStyle?.color,  fontSize: globalStyle?.fontSize}}>{type === "sermon" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
-                        <TextInput style={[styles.input,{ fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
+                        <Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
+                        <TextInput style={[styles.input,{ fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
                     </View>
     
                     {/*PRAYER*/}
                     <KeyboardAvoidingView behavior='padding' style={styles.inputContainer} >
-                        <Text style={{color:globalStyle?.color , fontSize: globalStyle?.fontSize}}>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
-                        <TextInput style={[styles.input, { fontSize: globalStyle?.fontSize}]} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
+                        <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize}}>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
+                        <TextInput style={[styles.input, { fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
     
                         <View style={[styles.flex,{paddingTop: 20,}]}>
                             <TouchableOpacity 
-                            style={[styles.border, {  backgroundColor: globalStyle?.bgHeader, borderColor: globalStyle?.borderColor ,alignItems: 'center', justifyContent: 'space-evenly', flexDirection: 'row', padding: 10, gap: 5, width: 100,elevation: 5 }]} 
-                            onPress={ () => handlePassageVisible(true) }
+                                style={[styles.border, {  backgroundColor: theme.colors.secondary, borderColor: theme.colors.borderColor,alignItems: 'center', justifyContent: 'space-evenly', flexDirection: 'row', padding: 10, gap: 5, width: 100,elevation: 5 }]} 
+                                onPress={ () => handlePassageVisible(true) }
                             >
-                            {/* <Entypo name="chevron-thin-up" size={24} color={globalStyle?.color} /> */}
-                            <FontAwesome5 name="bible" size={24} color={globalStyle?.color} />
-                            <Text style={{color:globalStyle?.color , fontSize: globalStyle?.fontSize}}>Bible</Text>
+                            <FontAwesome5 name="bible" size={24} color={theme.colors.textColor} />
+                            <Text style={{color: theme.colors.textColor , fontSize: theme.fonts.fontSize}}>Bible</Text>
           
                             </TouchableOpacity>
                         </View>
@@ -755,16 +755,15 @@ return (
             ) : (<ActivityIndicator style={styles.flex} size={'large'}/>) }
             
 
-            <AlertModal message={message} visible={alertModalVisible} globalStyle={globalStyle} />
+            <AlertModal message={message} visible={alertModalVisible} />
             
-            <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} globalStyle={globalStyle} scripture={scripture} type={entryType} handlePassage={handlePassage} />
+            <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} scripture={scripture} type={entryType} handlePassage={handlePassage} />
         
 
         </View>
 
-        {/* <BackConfirmationModal message={message} visible={backConfirmVisible} handleModal={handleBackConfirmModal}  updateEntry={updateEntry} globalStyle={globalStyle}  /> */}
-    
-        <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={deleteEntry} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={entryType}  globalStyle={globalStyle} handleSettingState={handleSettingState}  settingState={settingState}/>
+
+        <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={deleteEntry} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={entryType} handleSettingState={handleSettingState}  settingState={settingState}/>
         
     </>
 )

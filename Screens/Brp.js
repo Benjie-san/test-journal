@@ -1,21 +1,15 @@
-import { StyleSheet, Text, TouchableOpacity, View, LayoutAnimation, Dimensions, UIManager, FlatList, } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, FlatList, } from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import Entypo from '@expo/vector-icons/Entypo'; 
-//import data from '../constants/2023.json';
 import data from '../constants/2024.json';
-
-import AddEntry from '../components/AddEntry';
-import DisplayEntry from '../components/DisplayEntry';
-import Ionicons from '@expo/vector-icons/Ionicons';
-const dbJournal = SQLite.openDatabase("_journal_database.db");
 import * as SQLite from 'expo-sqlite';
 import { useIsFocused } from '@react-navigation/native';
-
 import * as FileSystem from 'expo-file-system';
 import {Asset} from 'expo-asset';
-
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
+import { useTheme } from 'react-native-paper';
 
+const dbJournal = SQLite.openDatabase("_journal_database.db");
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const theme2024 =["SYSTEMS IMPROVEMENT", "SYSTEMS IMPROVEMENT", "MACRO-EVANGELISM","MACRO-EVANGELISM", 'ACCOUNT SETTLEMENT', 'ACCOUNT SETTLEMENT', "RELATIONAL DISCIPLESHIP", "RELATIONAL DISCIPLESHIP", "TRAINING-CENTERED", "TRAINING-CENTERED", "CHURCH", "CHURCH"];
@@ -40,8 +34,8 @@ async function openBrpDatabase() {
    return SQLite.openDatabase("brpDatabase.db");
 }
 
-const ExpandableComponent = ({onRef, item, index, navigation, globalStyle}) =>{
-   
+const ExpandableComponent = ({onRef, item, index, navigation}) =>{
+   const theme = useTheme();
    //states for showing it
    const [height, setHeight] = useState(0);
    const [show, setShow] = useState(false);
@@ -224,11 +218,11 @@ const ExpandableComponent = ({onRef, item, index, navigation, globalStyle}) =>{
       <View style={[{flex:1}]}>
          <TouchableOpacity 
             onPress={() => handleMonthPress()} 
-            style={[styles.months, { borderBottomWidth: 1, borderColor: globalStyle?.color, }]}
+            style={[styles.months, { borderBottomWidth: 1, borderColor: theme.colors.textColor, }]}
          >
-            <Text style={{fontSize: 20, color: globalStyle.color}}>{item.category_name}</Text> 
-            {show?(<Text style={{fontSize: 17, paddingLeft: 10,  color: globalStyle?.color, }}>{theme2024[index]}</Text>):null}
-            <Entypo name={show ? "chevron-thin-up" : "chevron-thin-down"} size={28} color={globalStyle?.color}/>
+            <Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}}>{item.category_name}</Text> 
+            {show?(<Text style={{fontSize: theme.fonts.fontSize, paddingLeft: 10,  color: theme.colors.textColor, }}>{theme2024[index]}</Text>):null}
+            <Entypo name={show ? "chevron-thin-up" : "chevron-thin-down"} size={28} color={theme.colors.textColor}/>
          </TouchableOpacity>
          <Animated.View style={animatedStyle}>
       
@@ -239,12 +233,12 @@ const ExpandableComponent = ({onRef, item, index, navigation, globalStyle}) =>{
       
                   <TouchableOpacity
                      onPress={()=>handleItemPress(item, key)}
-                     style={[styles.dailyEntry, {backgroundColor: globalStyle?.bgHeader, borderBottomColor: globalStyle?.borderColor, }]}
+                     style={[styles.dailyEntry, {backgroundColor: theme.colors.primary, borderBottomColor: theme.colors.borderColor, }]}
                      key={key}>
                         <View style={{flexDirection: 'row'}}> 
-                           <Text style={{fontSize: 17,  color: globalStyle?.color}}>{getThatDay(item.day)},</Text>
-                           <Text style={{fontSize: 17,   color: globalStyle?.color}}> {item.day}  -</Text>
-                           <Text style={{fontSize: 17, paddingLeft: 10,  color: globalStyle?.color}}>{item.verse}</Text>
+                           <Text style={{fontSize: theme.fonts.fontSize+1, color: theme.colors.textColor}}>{getThatDay(item.day)},</Text>
+                           <Text style={{fontSize: theme.fonts.fontSize+1, color: theme.colors.textColor}}> {item.day}  -</Text>
+                           <Text style={{fontSize: theme.fonts.fontSize+1, paddingLeft: 10,  color: theme.colors.textColor}}>{item.verse}</Text>
                         </View>
 
                         <View style={[styles.check, styles.border,
@@ -264,15 +258,16 @@ const ExpandableComponent = ({onRef, item, index, navigation, globalStyle}) =>{
    );
 }
 
-export default function Brp({navigation, globalStyle}){
+export default function Brp({navigation}){
+   const theme = useTheme();
 
    let content = Object.keys(data).map( (key, index) =>
-   (
-      {
-      isExpanded: false,
-      category_name: Object.keys(data)[index],
-      }
-   )
+      (
+         {
+         isExpanded: false,
+         category_name: Object.keys(data)[index],
+         }
+      )
    );
 
    const [listData, setListData] = useState(content); // state that populates the items from data
@@ -282,7 +277,7 @@ export default function Brp({navigation, globalStyle}){
    return (
    <>
    
-   <View style={[styles.container, { backgroundColor: globalStyle.bgHeader, borderTopColor: globalStyle.borderColor, }]}>
+   <View style={[styles.container, { backgroundColor: theme.colors.primary, borderTopColor: theme.colors.borderColor, }]}>
    
          <View style={{ flex:1,}}>
 
@@ -303,7 +298,6 @@ export default function Brp({navigation, globalStyle}){
                      key={item.category_name}
                      item={item}
                      index={index}
-                     globalStyle={globalStyle}
                      navigation={navigation}
                   />
                }

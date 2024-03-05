@@ -1,31 +1,30 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
 import React,{useState} from 'react'
-import Fontisto from '@expo/vector-icons/Fontisto';
-import { RadioButton } from 'react-native-paper'; 
-
 import SettingsModal from './SettingsModal';
+import { useTheme, RadioButton } from 'react-native-paper';
 
-export default function Settings({navigation, darkMode, handleDarkMode, globalStyle, handleFontSize}) {
-
+export default function Settings({currentTheme, currentFontSize, handleTheme, handleFontSize}) {
+  const theme = useTheme();
   const [themeModal, setThemeModal] = useState(false);
   const [fontSizeModal, setFontSizeModal] = useState(false);
+  const [themeSetting, setThemeSetting] = useState(currentTheme)
+  const [checked, setChecked] = useState(currentTheme);
+  const [fontSize, setFontSize] = useState(currentFontSize);
+  const [fontSizeChecked, setfontSizeChecked] = useState(currentFontSize);
 
-  const [theme, setTheme] = useState(globalStyle?.themeName);
-  const [checked, setChecked] = useState(globalStyle?.themeName);
-  const [fontSize, setFontSize] = useState(globalStyle?.fontSizeName);
-  const [fontSizeChecked, setfontSizeChecked] = useState(globalStyle?.fontSizeName);
-
-  const handleTheme = (name, item) =>{
-		setChecked(name);
-		setTheme(name);
+  const handleThemeSetting = (name, item) =>{
+		setChecked(item);
+    handleTheme(item);
+    setThemeSetting(item);
     setThemeModal(false);
-    handleDarkMode(item);
+
 	}
 
   const handleFontSizeSettings = (item) =>{
-    handleFontSize(item);
+    handleFontSize(item.toLowerCase());
     setfontSizeChecked(item);
     setFontSize(item);
+    setFontSizeModal(false)
   }
 
   const handleThemeModal = (item) =>{
@@ -37,34 +36,33 @@ export default function Settings({navigation, darkMode, handleDarkMode, globalSt
   
   return (
     <>
-    <View style={[styles.container, {backgroundColor: globalStyle?.bgBody}]}>
+    <View style={[styles.container, {backgroundColor: theme.colors.secondary}]}>
       
       <View style={styles.settings}>
 
           <View style={[styles.itemSettings]} > 
-            <Text style={{color: globalStyle?.settingsColor, fontSize: globalStyle?.fontSize}} >General</Text>
+            <Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize+2}} >General</Text>
 
             <TouchableOpacity onPress={() => handleThemeModal(true)}>
-              <Text  style={{fontSize: globalStyle.fontSize, color: globalStyle?.color}} >Default Theme</Text>
-              <Text  style={{fontSize: globalStyle.fontSize, color: globalStyle?.color, opacity: 0.8}} >{theme}</Text>
+              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Default Theme</Text>
+              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, opacity: 0.8}} >{themeSetting}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => handleFontSizeModal(true)}>
-              <Text  style={{fontSize: globalStyle.fontSize, color: globalStyle?.color}} >Default Font Size</Text>
-              <Text  style={{fontSize: globalStyle.fontSize, color: globalStyle?.color, opacity: 0.8}} >{fontSize}</Text>
+              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Default Font Size</Text>
+              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, opacity: 0.8}} >{fontSize}</Text>
             </TouchableOpacity>
             
           </View>
 
         <View style={[styles.hr]}></View>
-
         
           <View style={[styles.itemSettings]} >
-            <Text style={{color: globalStyle.settingsColor, fontSize:  globalStyle?.fontSize}} >Sort</Text>
+            <Text style={{color: theme.colors.altColor, fontSize:  theme.fonts.fontSize+2}} >Sort</Text>
 
             <TouchableOpacity>
-              <Text  style={{fontSize: globalStyle.fontSize, color: globalStyle?.color}} >Default Entries Sort Order</Text>
-              <Text  style={{fontSize: globalStyle.fontSize, color: globalStyle?.color, opacity: 0.8}} >Last Modified</Text>
+              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Default Entries Sort Order</Text>
+              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, opacity: 0.8}} >Last Modified</Text>
             </TouchableOpacity>
 
           </View>
@@ -72,10 +70,10 @@ export default function Settings({navigation, darkMode, handleDarkMode, globalSt
         <View style={[styles.hr]}></View>
 
           <View style={[styles.itemSettings]} >
-            <Text style={{color: globalStyle.settingsColor, fontSize: globalStyle?.fontSize}} >Reminder</Text>
+            <Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize}} >Reminder</Text>
             <TouchableOpacity>
-              <Text  style={{fontSize:  globalStyle.fontSize, color: globalStyle.color}} >Default Notification Time</Text>
-              <Text  style={{fontSize: globalStyle.fontSize, color: globalStyle.color, opacity: 0.8}} >6 AM</Text>
+              <Text  style={{fontSize:  theme.fonts.fontSize, color: theme.colors.textColor}} >Default Notification Time</Text>
+              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, opacity: 0.8}} >6 AM</Text>
             </TouchableOpacity>
           </View>
 
@@ -84,63 +82,68 @@ export default function Settings({navigation, darkMode, handleDarkMode, globalSt
     </View>
 
     {/*modal for theme*/}
-    <SettingsModal visible={themeModal} handleModal={handleThemeModal} globalStyle={globalStyle} >
+    <SettingsModal visible={themeModal} handleModal={handleThemeModal} >
 
-      <Text style={{fontSize: globalStyle?.fontSize, color: globalStyle?.color, paddingBottom: 10,}}>Set Theme:</Text>
+      <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, paddingBottom: 10,}}>Set Theme:</Text>
       
-      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleTheme("Light", "light")}>
+      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleThemeSetting("Light", "light")}>
         <RadioButton
-          uncheckedColor={globalStyle?.color}
-          value={"Light"} 
-          onPress={ () => handleTheme("Light", "light") } 
-          status={ checked == "Light" ? 'checked' : 'unchecked' }
+          color={theme.colors.altColor}
+          value={"light"} 
+          onPress={ () => handleThemeSetting("Light", "light") } 
+          status={ checked == "light" ? 'checked' : 'unchecked' }
+          unchecked={theme.colors.textColor}
         />
-        <Text style={{fontSize: globalStyle?.fontSize, color: globalStyle?.color}}>Light Mode</Text>
+        <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>Light Mode</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleTheme("Dark", "dark")} >
+      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleThemeSetting("Dark", "dark")} >
         <RadioButton
-          uncheckedColor={globalStyle?.color}
-          value={"Dark"} 
-          onPress={ () => handleTheme("Dark", "dark") } 
-          status={ checked == "Dark" ? 'checked' : 'unchecked' }
+          value={"dark"} 
+          color={theme.colors.altColor}
+          onPress={ () => handleThemeSetting("Dark", "dark") } 
+          status={ checked == "dark" ? 'checked' : 'unchecked' }
+          unchecked={theme.colors.textColor}
         />
-        <Text style={{fontSize: globalStyle?.fontSize, color: globalStyle?.color}}>Dark Mode</Text>
+        <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>Dark Mode</Text>
       </TouchableOpacity>
     </SettingsModal>
 
     {/*modal for fontsize*/}
-    <SettingsModal visible={fontSizeModal} handleModal={handleFontSizeModal} globalStyle={globalStyle} >
-      <Text style={{fontSize: globalStyle?.fontSize, color: globalStyle?.color, paddingBottom: 10,}}>Set Font Size:</Text>
+    <SettingsModal visible={fontSizeModal} handleModal={handleFontSizeModal} >
+      <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, paddingBottom: 10,}}>Set Font Size:</Text>
 
       <TouchableOpacity style={styles.selectionBtn} onPress={() => handleFontSizeSettings("Small")}>
         <RadioButton
-          uncheckedColor={globalStyle?.color}
-          value={"Small"} 
+          value={"small"} 
+          color={theme.colors.altColor}
           onPress={ () => handleFontSizeSettings("Small") } 
-          status={ fontSizeChecked == "Small" ? 'checked' : 'unchecked' }
-        />
-        <Text style={{fontSize: globalStyle?.fontSize, color: globalStyle?.color}}>Small</Text>
+          status={ fontSizeChecked == "small" ? 'checked' : 'unchecked' } 
+          unchecked={theme.colors.textColor}
+          />
+        <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>Small</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.selectionBtn} onPress={() => handleFontSizeSettings("Medium")}>
         <RadioButton
-          uncheckedColor={globalStyle?.color}
-          value={"Medium"} 
+          value={"medium"}
+          color={theme.colors.altColor}
           onPress={ () => handleFontSizeSettings("Medium") } 
-          status={ fontSizeChecked == "Medium" ? 'checked' : 'unchecked' }
+          status={ fontSizeChecked == "medium" ? 'checked' : 'unchecked' }
+          unchecked={theme.colors.textColor}
         />
-        <Text style={{fontSize: globalStyle?.fontSize, color: globalStyle?.color}}>Medium</Text>
+        <Text style={{fontSize: theme.fonts.fontSize, color:  theme.colors.textColor}}>Medium</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.selectionBtn} onPress={() => handleFontSizeSettings("Large")}>
         <RadioButton
-          uncheckedColor={globalStyle?.color}
-          value={"Large"} 
+          value={"large"} 
+          color={theme.colors.altColor}
           onPress={ () => handleFontSizeSettings("Large") } 
-          status={ fontSizeChecked == "Large" ? 'checked' : 'unchecked' }
+          status={ fontSizeChecked == "large" ? 'checked' : 'unchecked' }
+          unchecked={theme.colors.textColor}
         />
-        <Text style={{fontSize: globalStyle?.fontSize, color: globalStyle?.color}}>Large</Text>
+        <Text style={{fontSize: theme.fonts.fontSize, color:  theme.colors.textColor}}>Large</Text>
       </TouchableOpacity>
       
     </SettingsModal>

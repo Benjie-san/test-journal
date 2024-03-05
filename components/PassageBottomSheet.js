@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import React,{ useState, useEffect } from 'react';
 import Modal from "react-native-modal";
-import { RadioButton } from 'react-native-paper'; 
+import { useTheme, RadioButton } from 'react-native-paper'; 
 import asv from '../constants/asv.json';
 import esv from '../constants/esv.json';
 import tagalog from '../constants/tagab.json';
@@ -10,7 +10,8 @@ import styles from '../styles/passageStyle';
 
 const translationsName = ["ESV","ASV", "Tagalog"];
 
-const TranslationModal = ({visible, handleModal, handleTranslation, globalStyle}) => {
+const TranslationModal = ({visible, handleModal, handleTranslation}) => {
+	const theme = useTheme();
 
 	const [checked, setChecked] = useState('ESV');
 
@@ -33,7 +34,7 @@ const TranslationModal = ({visible, handleModal, handleTranslation, globalStyle}
             backdropTransitionOutTiming={0}
             hideModalContentWhileAnimating
 		>
-            <View style={[styles.picker, {backgroundColor: globalStyle.verseModal}]}>
+            <View style={[styles.picker, {backgroundColor: theme.colors.primary}]}>
 				{
 					translationsName.map( (item, index) => (
 						<TouchableOpacity 
@@ -41,19 +42,19 @@ const TranslationModal = ({visible, handleModal, handleTranslation, globalStyle}
 							onPress={ () => handleRadioButton(item, index) } 
 							style={{
 								borderBottomWidth: translationsName.length-1 == index  ? 0 : 1 , 
-								borderBottomColor: globalStyle.borderColor,
+								borderBottomColor: theme.colors.borderColor,
 								flexDirection: 'row',
 								alignItems: 'center',
 								gap: 10,
 							}}
 							>
 							<RadioButton
-								uncheckedColor={globalStyle?.color}
-								value={item} 
+								color={theme.colors.altColor}
+								value={item}
 								onPress={ () => handleRadioButton(item, index) } 
 								status={ checked === item ? 'checked' : 'unchecked' }
 							/>
-							<Text style={[ {color: globalStyle?.color, fontSize: 17}]} >{item}</Text>
+							<Text style={[ {color: theme.colors.textColor, fontSize: theme.fonts.fontSize}]} >{item}</Text>
 						</TouchableOpacity>
 					) )
 				}
@@ -63,8 +64,9 @@ const TranslationModal = ({visible, handleModal, handleTranslation, globalStyle}
   );
 }
 
-export default function PassageBottomSheet({globalStyle, visible, handleModal, scripture, handlePassage}) {	
-	
+export default function PassageBottomSheet({visible, handleModal, scripture, handlePassage}) {	
+	const theme = useTheme();
+
 	const [fetchedVerse, setFetchedVerse] = useState([]);
 	const [verseNumber, setVerseNumber] = useState([]);
 
@@ -160,30 +162,30 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, s
             hideModalContentWhileAnimating
 			style={styles.modal}
 		>
-			<View style={[styles.modalContent, {backgroundColor: globalStyle?.verseModal}]}>
+			<View style={[styles.modalContent, {backgroundColor: theme.colors.primary}]}>
 				
 				<View style={styles.center}>
 					
 					<View style={[styles.header,]} >
 						<View style={{flexDirection: 'row', alignItems: 'center', flex: 1,}}>
-							<Text style={[{color: globalStyle?.color, fontSize: 17, fontWeight: 'bold'}]} >
+							<Text style={[{color: theme.colors.textColor, fontSize: theme.fonts.fontSize+1, fontWeight: 'bold'}]} >
 								{scripture !== '' ? scripture : "Set Scripture first"}
 							</Text>
 							{scripture !== '' ? (
 								<TouchableOpacity onPress={ ()=> handleTranslationPickerModal(true)  } style={[styles.headerBtn, ] } > 
-									<Text style={[ {color: globalStyle?.settingsColor, fontSize: 17}]}>{currentTranslation}</Text>
+									<Text style={[ {color: theme.colors.altColor, fontSize: theme.fonts.fontSize+1}]}>{currentTranslation}</Text>
 								</TouchableOpacity>
 							) : null }
 						</View>
 				
 					
-						<TouchableOpacity style={[styles.border, {height: 45, padding: 10, }]} onPress={()=>handleModal(false)}>
-							<Text style={[ {color: globalStyle?.color, fontSize: 17}]}>Close</Text>
+						<TouchableOpacity style={[{height: 45, padding: 10, opacity: 0.5}]} onPress={()=>handleModal(false)}>
+							<Text style={[ {color: theme.colors.textColor, fontSize: theme.fonts.fontSize+1}]}>Close</Text>
 						</TouchableOpacity>
 
 					</View>
 
-					<TranslationModal visible={translationPickerModalVisible} handleModal={handleTranslationPickerModal} handleTranslation={handleTranslation} globalStyle={globalStyle} />
+					<TranslationModal visible={translationPickerModalVisible} handleModal={handleTranslationPickerModal} handleTranslation={handleTranslation} />
 			
 					<ScrollView contentContainerStyle={[styles.verseView, styles.center,]}
 					>
@@ -192,13 +194,13 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, s
 						{
 							fetchedVerse.map( (item, index) => (
 								<View key={index} style={[{flexDirection: 'row', alignItems:'center', justifyContent: 'flex-start', paddingBottom: 5, width: '100%',  gap: 10}]}>
-									<Text style={[styles.verseText, {color: globalStyle?.color, alignSelf: 'flex-start', padding: 5,}]}>{verseNumber[index]}</Text>
-									<Text style={[styles.verseText, {color: globalStyle?.color,  padding: 5, width: '90%'}]}>{item}</Text>
+									<Text style={[styles.verseText, { fontSize: theme.fonts.fontSiz, color: theme.colors.textColor, alignSelf: 'flex-start', padding: 5,}]}>{verseNumber[index]}</Text>
+									<Text style={[styles.verseText, {fontSize: theme.fonts.fontSiz, color: theme.colors.textColor,  padding: 5, width: '90%'}]}>{item}</Text>
 								</View>
 							))
 						}
 						</>
-						) : ( <Text style={{fontSize: 30, paddingBottom: 150, color: globalStyle.color}} >No Verses Found</Text> ) 
+						) : ( <Text style={{fontSize: theme.fonts.fontSize, paddingBottom: 150, color: theme.colors.textColor}} >No Verses Found</Text> ) 
 					}
 						
 					</ScrollView>
@@ -209,5 +211,5 @@ export default function PassageBottomSheet({globalStyle, visible, handleModal, s
 
 		</Modal>
 	
-   )
+    )
 }

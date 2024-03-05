@@ -1,8 +1,10 @@
 import React, {memo} from 'react';
 import { TouchableOpacity, Text, StyleSheet, View} from 'react-native';
+import { useTheme } from 'react-native-paper';
 
 
-const FlatListItems = ({item, globalStyle, handleDisplayEntryFetch}) => {
+const FlatListItems = ({item, handleDisplayEntryFetch}) => {
+    const theme = useTheme();
 
     const formatLastModified = (timestamp) => {
         const lastModifiedTime = new Date(timestamp);
@@ -34,13 +36,13 @@ const FlatListItems = ({item, globalStyle, handleDisplayEntryFetch}) => {
     return (
 
         <TouchableOpacity
-            style={ [styles.entry, {backgroundColor: globalStyle?.noteList, elevation: 2, gap: 5}] }
+            style={ [styles.entry, {backgroundColor: theme.colors.primary, elevation: 2, gap: 5}] }
             onPress={ ()=> handleDisplayEntryFetch(item) }
         >
     
-            <Text style={{color: globalStyle?.color, fontSize: 16, overflow:'hidden', flex: 1}}>{item.title}</Text>
+            <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden', flex: 1}}>{item.title}</Text>
 
-            <Text style={{color: globalStyle?.color, fontSize: 16, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+            <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
         </TouchableOpacity>
     )
 

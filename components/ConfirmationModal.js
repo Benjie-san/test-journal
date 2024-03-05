@@ -1,8 +1,11 @@
 import styles from '../styles/entryStyle';
 import { Text, View, TouchableOpacity,} from 'react-native';
 import Modal from "react-native-modal";
+import { useTheme } from 'react-native-paper';
 
-const ConfirmationModal = ({visible, title, message, settingState, handleSettingState, handleModal, globalStyle}) => {
+const ConfirmationModal = ({visible, title, message, settingState, handleSettingState, handleModal,}) => {
+    const theme = useTheme();
+
     const handleFunction = () =>{
         handleSettingState(title);
         handleModal(false);
@@ -25,12 +28,12 @@ const ConfirmationModal = ({visible, title, message, settingState, handleSetting
             <View
                 style={[styles.flex]}
             >
-                <View style={[styles.confirmationModal,{backgroundColor: globalStyle?.bgBody, borderColor: globalStyle?.borderColor,}]}>
+                <View style={[styles.confirmationModal,{backgroundColor: theme.colors.secondary, borderColor: theme.colors.borderColor,}]}>
 
-                <Text style={{fontSize: globalStyle?.fontSize, alignSelf:'flex-start', color: globalStyle?.color, fontSize: 17, fontWeight: 'bold', padding: 5,}}>
+                <Text style={{fontSize: theme.fonts.fontSize, alignSelf:'flex-start', color: theme.colors.textColor, fontWeight: 'bold', padding: 5,}}>
                     {title}
                 </Text>
-                <Text style={{fontSize: globalStyle?.fontSize, alignSelf:'flex-start', color: globalStyle?.color, padding: 5,}}>
+                <Text style={{fontSize: theme.fonts.fontSize, alignSelf:'flex-start', color: theme.colors.textColor, padding: 5,}}>
                     {/* Are you sure want to move the entry to trash? */}
                     {message}
                 </Text>
@@ -38,15 +41,14 @@ const ConfirmationModal = ({visible, title, message, settingState, handleSetting
                     marginTop: 10,
                     alignSelf:'flex-end',
                     flexDirection:'row',
-                    
                     }}
                 >
                     <TouchableOpacity style={[styles.deleteButtons]} onPress={() => handleModal(false)}>
-                        <Text style={{ color: globalStyle?.color, fontSize: globalStyle?.fontSize}}>Cancel</Text>
+                        <Text style={{ color: theme.colors.textColor, fontSize: theme.fonts.fontSize}}>Cancel</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity  style={[styles.deleteButtons,]} onPress={() => handleFunction()}>
-                        <Text style={{color: title === "Delete" ? "red" : globalStyle.settingsColor, fontSize: globalStyle?.fontSize}}>Confirm</Text>
+                        <Text style={{color: title === "Delete" ? "red" : theme.colors.altColor, fontSize: theme.fonts.fontSize}}>Confirm</Text>
                     </TouchableOpacity>
                 </View>
                 </View>

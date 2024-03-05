@@ -1,8 +1,11 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import React from 'react';
 import Modal from "react-native-modal";
+import { useTheme } from 'react-native-paper';
 
 export default function SettingsModal({visible, handleModal, children, globalStyle}) {
+  const theme = useTheme();
+
   return (
     <Modal
       isVisible={visible}
@@ -22,8 +25,8 @@ export default function SettingsModal({visible, handleModal, children, globalSty
           style={[
             styles.container,
             {
-              backgroundColor: globalStyle?.bgBody,
-              borderColor: globalStyle?.borderColor,
+              backgroundColor: theme.colors.secondary,
+              borderColor: theme.colors.textColor,
             },
           ]}
         >

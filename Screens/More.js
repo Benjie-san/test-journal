@@ -4,9 +4,10 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { MaterialIcons } from '@expo/vector-icons';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import { Feather } from '@expo/vector-icons';
+import { useTheme } from 'react-native-paper'
 
-export default function More({darkMode, handleDarkMode, globalStyle, navigation}) {
-
+export default function More({navigation}) {
+  const theme = useTheme();
   const handleOpenSettings = () =>{
     navigation.navigate("Settings");
   }
@@ -19,49 +20,48 @@ export default function More({darkMode, handleDarkMode, globalStyle, navigation}
 
   return (
     <>
-        <View style={[styles.container, {backgroundColor: globalStyle?.bgBody}]}>
+      <View style={[styles.container, {backgroundColor: theme.colors.secondary}]}>
 
-          <View style={styles.moreViewRow} >
-            <TouchableOpacity style={styles.moreBtn} onPress={ ()=> handleOpenArchive() } >
-                <Feather name="archive" size={28}  color={globalStyle?.color} />
-                <Text style={{fontSize: globalStyle.fontSize, color: globalStyle.color}} >Archive</Text>
-            </TouchableOpacity>
+        <View style={styles.moreViewRow} >
+          <TouchableOpacity style={styles.moreBtn} onPress={ ()=> handleOpenArchive() } >
+              <Feather name="archive" size={28}  color={theme.colors.textColor} />
+              <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Archive</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity style={styles.moreBtn} onPress={ ()=> handleOpenTrash() }>
-                <Feather name="trash" size={28}  color={globalStyle?.color} />
-                <Text style={{fontSize: globalStyle.fontSize, color: globalStyle.color}} >Trash</Text>
-            </TouchableOpacity>
+          <TouchableOpacity style={styles.moreBtn} onPress={ ()=> handleOpenTrash() }>
+              <Feather name="trash" size={28}  color={theme.colors.textColor} />
+              <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Trash</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity  style={styles.moreBtn} onPress={handleOpenSettings} >
-                <Feather name="settings" size={28} color={globalStyle?.color} />
-                <Text style={{fontSize: globalStyle.fontSize, color: globalStyle.color}} >Settings</Text>
-            </TouchableOpacity>
-            
-          </View>
+          <TouchableOpacity  style={styles.moreBtn} onPress={handleOpenSettings} >
+              <Feather name="settings" size={28} color={theme.colors.textColor} />
+              <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Settings</Text>
+          </TouchableOpacity>
+          
+        </View>
 
-          <View style={styles.moreViewRow}>
-            <TouchableOpacity style={styles.moreBtn}>
-                <MaterialIcons name="menu-book" size={28}  color={globalStyle?.color} />
-                <Text style={{fontSize: globalStyle.fontSize, color: globalStyle.color}} >Tutorial</Text>
-            </TouchableOpacity>
+        <View style={styles.moreViewRow}>
+          <TouchableOpacity style={styles.moreBtn}>
+              <MaterialIcons name="menu-book" size={28}  color={theme.colors.textColor} />
+              <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Tutorial</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity style={styles.moreBtn}>
-                <Feather name="info" size={28}  color={globalStyle?.color} />
-                <Text  style={{fontSize: globalStyle.fontSize, color: globalStyle.color}} >About</Text>
-            </TouchableOpacity>
+          <TouchableOpacity style={styles.moreBtn}>
+              <Feather name="info" size={28}  color={theme.colors.textColor} />
+              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >About</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity disabled style={styles.moreBtn} >
-                <Feather name="settings" size={28} color={globalStyle?.bgBody} />
-                <Text style={{fontSize: globalStyle.fontSize, color: globalStyle.bgBody}} >Settings</Text>
-            </TouchableOpacity>
-            
-
-          </View>
-
-
+          <TouchableOpacity disabled style={styles.moreBtn} >
+              <Feather name="settings" size={28} color={theme.colors.textColor} />
+              <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Settings</Text>
+          </TouchableOpacity>
+          
 
         </View>
-  
+
+
+
+      </View>  
     </>
   )
 }

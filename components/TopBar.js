@@ -1,17 +1,20 @@
-import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, FlatList, TouchableWithoutFeedbackComponent } from 'react-native';
 import React,{useState, useEffect} from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { useTheme } from 'react-native-paper';
 
 import FlatListItems from './FlatListItems';
 
 const Tab = createMaterialTopTabNavigator();
 
-const FlatListComponent = ({notes, noteListLoading, globalStyle, handleDisplayEntryFetch }) => (
+const FlatListComponent = ({notes, noteListLoading, handleDisplayEntryFetch }) => {
+  const theme = useTheme();
+  return(
   <View style={styles.flex}>
     {noteListLoading ? <ActivityIndicator style={styles.flex} size={'large'}/> :
-    (<View style={[ styles.notelist, {backgroundColor: globalStyle?.bgBody}]}>
+    (<View style={[ styles.notelist, {backgroundColor: theme.colors.secondary}]}>
       {notes.length === 0 ?
-        (<Text style={{fontSize: 30, paddingBottom: 150, color: globalStyle?.color}}>No Entries Found</Text>)
+        (<Text style={{fontSize: theme.fonts.fontSize+14, paddingBottom: 150, color: theme.colors.textColor}}>No Entries Found</Text>)
         :
         ( <FlatList
             style={{width: '100%'}}
@@ -20,55 +23,60 @@ const FlatListComponent = ({notes, noteListLoading, globalStyle, handleDisplayEn
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
-              <FlatListItems item={item} handleDisplayEntryFetch={handleDisplayEntryFetch} globalStyle={globalStyle}/>
+              <FlatListItems item={item} handleDisplayEntryFetch={handleDisplayEntryFetch}/>
             )}
           />)
       }
     </View>)
     } 
   </View>
-);
+)
+  }
 
-const AllEntries = ({notes, noteListLoading, globalStyle, handleDisplayEntryFetch, }) => {
+const AllEntries = ({notes, noteListLoading, handleDisplayEntryFetch, }) => {
   return( 
-    <FlatListComponent notes={notes} noteListLoading={noteListLoading} globalStyle={globalStyle} handleDisplayEntryFetch={handleDisplayEntryFetch}  />
+    <FlatListComponent notes={notes} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch}  />
   );
 
 };
 
-const JournalEntries = ({notesJournal, noteListLoading, globalStyle, handleDisplayEntryFetch, }) => {
+const JournalEntries = ({notesJournal, noteListLoading, handleDisplayEntryFetch, }) => {
   return(
-    <FlatListComponent notes={notesJournal} noteListLoading={noteListLoading} globalStyle={globalStyle} handleDisplayEntryFetch={handleDisplayEntryFetch} />
+    <FlatListComponent notes={notesJournal} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch} />
   );
 };
   
-const OPMEntries = ({notesOPM, noteListLoading, globalStyle, handleDisplayEntryFetch, }) => {
+const OPMEntries = ({notesOPM, noteListLoading, handleDisplayEntryFetch, }) => {
   return(
-    <FlatListComponent notes={notesOPM} noteListLoading={noteListLoading} globalStyle={globalStyle} handleDisplayEntryFetch={handleDisplayEntryFetch} />
+    <FlatListComponent notes={notesOPM} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch} />
   );
 };
 
-const SortBtn = ({name, count, focused, globalStyle}) => (
-  <View style={[styles.sortingBtn]}>
-    <Text style={[{color: focused ? "#1d9bf0" : globalStyle?.color, fontSize: 15}]}>
-      {name}
-    </Text>
+const SortBtn = ({name, count, focused}) => {
+  const theme = useTheme();
+  return(
+    <View style={[styles.sortingBtn]}>
+      <Text style={[{color: focused ? "#1d9bf0" : theme.colors.textColor, fontSize: theme.fonts.fontSize-1}]}>
+        {name}
+      </Text>
 
-    <View style={[styles.itemCount,{backgroundColor: focused ? "#1d9bf0" : '#808080'  }]}>
-        <Text style={{textAlign: 'center', color: focused ? '#fff' : '#f5f5f5'}}>
-          {count}
-        </Text>
+      <View style={[styles.itemCount,{backgroundColor: focused ? "#1d9bf0" : '#808080'  }]}>
+          <Text style={{textAlign: 'center', color: focused ? '#fff' : '#f5f5f5'}}>
+            {count}
+          </Text>
+      </View>
     </View>
-  </View>
-);
+  )
+}
 
-const TopBar = ({ globalStyle, notes, notesJournal, notesOPM, noteListLoading, handleDisplayEntryFetch, sortButtonCount}) => {
+const TopBar = ({ notes, notesJournal, notesOPM, noteListLoading, handleDisplayEntryFetch, sortButtonCount}) => {
+  const theme = useTheme();
 
-  const RenderAll = () => <AllEntries globalStyle={globalStyle} notes={notes} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} />
+  const RenderAll = () => <AllEntries  notes={notes} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} />
 
-  const RenderJournal = () => <JournalEntries globalStyle={globalStyle} notesJournal={notesJournal} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch}  />
+  const RenderJournal = () => <JournalEntries  notesJournal={notesJournal} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch}  />
 
-  const RenderOPM = () => <OPMEntries globalStyle={globalStyle}  notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch}  />
+  const RenderOPM = () => <OPMEntries   notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch}  />
   
 
   return (
@@ -84,7 +92,7 @@ const TopBar = ({ globalStyle, notes, notesJournal, notesOPM, noteListLoading, h
               width:"100%",
           },
           tabBarStyle:{
-            backgroundColor: globalStyle?.bgHeader,
+            backgroundColor: theme.colors.primary,
           },
         }}
     >
@@ -93,7 +101,7 @@ const TopBar = ({ globalStyle, notes, notesJournal, notesOPM, noteListLoading, h
           component={RenderAll} 
           options={{
               tabBarIcon: ({ focused })=>{
-                return( < SortBtn name="All" count={sortButtonCount[0]} focused={focused} globalStyle={globalStyle} /> )
+                return( < SortBtn name="All" count={sortButtonCount[0]} focused={focused}  /> )
               },
           }}
         />
@@ -102,7 +110,7 @@ const TopBar = ({ globalStyle, notes, notesJournal, notesOPM, noteListLoading, h
           component={RenderJournal} 
           options={{
               tabBarIcon: ({ focused })=>{
-                return( < SortBtn name="Journal" count={sortButtonCount[1]} focused={focused} globalStyle={globalStyle} /> )
+                return( < SortBtn name="Journal" count={sortButtonCount[1]} focused={focused}  /> )
               },
           }}
         />
@@ -111,7 +119,7 @@ const TopBar = ({ globalStyle, notes, notesJournal, notesOPM, noteListLoading, h
           component={RenderOPM} 
           options={{
               tabBarIcon: ({ focused })=>{
-                return( < SortBtn name="OPM" count={sortButtonCount[2]} focused={focused} globalStyle={globalStyle} /> )
+                return( < SortBtn name="OPM" count={sortButtonCount[2]} focused={focused} /> )
               },
           }}
         />
