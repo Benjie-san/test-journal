@@ -9,7 +9,7 @@
 
 //==========================//
 
-// Features to add
+// Added Features
 /*
     -
 
@@ -20,7 +20,7 @@
 
 //---------------------------//
 
-// Added features
+// Features to add
 /*
     - Theme setting(colors and font)
     
