@@ -661,7 +661,7 @@ useEffect(() => {
 
 return (
     <>
-        <View style={{flex:1, margin: 0}} >
+        <View style={{flex:1, margin: 0, backgroundColor: theme.colors.secondary}} >
         
             {/*FORMS*/}
             { entryLoading ? (
@@ -678,7 +678,7 @@ return (
                             <Text style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>Date:</Text>
                             <Pressable style={styles.touchable} onPress={handleDateModal}>
                             <TextInput
-                                style={{color:  theme.colors.textColor, fontSize: theme.fonts.fontSize}}
+                                style={{color: "black", fontSize: theme.fonts.fontSize}}
                                 value={date}
                                 onChangeText={handleChangeDate}
                                 editable={false}
@@ -752,7 +752,7 @@ return (
     
                 </View>
 
-            ) : (<ActivityIndicator style={styles.flex} size={'large'}/>) }
+            ) : (<ActivityIndicator style={[styles.flex]} size={'large'}/>) }
             
 
             <AlertModal message={message} visible={alertModalVisible} />

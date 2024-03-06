@@ -39,6 +39,7 @@ const ExpandableComponent = ({onRef, item, index, navigation}) =>{
    //states for showing it
    const [height, setHeight] = useState(0);
    const [show, setShow] = useState(false);
+   const [expandedIndex, setExpandedIndex] = useState(null);
 
    //states for ancordion
    const [currentMonthEntries, setCurrentMonthEntries] = useState([])
@@ -48,6 +49,8 @@ const ExpandableComponent = ({onRef, item, index, navigation}) =>{
    const [idComplete, setIdcomplete] = useState([]);
    
    const isFocused = useIsFocused();
+
+   const [loadMonth, setLoadMonth] = useState(false);
 
    const openAddEntry = (type, scripture, id, index) => {
       navigation.navigate("Home", {
@@ -104,6 +107,7 @@ const ExpandableComponent = ({onRef, item, index, navigation}) =>{
                   dataArray.push(item);
                }
                setCurrentMonthEntries([...dataArray]);
+
             },
             (_, error) => {
                   alert("No Entry yet")
@@ -112,10 +116,10 @@ const ExpandableComponent = ({onRef, item, index, navigation}) =>{
             );
          })
       });
+               
    }
 
    const fetchMonthCompletion = (item) =>{
-
       dbJournal.transaction((tx) => {
          tx.executeSql(
             "SELECT * FROM entries WHERE month = ? ;",
@@ -145,7 +149,6 @@ const ExpandableComponent = ({onRef, item, index, navigation}) =>{
       });
    }
 
-
    const fetchCurrentEntry = (id) =>{
    
       dbJournal.transaction((tx) => {
@@ -171,9 +174,9 @@ const ExpandableComponent = ({onRef, item, index, navigation}) =>{
    }
 
    const handleMonthPress = () =>{
-      fetchCurrentMonth(item.category_name);
-      fetchMonthCompletion(item.category_name);
       setShow(!show);
+      fetchMonthCompletion(item.category_name);
+      fetchCurrentMonth(item.category_name);
    }
 
    const onLayout = (event) => {
@@ -199,11 +202,13 @@ const ExpandableComponent = ({onRef, item, index, navigation}) =>{
    }
 
    useEffect(() => {
-      if(show){
-         onRef.current.scrollToIndex({ index, animated: true });
-      } 
-
-   }, [show])
+      if(height != 0 && show){
+         onRef.current?.scrollToIndex({ 
+            index, 
+            animated: true,
+         });
+      }
+   }, [height, show])
 
    useEffect(() => {
       if(isFocused){
@@ -220,10 +225,14 @@ const ExpandableComponent = ({onRef, item, index, navigation}) =>{
             onPress={() => handleMonthPress()} 
             style={[styles.months, { borderBottomWidth: 1, borderColor: theme.colors.textColor, }]}
          >
-            <Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}}>{item.category_name}</Text> 
-            {show?(<Text style={{fontSize: theme.fonts.fontSize, paddingLeft: 10,  color: theme.colors.textColor, }}>{theme2024[index]}</Text>):null}
+            <Text style={{fontSize: theme.fonts.fontSize+3, color: theme.colors.textColor}}>{item.category_name}</Text> 
+
+            {show ? (<Text style={{fontSize: theme.fonts.fontSize, paddingLeft: 10,  color: theme.colors.textColor, }}>{theme2024[index]}</Text>):null}
+
             <Entypo name={show ? "chevron-thin-up" : "chevron-thin-down"} size={28} color={theme.colors.textColor}/>
+
          </TouchableOpacity>
+
          <Animated.View style={animatedStyle}>
       
             <View onLayout={onLayout} style={{position: 'absolute', width: '100%', paddingLeft:5, paddingRight:5}}>
@@ -231,21 +240,21 @@ const ExpandableComponent = ({onRef, item, index, navigation}) =>{
                {
                   currentMonthEntries.map((item, key) => (
       
-                  <TouchableOpacity
-                     onPress={()=>handleItemPress(item, key)}
-                     style={[styles.dailyEntry, {backgroundColor: theme.colors.primary, borderBottomColor: theme.colors.borderColor, }]}
-                     key={key}>
-                        <View style={{flexDirection: 'row'}}> 
-                           <Text style={{fontSize: theme.fonts.fontSize+1, color: theme.colors.textColor}}>{getThatDay(item.day)},</Text>
-                           <Text style={{fontSize: theme.fonts.fontSize+1, color: theme.colors.textColor}}> {item.day}  -</Text>
-                           <Text style={{fontSize: theme.fonts.fontSize+1, paddingLeft: 10,  color: theme.colors.textColor}}>{item.verse}</Text>
-                        </View>
+                     <TouchableOpacity
+                        onPress={()=>handleItemPress(item, key)}
+                        style={[styles.dailyEntry, {backgroundColor: theme.colors.primary, borderBottomColor: theme.colors.borderColor, }]}
+                        key={key}>
+                           <View style={{flexDirection: 'row'}}> 
+                              <Text style={{fontSize: theme.fonts.fontSize+1, color: theme.colors.textColor}}>{getThatDay(item.day)},</Text>
+                              <Text style={{fontSize: theme.fonts.fontSize+1, color: theme.colors.textColor}}> {item.day}  -</Text>
+                              <Text style={{fontSize: theme.fonts.fontSize+1, paddingLeft: 10,  color: theme.colors.textColor}}>{item.verse}</Text>
+                           </View>
 
-                        <View style={[styles.check, styles.border,
-                           {backgroundColor: idArray.includes(item.id) ? idComplete.includes(item.id) ? "#8CFF31":'#fff': '#fff'}]}>
-                        </View>
-               
-                  </TouchableOpacity>
+                           <View style={[styles.check, styles.border,
+                              {backgroundColor: idArray.includes(item.id) ? idComplete.includes(item.id) ? "#8CFF31":'#fff': '#fff'}]}>
+                           </View>
+                  
+                     </TouchableOpacity>
             
                   ))
                }
@@ -275,38 +284,38 @@ export default function Brp({navigation}){
    const flatListRef = useRef(null);
 
    return (
-   <>
-   
-   <View style={[styles.container, { backgroundColor: theme.colors.primary, borderTopColor: theme.colors.borderColor, }]}>
-   
-         <View style={{ flex:1,}}>
+      <>
+      
+      <View style={[styles.container, { backgroundColor: theme.colors.primary, borderTopColor: theme.colors.borderColor, }]}>
+      
+            <View style={{ flex:1,}}>
 
-            <FlatList
-               ref={flatListRef}
-               data={listData}
-               keyExtractor={(item, index) => index.toString()}
-               initialScrollIndex={0}  
-               onScrollToIndexFailed={info => {
-                  const wait = new Promise(resolve => setTimeout(resolve, 500));
-                  wait.then(() => {
-                     flatListRef.current?.scrollToIndex({ index: info.index, animated: true });
-                  });
-               }}
-               renderItem={ ({item, index}) =>
-                  <ExpandableComponent
-                     onRef={flatListRef}
-                     key={item.category_name}
-                     item={item}
-                     index={index}
-                     navigation={navigation}
-                  />
-               }
-            />
-         </View>
-   </View>
+               <FlatList
+                  ref={flatListRef}
+                  data={listData}
+                  keyExtractor={(item, index) => index.toString()}
+                  initialScrollIndex={0}  
+                  onScrollToIndexFailed={info => {
+                     const wait = new Promise(resolve => setTimeout(resolve, 500));
+                     wait.then(() => {
+                        flatListRef.current?.scrollToIndex({ index: info.index, animated: true });
+                     });
+                  }}
+                  renderItem={ ({item, index}) =>
+                     <ExpandableComponent
+                        onRef={flatListRef}
+                        key={item.category_name}
+                        item={item}
+                        index={index}
+                        navigation={navigation}
+                     />
+                  }
+               />
+            </View>
+      </View>
 
 
-   </>
+      </>
    )
 }
 

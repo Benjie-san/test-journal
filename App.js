@@ -1,8 +1,6 @@
-import { StyleSheet, Text, View, Platform } from "react-native";
+
 import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
 import { Provider as PaperProvider,  MD3LightTheme as DefaultTheme,  } from 'react-native-paper'; //if there's no provider it returns an error
 
 //RN Navigation Imports
@@ -188,7 +186,7 @@ export default function App() {
 
       <PaperProvider theme={customTheme}>
       <StatusBar/>
-        <NavigationContainer  theme={customTheme}>
+        <NavigationContainer>
           <NavigationIndex handleTheme={handleTheme} handleFontSize={handleFontSize} currentTheme={theme} currentFontSize={fontSize} />
         </NavigationContainer>
       </PaperProvider>

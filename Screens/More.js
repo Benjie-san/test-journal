@@ -52,8 +52,8 @@ export default function More({navigation}) {
           </TouchableOpacity>
 
           <TouchableOpacity disabled style={styles.moreBtn} >
-              <Feather name="settings" size={28} color={theme.colors.textColor} />
-              <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Settings</Text>
+              <Feather name="settings" size={28} color={theme.colors.secondary} />
+              <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.secondary}} >Settings</Text>
           </TouchableOpacity>
           
 

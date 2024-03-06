@@ -10,7 +10,7 @@ const Tab = createMaterialTopTabNavigator();
 const FlatListComponent = ({notes, noteListLoading, handleDisplayEntryFetch }) => {
   const theme = useTheme();
   return(
-  <View style={styles.flex}>
+  <View style={[styles.flex, {backgroundColor: theme.colors.secondary}]}>
     {noteListLoading ? <ActivityIndicator style={styles.flex} size={'large'}/> :
     (<View style={[ styles.notelist, {backgroundColor: theme.colors.secondary}]}>
       {notes.length === 0 ?

@@ -142,6 +142,10 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 		}
 	
 	}
+
+	const toggleModal = () =>{
+		handleModal(!visible)
+	}
 	
 	useEffect(() => {
 		getVerse(scripture, esv);
@@ -154,6 +158,8 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 			isVisible={visible}
 			animationIn="bounceInUp"
 			animationOut="bounceOutDown"
+			swipeDirection="down"
+			onSwipeComplete={toggleModal}
 			animationInTiming={900}
 			animationOutTiming={500}
 			backdropTransitionInTiming={1000}
