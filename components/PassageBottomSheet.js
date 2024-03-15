@@ -151,7 +151,7 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 		getVerse(scripture, esv);
 	}, [scripture]);
 	
-  return (
+	return (
 		<Modal
 			onBackdropPress={() => handleModal(false)}
 			onBackButtonPress={() => handleModal(false)}

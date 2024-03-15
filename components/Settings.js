@@ -41,16 +41,16 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
       <View style={styles.settings}>
 
           <View style={[styles.itemSettings]} > 
-            <Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize+2}} >General</Text>
+            <Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize+4}} >General</Text>
 
             <TouchableOpacity onPress={() => handleThemeModal(true)}>
-              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Default Theme</Text>
-              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, opacity: 0.8}} >{themeSetting}</Text>
+              <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}} >Default Theme</Text>
+              <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, opacity: 0.8}} >{themeSetting}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => handleFontSizeModal(true)}>
-              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Default Font Size</Text>
-              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, opacity: 0.8}} >{fontSize}</Text>
+              <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}} >Default Font Size</Text>
+              <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, opacity: 0.8}} >{fontSize}</Text>
             </TouchableOpacity>
             
           </View>
@@ -58,11 +58,11 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
         <View style={[styles.hr]}></View>
         
           <View style={[styles.itemSettings]} >
-            <Text style={{color: theme.colors.altColor, fontSize:  theme.fonts.fontSize+2}} >Sort</Text>
+            <Text style={{color: theme.colors.altColor, fontSize:  theme.fonts.fontSize+4}} >Sort</Text>
 
             <TouchableOpacity>
-              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Default Entries Sort Order</Text>
-              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, opacity: 0.8}} >Last Modified</Text>
+              <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}} >Default Entries Sort Order</Text>
+              <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, opacity: 0.8}} >Last Modified</Text>
             </TouchableOpacity>
 
           </View>
@@ -70,10 +70,10 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
         <View style={[styles.hr]}></View>
 
           <View style={[styles.itemSettings]} >
-            <Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize}} >Reminder</Text>
+            <Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize+4}} >Reminder</Text>
             <TouchableOpacity>
-              <Text  style={{fontSize:  theme.fonts.fontSize, color: theme.colors.textColor}} >Default Notification Time</Text>
-              <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, opacity: 0.8}} >6 AM</Text>
+              <Text  style={{fontSize:  theme.fonts.fontSize+2, color: theme.colors.textColor}} >Default Notification Time</Text>
+              <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, opacity: 0.8}} >6 AM</Text>
             </TouchableOpacity>
           </View>
 
@@ -92,7 +92,7 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
           value={"light"} 
           onPress={ () => handleThemeSetting("Light", "light") } 
           status={ checked == "light" ? 'checked' : 'unchecked' }
-          unchecked={theme.colors.textColor}
+          uncheckedColor={theme.colors.textColor}
         />
         <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>Light Mode</Text>
       </TouchableOpacity>
@@ -103,7 +103,7 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
           color={theme.colors.altColor}
           onPress={ () => handleThemeSetting("Dark", "dark") } 
           status={ checked == "dark" ? 'checked' : 'unchecked' }
-          unchecked={theme.colors.textColor}
+          uncheckedColor={theme.colors.textColor}
         />
         <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>Dark Mode</Text>
       </TouchableOpacity>
@@ -119,7 +119,7 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
           color={theme.colors.altColor}
           onPress={ () => handleFontSizeSettings("Small") } 
           status={ fontSizeChecked == "small" ? 'checked' : 'unchecked' } 
-          unchecked={theme.colors.textColor}
+          uncheckedColor={theme.colors.textColor}
           />
         <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>Small</Text>
       </TouchableOpacity>
@@ -130,7 +130,7 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
           color={theme.colors.altColor}
           onPress={ () => handleFontSizeSettings("Medium") } 
           status={ fontSizeChecked == "medium" ? 'checked' : 'unchecked' }
-          unchecked={theme.colors.textColor}
+          uncheckedColor={theme.colors.textColor}
         />
         <Text style={{fontSize: theme.fonts.fontSize, color:  theme.colors.textColor}}>Medium</Text>
       </TouchableOpacity>
@@ -141,7 +141,7 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
           color={theme.colors.altColor}
           onPress={ () => handleFontSizeSettings("Large") } 
           status={ fontSizeChecked == "large" ? 'checked' : 'unchecked' }
-          unchecked={theme.colors.textColor}
+          uncheckedColor={theme.colors.textColor}
         />
         <Text style={{fontSize: theme.fonts.fontSize, color:  theme.colors.textColor}}>Large</Text>
       </TouchableOpacity>

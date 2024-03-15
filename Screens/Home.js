@@ -11,6 +11,7 @@ import { useTheme } from 'react-native-paper';
 // import for components
 import Navbar from '../components/Navbar';
 import TopBar from '../components/TopBar';
+import SortModal from '../components/SortModal';
 
 //import vector-icons
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -82,7 +83,7 @@ const AddModal = ({visible, type, handleModal}) => {
   );
 }
 
-export default function Home({navigation}) {
+export default function Home({navigation, route}) {
   const theme = useTheme();
   // import for data
   const [notes, setNotes] = useState([]);// showing all the data
@@ -115,6 +116,14 @@ export default function Home({navigation}) {
   //states for loading indicators
   const [noteListLoading, setNoteListLoading] = useState(true);
   const [verseLoading, setVerseLoading] = useState(true);
+
+  //Sort Bottom Sheet
+  const [sortModal, setSortModal] = useState(false);
+
+  const handleSortModal = (item) =>{
+    setSortModal(item)
+  }
+
 
   // //FUNCTIONS FOR DAILY STREAK
   // const [streakCount, setStreakCount] = useState(0); 
@@ -483,14 +492,17 @@ export default function Home({navigation}) {
       </View>
     </View>
 
-    <TopBar notes={notes} notesJournal={notesJournal} notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount}  />
-    
-    <Navbar onPressAddEntry={handleVisibleAddModal} />
+      <TopBar navigation={navigation} route={route} notes={notes} notesJournal={notesJournal} notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount} sortModal={sortModal} handleSortModal={handleSortModal} />
+      
+      <Navbar onPressAddEntry={handleVisibleAddModal} />
 
-    {/*MODALSS*/}
+      {/*MODALSS*/}
 
-    {/*modal for displaying add entry*/}
-    <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal} />
+      {/*modal for displaying add entry*/}
+      <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal} />
+
+      <SortModal visible={sortModal} handleModal={handleSortModal} />
+        
 
     </>
   )
