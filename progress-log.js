@@ -5,6 +5,14 @@
 // To do for today
 /*
 
+- set sort modal and its properties
+
+- Edit form objects of entry
+
+- add field for opened
+
+- 
+
 */
 
 //==========================//

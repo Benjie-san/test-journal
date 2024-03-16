@@ -89,10 +89,11 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
       <TouchableOpacity style={styles.selectionBtn} onPress={() => handleThemeSetting("Light", "light")}>
         <RadioButton
           color={theme.colors.altColor}
+          uncheckedColor={theme.colors.textColor}
           value={"light"} 
           onPress={ () => handleThemeSetting("Light", "light") } 
           status={ checked == "light" ? 'checked' : 'unchecked' }
-          uncheckedColor={theme.colors.textColor}
+         
         />
         <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>Light Mode</Text>
       </TouchableOpacity>

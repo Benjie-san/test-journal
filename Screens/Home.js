@@ -501,7 +501,7 @@ export default function Home({navigation, route}) {
       {/*modal for displaying add entry*/}
       <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal} />
 
-      <SortModal visible={sortModal} handleModal={handleSortModal} />
+      <SortModal visible={sortModal} handleModal={handleSortModal} navigation={navigation} />
         
 
     </>

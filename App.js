@@ -123,7 +123,6 @@ export default function App() {
       'INSERT INTO settings (currentTheme, fontSize, defaultSort, notifTime, dailyStreak, dailyStreakDate) VALUES (?, ?, ?, ?, ?, ?);',
       ["light", "Small", "modifiedDate", "6", 0, "none"],
       (tx, results) => {
-        handleGlobalStyle("light");
         console.log("Success default Settings are SET!!!");
       },
       (error) => {

@@ -168,7 +168,7 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
             hideModalContentWhileAnimating
 			style={styles.modal}
 		>
-			<View style={[styles.modalContent, {backgroundColor: theme.colors.primary}]}>
+			<View style={[styles.modalContent, {backgroundColor: theme.colors.primary, height: 500}]}>
 				
 				<View style={styles.center}>
 					
