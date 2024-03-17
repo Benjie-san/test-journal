@@ -5,7 +5,7 @@
 // To do for today
 /*
 
-- set sort modal and its properties
+- set the db stuff for sort modal, along with corresponding setting for it
 
 - Edit form objects of entry
 
