@@ -4,16 +4,24 @@ import Modal from "react-native-modal";
 import { useTheme } from 'react-native-paper'; 
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { Checkbox } from 'react-native-paper';
-
+import { FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import { Entypo } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
+import { Foundation } from '@expo/vector-icons';
+import { Fontisto } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
 import styles from '../styles/passageStyle';
-
 const Tab = createMaterialTopTabNavigator();
 
 export default function SortModal({visible, handleModal, }) {
 
     const theme = useTheme();
-	const [currentFilter, setCurrentFilter] = useState("");
-	const [checked, setChecked] = useState(false);
+	const [currentFilter, setCurrentFilter] = useState("All");
+	const [checked, setChecked] = useState(true);
+	const [selected, setSelected] = useState(true);
+	const [currentSort, setCurrentSort] = useState("By Month")
     const toggleModal = () =>{
         handleModal(!visible)
     }
@@ -65,34 +73,55 @@ export default function SortModal({visible, handleModal, }) {
 	
 	const RenderSort = () =>{
 
-		const SortItem = ({name}) => (
+
+		const handleSortItem = (name) =>{
+			setSelected(!selected)
+			setCurrentSort(name)
+		}
+
+		const SortItem = ({ name,  }) => (
 			<TouchableOpacity 
-				onPress={ ()=>handleFilter(name) }
-				style={{flexDirection: 'row', alignItems: 'center'}}
+				onPress={ ()=>handleSortItem(name) }
+				style={{flexDirection: 'row', alignItems: 'center', padding: 10, gap: 10}}
 			>
-				<Checkbox
-					status={ checked ? name == currentFilter ? 'checked' : 'unchecked' : 'unchecked' }
-					onPress={ () => handleFilter(name) }
-					color={theme.colors.altColor}
-					uncheckedColor={theme.colors.textColor}
-				/>
+				<AntDesign name={selected ? 'arrowdown' : 'arrowup'} size={24} color={ name == currentSort ? theme.colors.textColor : theme.colors.altTextColor} />
 				<Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize}} >{name}</Text>
 			</TouchableOpacity>
 		);
 
 		return(
-			<View  style={renderStyles.style}>
-				<Text>Sort</Text>
+			<View style={renderStyles.style}>
+				<SortItem name="By Month" />
+				<SortItem name="By Modified Time"/>
+				<SortItem name="By Created Time" />
 			</View>
 		);
 	}
 	
 	const RenderDisplay = () => {
 
+		const handleDisplayItem = () =>{
+
+		}
+
+		const DisplayItem = ({ name, icon  }) => (
+			<TouchableOpacity 
+				onPress={ ()=>handleDisplayItem(name) }
+				style={{flexDirection: 'row', alignItems: 'center', padding: 10, gap: 10,}}
+			>	
+				{icon}
+				<Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize}} >{name}</Text>
+			</TouchableOpacity>
+		);
 
 		return(
 			<View style={renderStyles.style}>
-				<Text>Display</Text>
+				<DisplayItem name="List" icon={ <Foundation name="list" size={30} color={theme.colors.textColor} /> }/>
+				<DisplayItem name="Details" icon={<FontAwesome5 name="equals" size={24} color={theme.colors.textColor} />} />
+				<DisplayItem name="Grid" icon={<Fontisto name="nav-icon-grid" size={24} color={theme.colors.textColor} />} />
+				<DisplayItem name="Large Grid" icon={<MaterialCommunityIcons name="view-grid" size={24} color={theme.colors.textColor}  />} />
+				
+
 			</View>
 		);
 	}
