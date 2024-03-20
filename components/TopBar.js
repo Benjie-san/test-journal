@@ -8,22 +8,12 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Tab = createMaterialTopTabNavigator();
 
-const FlatListComponent = ({notes, noteListLoading, handleDisplayEntryFetch, sortModal, handleSortModal }) => {
+const FlatListComponent = ({notes, noteListLoading, handleDisplayEntryFetch, }) => {
   const theme = useTheme();
   return(
   <View style={[styles.flex, {backgroundColor: theme.colors.tertiary}]}>
     
-    <View style={{backgroundColor: theme.colors.primary, width: "100%", padding: 15, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: theme.colors.borderColor, borderBottomWidth: 1, borderBottomColor: theme.colors.borderColor, }} > 
 
-      <Text style={{textAlign: 'center', fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}} >Recent Entries</Text>
-
-      <TouchableOpacity onPress={ ()=> handleSortModal(true) } style={{backgroundColor: theme.colors.secondary, padding: 5, borderRadius: 5,}}>
-
-        <MaterialCommunityIcons name="sort" size={24} color={theme.colors.textColor} />
-
-      </TouchableOpacity>
-    </View>
-    
     {noteListLoading ? <ActivityIndicator style={styles.flex} size={'large'}/> :
     (<View style={[ styles.notelist, {backgroundColor: theme.colors.secondary}]}>
       {notes.length === 0 ?
@@ -46,22 +36,22 @@ const FlatListComponent = ({notes, noteListLoading, handleDisplayEntryFetch, sor
 )
   }
 
-const AllEntries = ({notes, noteListLoading, handleDisplayEntryFetch,sortModal, handleSortModal }) => {
+const AllEntries = ({notes, noteListLoading, handleDisplayEntryFetch, }) => {
   return( 
-    <FlatListComponent notes={notes} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch}  sortModal={sortModal} handleSortModal={handleSortModal} />
+    <FlatListComponent notes={notes} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch} />
   );
 
 };
 
-const JournalEntries = ({notesJournal, noteListLoading, handleDisplayEntryFetch, sortModal, handleSortModal}) => {
+const JournalEntries = ({notesJournal, noteListLoading, handleDisplayEntryFetch, }) => {
   return(
-    <FlatListComponent notes={notesJournal} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch} sortModal={sortModal} handleSortModal={handleSortModal} />
+    <FlatListComponent notes={notesJournal} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch}/>
   );
 };
   
-const OPMEntries = ({notesOPM, noteListLoading, handleDisplayEntryFetch,sortModal, handleSortModal }) => {
+const OPMEntries = ({notesOPM, noteListLoading, handleDisplayEntryFetch, }) => {
   return(
-    <FlatListComponent notes={notesOPM} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch} sortModal={sortModal} handleSortModal={handleSortModal} />
+    <FlatListComponent notes={notesOPM} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch}  />
   );
 };
 
@@ -82,21 +72,22 @@ const SortBtn = ({name, count, focused}) => {
   )
 }
 
-const TopBar = ({navigation, route, notes, notesJournal, notesOPM, noteListLoading, handleDisplayEntryFetch, sortButtonCount, sortModal, handleSortModal}) => {
+const TopBar = ({navigation, route, notes, notesJournal, notesOPM, noteListLoading, handleDisplayEntryFetch, sortButtonCount, }) => {
   const theme = useTheme();
 
-  const RenderAll = () => <AllEntries  notes={notes} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortModal={sortModal} handleSortModal={handleSortModal} />
+  const RenderAll = () => <AllEntries  notes={notes} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch}  />
 
-  const RenderJournal = () => <JournalEntries  notesJournal={notesJournal} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortModal={sortModal} handleSortModal={handleSortModal} />
+  const RenderJournal = () => <JournalEntries  notesJournal={notesJournal} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} />
 
-  const RenderOPM = () => <OPMEntries   notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortModal={sortModal} handleSortModal={handleSortModal} />
+  const RenderOPM = () => <OPMEntries   notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch}/>
   
   return (
     <>
-    {/* <Tab.Navigator
+    <Tab.Navigator
         initialRouteName='All'
         barStyle={{width:"100%"}}
         screenOptions={{
+          headerShown: false,
           tabBarShowLabel: false,
           tabBarIconStyle: {
               alignItems:'center',
@@ -136,8 +127,8 @@ const TopBar = ({navigation, route, notes, notesJournal, notesOPM, noteListLoadi
           }}
         />
 
-    </Tab.Navigator> */}
-    <RenderAll />
+    </Tab.Navigator>
+
     </>
 
   )

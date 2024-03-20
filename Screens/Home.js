@@ -18,6 +18,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { Entypo } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const dbSettings = SQLite.openDatabase("settings4.db");
 const db = SQLite.openDatabase('_journal_database.db');
@@ -490,19 +491,37 @@ export default function Home({navigation, route}) {
         }
 
       </View>
+
+        
+    <View style={{backgroundColor: theme.colors.primary, width: "100%", padding: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: theme.colors.borderColor, borderBottomWidth: 1, borderBottomColor: theme.colors.borderColor, }} > 
+
+      <Text style={{textAlign: 'center', fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}} >Recent Entries</Text>
+
+      <TouchableOpacity onPress={ ()=> handleSortModal(true) } style={{backgroundColor: theme.colors.secondary, padding: 5, borderRadius: 5,}}>
+
+        <MaterialCommunityIcons name="sort" size={24} color={theme.colors.textColor} />
+
+      </TouchableOpacity>
     </View>
 
-      <TopBar navigation={navigation} route={route} notes={notes} notesJournal={notesJournal} notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount} sortModal={sortModal} handleSortModal={handleSortModal} />
+
+
+    </View>
+
+    <TopBar navigation={navigation} route={route} notes={notes} notesJournal={notesJournal} notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount}  />
       
+  
       <Navbar onPressAddEntry={handleVisibleAddModal} />
 
       {/*MODALSS*/}
 
       {/*modal for displaying add entry*/}
       <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal} />
+      <View>
+        <SortModal visible={sortModal} handleModal={handleSortModal} />
 
-      <SortModal visible={sortModal} handleModal={handleSortModal} navigation={navigation} />
-        
+      </View>
+
 
     </>
   )

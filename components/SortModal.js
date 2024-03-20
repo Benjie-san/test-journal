@@ -10,18 +10,19 @@ import { Foundation } from '@expo/vector-icons';
 import { Fontisto } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import styles from '../styles/passageStyle';
-const Tab = createMaterialTopTabNavigator();
+import { NavigationContainer } from "@react-navigation/native";
+
 import { useNavigation } from '@react-navigation/native';
 
 export default function SortModal({visible, handleModal }) {
-
+	const Tab1 = createMaterialTopTabNavigator();
     const theme = useTheme();
 	const [currentFilter, setCurrentFilter] = useState("All");
 	const [checked, setChecked] = useState(true);
 	const [selected, setSelected] = useState(true);
 	const [currentSort, setCurrentSort] = useState("By Month");
 
-	const [height, setHeight] = useState(250);
+	const [height, setHeight] = useState(260);
 
 	const handleheight = (item) =>{
 		setHeight(item)
@@ -73,7 +74,7 @@ export default function SortModal({visible, handleModal }) {
 			const unsubscribe = navigation.addListener('tabPress', (e) => {
 				// let splitTarget = e.target.split("-")
 				// console.log("First Screen Index:", splitTarget[0]);
-				handleheight(250);
+				handleheight(260);
 			});
 		
 			return unsubscribe;
@@ -170,8 +171,6 @@ export default function SortModal({visible, handleModal }) {
 	}
 
 
-
-
     return (
         <Modal
 			onBackdropPress={() => handleModal(false)}
@@ -190,28 +189,29 @@ export default function SortModal({visible, handleModal }) {
 			style={[styles.modal,]}
 		>
 			<View style={[styles.modalContent, {backgroundColor: theme.colors.primary, height: height}]}>
-				<Tab.Navigator
-					screenOptions={{
-						style:{backgroundColor: theme.colors.primary,},
-						tabBarLabelStyle:{color: theme.colors.textColor,},
-						tabBarStyle:{
-							width: '100%',
-							elevation: 0,
-							shadowColor: "#000000",
-							shadowOffset: { width: 0, height: 10 }, // change this for more shadow
-							shadowOpacity: 0.4,
-							shadowRadius: 6,
-							backgroundColor: theme.colors.primary,
-							color: theme.colors.textColor,
-						},
-						swipeEnabled: false,
-					}}
-				>
-					<Tab.Screen headerTitle="Filter" name="filter" component={RenderFilter}/>
-					<Tab.Screen headerTitle="Sort" name="sort" component={RenderSort} />
-					<Tab.Screen headerTitle="Display" name="display" component={RenderDisplay}/ >
-				
-				</Tab.Navigator>
+				<NavigationContainer independent={true}>
+					<Tab1.Navigator
+						screenOptions={{
+							tabBarLabelStyle:{color: theme.colors.textColor,},
+							tabBarStyle:{
+								width: '100%',
+								elevation: 0,
+								shadowColor: "#000000",
+								shadowOffset: { width: 0, height: 10 }, // change this for more shadow
+								shadowOpacity: 0.4,
+								shadowRadius: 6,
+								backgroundColor: theme.colors.primary,
+								color: theme.colors.textColor,
+							},
+							swipeEnabled: false,
+						}}
+					>
+						<Tab1.Screen headerTitle="Filter" name="filter" component={RenderFilter}/>
+						<Tab1.Screen headerTitle="Sort" name="sort" component={RenderSort} />
+						<Tab1.Screen headerTitle="Display" name="display" component={RenderDisplay}/ >
+					
+					</Tab1.Navigator>
+				</NavigationContainer>
 			</View>
 
 		</Modal>
