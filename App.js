@@ -27,6 +27,9 @@ export default function App() {
   // Styles
   const [theme, setTheme] = useState("light");
   const [fontSize, setFontSize] = useState("small");
+  const [sort, setSort] = useState("modifiedTime");
+  const [display, setDisplay] = useState("list");
+  const [filter, setFilter] = useState("");
 
   const customTheme = theme == "light" 
     ? {
@@ -53,8 +56,22 @@ export default function App() {
     updateFontSize(item);
     fetchDefaultSettings();
   }
-
-
+  
+  const handleSort = (item) => {
+    updateSort(item);
+    setSort(item)
+  }
+  
+  const handleDisplay = (item) => {
+    updateDisplay();
+    setDisplay(item)
+  }
+  
+  const handleFilter = (item) => {
+    updateFilter(item);
+    setFilter(item)
+  }
+  
  // =================== DB FOR SETTINGS ==============================================
   const setupSettingsDatabase = () => {
     // Check if the table exists
@@ -69,7 +86,7 @@ export default function App() {
             // Table doesn't exist, create it
             dbSettings.transaction((tx) => {
               tx.executeSql(
-                'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY AUTOINCREMENT, currentTheme TEXT, fontSize TEXT, defaultSort TEXT, notifTime TEXT, dailyStreak NUMBER, dailyStreakDate TEXT);',
+                'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY AUTOINCREMENT, currentTheme TEXT, fontSize TEXT, defaultSort TEXT, deafaultDisplay TEXT, defaultFilter TEXT, notifTime TEXT);',
                 [],
                 (_, result) => { 
                   console.log('Table Settings: created successfully'); 
@@ -120,8 +137,8 @@ export default function App() {
     console.log("insert called")
     dbSettings.transaction((tx) => {
       tx.executeSql(
-      'INSERT INTO settings (currentTheme, fontSize, defaultSort, notifTime, dailyStreak, dailyStreakDate) VALUES (?, ?, ?, ?, ?, ?);',
-      ["light", "Small", "modifiedDate", "6", 0, "none"],
+      'INSERT INTO settings (currentTheme, fontSize, defaultSort, defaultDisplay, defaultFilter, notifTime) VALUES (?, ?, ?, ?, ?, ?);',
+      ["light", "Small", "modifiedDate", "list", new Date.getMonth(), "6",],
       (tx, results) => {
         console.log("Success default Settings are SET!!!");
       },
@@ -163,6 +180,52 @@ export default function App() {
         );
     });
   }
+  const updateSort = (sort) =>{
+    dbSettings.transaction((tx) => {
+      tx.executeSql(
+        'UPDATE settings SET defaultSort = ? WHERE id = ?;',
+        [sort, 1],
+        (_, result) => {
+          console.log('Sort updated successfully');
+          setSort(sort);  
+        },
+        (_, error) => {
+          console.error('Error updating Sort:', error);
+        }
+        );
+    });
+  }
+  const updateDisplay = (display) =>{
+    dbSettings.transaction((tx) => {
+      tx.executeSql(
+        'UPDATE settings SET defaultDisplay = ? WHERE id = ?;',
+        [display, 1],
+        (_, result) => {
+          console.log('Display updated successfully');
+          setDisplay(display);  
+        },
+        (_, error) => {
+          console.error('Error updating Display:', error);
+        }
+        );
+    });
+  }
+  const updateFilter = (filter) =>{
+    dbSettings.transaction((tx) => {
+      tx.executeSql(
+        'UPDATE settings SET defaultFilter = ? WHERE id = ?;',
+        [filter, 1],
+        (_, result) => {
+          console.log('Filter updated successfully');
+          setFilter(filter);  
+        },
+        (_, error) => {
+          console.error('Error updating Filter:', error);
+        }
+        );
+    });
+  }
+
 
 
  // ===============================  USE EFFECTS ==============================================
@@ -186,7 +249,18 @@ export default function App() {
       <PaperProvider theme={customTheme}>
       <StatusBar/>
         <NavigationContainer>
-          <NavigationIndex handleTheme={handleTheme} handleFontSize={handleFontSize} currentTheme={theme} currentFontSize={fontSize} />
+          <NavigationIndex 
+            currentTheme={theme} 
+            currentFontSize={fontSize}
+            currentSort={sort}
+            currentDisplay={display}
+            currentFilter={filter}
+            handleTheme={handleTheme} 
+            handleFontSize={handleFontSize} 
+            handleSort={handleSort} 
+            handleDisplay={handleDisplay} 
+            handleFilter={handleFilter} 
+          />
         </NavigationContainer>
       </PaperProvider>
     </>

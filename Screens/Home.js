@@ -84,7 +84,7 @@ const AddModal = ({visible, type, handleModal}) => {
   );
 }
 
-export default function Home({navigation, route}) {
+export default function Home({navigation, route, currentSort, currentDisplay, currentFilter, handleSort, handleDisplay, handleFilter }) {
   const theme = useTheme();
   // import for data
   const [notes, setNotes] = useState([]);// showing all the data
@@ -285,8 +285,8 @@ export default function Home({navigation, route}) {
   const fetchAllData = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM entries WHERE settingState = ? ORDER BY modifiedDate DESC;",
-        ["normal"],
+        "SELECT * FROM entries WHERE settingState = ? ORDER BY ? DESC;",
+        ["normal", "modifiedDate"],
         (txObj, result) => {
           const rows = result.rows;
           const dataArray = [];
@@ -508,7 +508,11 @@ export default function Home({navigation, route}) {
 
     </View>
 
-    <TopBar navigation={navigation} route={route} notes={notes} notesJournal={notesJournal} notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount}  />
+    <TopBar 
+      navigation={navigation} route={route} 
+      notes={notes}  notesJournal={notesJournal}  notesOPM={notesOPM} noteListLoading={noteListLoading} 
+      handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount}  
+    />
       
   
       <Navbar onPressAddEntry={handleVisibleAddModal} />
@@ -516,11 +520,18 @@ export default function Home({navigation, route}) {
       {/*MODALSS*/}
 
       {/*modal for displaying add entry*/}
-      <AddModal visible={visibleAddModal} type={handleAddButton} handleModal={handleVisibleAddModal} />
-      <View>
-        <SortModal visible={sortModal} handleModal={handleSortModal} />
-
-      </View>
+      <AddModal 
+        visible={visibleAddModal} 
+        type={handleAddButton} 
+        handleModal={handleVisibleAddModal} 
+      />
+    
+      <SortModal 
+        visible={sortModal} handleModal={handleSortModal}
+        fetchAllData={fetchAllData} fetchData={fetchData} 
+        currentSortSetting={currentSort} currentDisplaySetting={currentDisplay} currentFilterSetting={currentFilter}
+        handleSort={handleSort} handleDisplay={handleDisplay} handleFilter={handleFilter}
+      />
 
 
     </>

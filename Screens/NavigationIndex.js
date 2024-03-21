@@ -22,11 +22,16 @@ const HomeStack = createNativeStackNavigator();
 const SearchStack = createNativeStackNavigator();
 const MoreStack = createNativeStackNavigator();
 
-export default function NavigationIndex ({currentTheme, currentFontSize, handleTheme, handleFontSize}) {
+export default function NavigationIndex ({currentTheme, currentFontSize, currentSort, currentDisplay, currentFilter, handleTheme, handleFontSize, handleSort, handleDisplay, handleFilter}) {
 
     const theme = useTheme();
     
-    const RenderHome = (props) => ( <Home {...props} /> );
+    const RenderHome = (props) => ( 
+        <Home {...props} 
+            currentSort={currentSort} currentDisplay={currentDisplay} currentFilter={currentFilter}
+            handleSort={handleSort} handleDisplay={handleDisplay} handleFilter={handleFilter}
+        /> 
+    );
     const RenderEntry = (props) => ( <Entry {...props} /> );
     const RenderBrp = (props) => <Brp {...props}/>;
     const RenderSearch = (props) => ( <Search {...props} />);

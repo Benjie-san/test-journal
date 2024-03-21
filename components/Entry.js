@@ -739,7 +739,7 @@ return (
                             >
                             <FontAwesome5 name="bible" size={24} color={theme.colors.textColor} />
                             <Text style={{color: theme.colors.textColor , fontSize: theme.fonts.fontSize}}>Bible</Text>
-          
+        
                             </TouchableOpacity>
                         </View>
     
@@ -757,13 +757,21 @@ return (
 
             <AlertModal message={message} visible={alertModalVisible} />
             
-            <PassageBottomSheet visible={passageModalVisble} handleModal={handlePassageVisible} scripture={scripture} type={entryType} handlePassage={handlePassage} />
+            <PassageBottomSheet 
+                visible={passageModalVisble} handleModal={handlePassageVisible} 
+                scripture={scripture} type={entryType} handlePassage={handlePassage} 
+            />
         
 
         </View>
 
-
-        <MenuModal visible={menuVisible} handleCloseModal={handleMenuVisible} deleteEntry={deleteEntry} status={status} handleStatus={handleStatus} entry={entryToBeShared} type={entryType} handleSettingState={handleSettingState}  settingState={settingState}/>
+        <MenuModal 
+            visible={menuVisible} handleCloseModal={handleMenuVisible} 
+            deleteEntry={deleteEntry} 
+            status={status} handleStatus={handleStatus} 
+            entry={entryToBeShared} type={entryType} 
+            handleSettingState={handleSettingState} settingState={settingState}
+        />
         
     </>
 )
