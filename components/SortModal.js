@@ -114,30 +114,28 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 			ref.current?.scrollToIndex({
 				index,
 				animated: true,
-				viewOffSet: 100,
 			})
-		}, [index])
+		}, [])
 		
 		
 		return(
-			<View style={[renderStyles.style, { marginBottom: 10, width: '100%' }]}>
+			<View style={[renderStyles.style, { marginBottom: 10, }]}>
 				<FlatList 
 					ref={ref}
 					keyExtractor={(item, index) => index.toString()}
-					contentContainerStyle={{paddingLeft: 10}}
 					showsHorizontalScrollIndicator={false}
-					initialScrollIndex={1}
+					initialScrollIndex={0}
 					onScrollToIndexFailed={info => {
 						const wait = new Promise(resolve => setTimeout(resolve, 500));
 						wait.then(() => {
-							ref.current?.scrollToIndex({ index: info.index, animated: true, 
+							ref.current?.scrollToIndex({ index: info.index, animated: true,
 							});
 						});
 					}}
 					data={months} 
 					horizontal
 					renderItem={ ({item, index:findex})=>(
-
+				
 						<TouchableOpacity 
 							onPress={ ()=>{handleFilterItem(item, findex) } } 
 							style={{
@@ -147,17 +145,18 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 								backgroundColor: currentFilter == item ? theme.colors.altColor : theme.colors.altTextColor,
 								borderColor:  currentDisplay == item ? '#fff' : theme.colors.borderColor,
 							}}
-						> 
-								<Text style={{color: currentFilter == item ? theme.colors.altTextColor : theme.colors.textColor, fontSize: theme.fonts.fontSize,}} >{item}</Text>
+						> 	
+							<View>
+							<Text style={{color: currentFilter == item ? theme.colors.altTextColor : theme.colors.textColor, fontSize: theme.fonts.fontSize,}} >{item}</Text>
+
+							</View>
 						</TouchableOpacity>
+					
 					) }
 				/>
 			</View>	
 		);
 	}
-
-	
-
 
     return (
         <Modal
