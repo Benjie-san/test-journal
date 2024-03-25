@@ -18,9 +18,10 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 	const [currentDisplay, setCurrentDisplay] = useState("List");
 	const [currentFilter, setCurrentFilter] = useState("All");
 	const [iconName, setIconName] = useState("arrowup");
+	const [filterBtn, setFilterBtn] = useState(false);
 
 	const ref = useRef(null);
-	const [index, setIndex] = useState(0)
+	const [index, setIndex] = useState(1)
 	const months = ["All", "Jan", "Feb", "Mar", "Apr", "May",  "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
 
     const toggleModal = () =>{
@@ -106,17 +107,22 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 			if(currentFilter !== month){
 				setCurrentFilter(month);
 				// console.log(index)
-				setIndex(index)
+				setIndex(index);
+				setFilterBtn(true);
 			}
 		
 		}
 		useEffect(() => {
-			ref.current?.scrollToIndex({
-				index,
-				animated: true,
-				viewOffSet: 100,
-			})
-		}, [index])
+			if(filterBtn){
+				ref.current?.scrollToIndex({
+					index,
+					animated: false,
+					viewOffSet: 50,
+				})
+				setFilterBtn(false);
+			}
+			
+		}, [index, filterBtn])
 		
 		
 		return(
@@ -124,20 +130,20 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 				<FlatList 
 					ref={ref}
 					keyExtractor={(item, index) => index.toString()}
-					contentContainerStyle={{paddingLeft: 10}}
 					showsHorizontalScrollIndicator={false}
-					initialScrollIndex={1}
+					initialScrollIndex={index}
+					contentContainerStyle={{ padding: 10 }}
 					onScrollToIndexFailed={info => {
 						const wait = new Promise(resolve => setTimeout(resolve, 500));
 						wait.then(() => {
-							ref.current?.scrollToIndex({ index: info.index, animated: true, 
+							ref.current?.scrollToIndex({ index: info.index, animated: false, 
 							});
 						});
 					}}
 					data={months} 
 					horizontal
 					renderItem={ ({item, index:findex})=>(
-
+				
 						<TouchableOpacity 
 							onPress={ ()=>{handleFilterItem(item, findex) } } 
 							style={{
@@ -145,11 +151,17 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 								padding: 10, marginRight: 7, 
 								paddingLeft: 15, paddingRight: 15,
 								backgroundColor: currentFilter == item ? theme.colors.altColor : theme.colors.altTextColor,
-								borderColor:  currentDisplay == item ? '#fff' : theme.colors.borderColor,
+								borderColor:  currentFilter == item ? '#fff' : theme.colors.borderColor,
 							}}
 						> 
-								<Text style={{color: currentFilter == item ? theme.colors.altTextColor : theme.colors.textColor, fontSize: theme.fonts.fontSize,}} >{item}</Text>
+								<Text style={{
+									color: currentFilter == item ? theme.colors.altTextColor : theme.colors.textColor, 
+									fontSize: theme.fonts.fontSize,}} 
+								>
+									{item}
+								</Text>
 						</TouchableOpacity>
+					
 					) }
 				/>
 			</View>	
