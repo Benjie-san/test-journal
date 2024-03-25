@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, FlatList } from 'react-native';
-import React,{ useState, useEffect, useRef } from 'react';
+import React,{ useState, useEffect, useRef, memo } from 'react';
 import Modal from "react-native-modal";
 import { useTheme } from 'react-native-paper'; 
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -9,7 +9,7 @@ import { Foundation } from '@expo/vector-icons';
 import { Fontisto } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import styles from '../styles/passageStyle';
-import { render } from 'react-dom';
+const months = ["All", "Jan", "Feb", "Mar", "Apr", "May",  "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
 
 export default function SortModal({visible, handleModal, fetchData, fetchAllData, currentSortSetting, currentDisplaySetting, currentFilterSetting, handleSort, handleDisplay, handleFilter }) {
     const theme = useTheme();
@@ -18,11 +18,9 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 	const [currentDisplay, setCurrentDisplay] = useState("List");
 	const [currentFilter, setCurrentFilter] = useState("All");
 	const [iconName, setIconName] = useState("arrowup");
-	const [filterBtn, setFilterBtn] = useState(false);
-
+	const [data, setData] = useState(months)
 	const ref = useRef(null);
-	const [index, setIndex] = useState(1)
-	const months = ["All", "Jan", "Feb", "Mar", "Apr", "May",  "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+	const [index, setIndex] = useState(0)
 
     const toggleModal = () =>{
         handleModal(!visible)
@@ -101,75 +99,64 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 		);
 	}
 
-	const RenderFilter = () => {
+
+	const RenderFilter = memo( () => {
 
 		const handleFilterItem = (month, index) =>{
 			if(currentFilter !== month){
 				setCurrentFilter(month);
 				// console.log(index)
-				setIndex(index);
-				setFilterBtn(true);
+				setIndex(index)
 			}
-		
 		}
-		useEffect(() => {
-			if(filterBtn){
-				ref.current?.scrollToIndex({
-					index,
-					animated: false,
-					viewOffSet: 50,
-				})
-				setFilterBtn(false);
-			}
-			
-		}, [index, filterBtn])
-		
-		
+	
 		return(
-			<View style={[renderStyles.style, { marginBottom: 10, width: '100%' }]}>
+			<View style={[renderStyles.style, { marginBottom: 10, width: '100%'}]}>
 				<FlatList 
 					ref={ref}
 					keyExtractor={(item, index) => index.toString()}
 					showsHorizontalScrollIndicator={false}
-					initialScrollIndex={index}
-					contentContainerStyle={{ padding: 10 }}
+					initialScrollIndex={0}
 					onScrollToIndexFailed={info => {
 						const wait = new Promise(resolve => setTimeout(resolve, 500));
 						wait.then(() => {
-							ref.current?.scrollToIndex({ index: info.index, animated: false, 
+							ref.current?.scrollToIndex({ index: info.index, animated: true,
 							});
 						});
 					}}
-					data={months} 
+					data={data} 
 					horizontal
 					renderItem={ ({item, index:findex})=>(
-				
-						<TouchableOpacity 
-							onPress={ ()=>{handleFilterItem(item, findex) } } 
-							style={{
-								borderWidth: 1, borderRadius: 10, 
-								padding: 10, marginRight: 7, 
-								paddingLeft: 15, paddingRight: 15,
-								backgroundColor: currentFilter == item ? theme.colors.altColor : theme.colors.altTextColor,
-								borderColor:  currentFilter == item ? '#fff' : theme.colors.borderColor,
-							}}
-						> 
-								<Text style={{
-									color: currentFilter == item ? theme.colors.altTextColor : theme.colors.textColor, 
-									fontSize: theme.fonts.fontSize,}} 
-								>
-									{item}
-								</Text>
-						</TouchableOpacity>
-					
+						
+							<TouchableOpacity 
+								onPress={ ()=>{handleFilterItem(item, findex) } } 
+								style={{
+									borderWidth: 1, borderRadius: 10, 
+									padding: 10, marginRight: 7, 
+									paddingLeft: 15, paddingRight: 15,
+									backgroundColor: currentFilter == item ? theme.colors.altColor : theme.colors.altTextColor,
+									borderColor:  currentDisplay == item ? '#fff' : theme.colors.borderColor,
+								}}
+							> 	
+								<View>
+								<Text style={{color: currentFilter == item ? theme.colors.altTextColor : theme.colors.textColor, fontSize: theme.fonts.fontSize,}} >{item}</Text>
+
+								</View>
+							</TouchableOpacity>
+						
 					) }
 				/>
 			</View>	
 		);
-	}
+		
+	});
 
-	
-
+	useEffect(() => {
+		ref.current?.scrollToIndex({
+			index,
+			animated: true,
+		})
+	}, [index])
 
     return (
         <Modal

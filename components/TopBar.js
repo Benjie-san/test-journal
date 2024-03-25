@@ -24,7 +24,6 @@ const FlatListComponent = ({notes, noteListLoading, handleDisplayEntryFetch, }) 
             data={ notes } 
             keyExtractor={(item, index) => index.toString()}
             showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
               <FlatListItems item={item} handleDisplayEntryFetch={handleDisplayEntryFetch}/>
             )}
