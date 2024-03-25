@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, FlatList } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, FlatList, Pressable } from 'react-native';
 import React,{ useState, useEffect, useRef, memo } from 'react';
 import Modal from "react-native-modal";
 import { useTheme } from 'react-native-paper'; 
@@ -20,7 +20,8 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 	const [iconName, setIconName] = useState("arrowup");
 	const [data, setData] = useState(months)
 	const ref = useRef(null);
-	const [index, setIndex] = useState(0)
+	const [index, setIndex] = useState(0);
+	const [btnType, setBtnType] = useState("");
 
     const toggleModal = () =>{
         handleModal(!visible)
@@ -34,32 +35,33 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 			gap: 10,
 		}
 	}
+
+	const handleSortItem = (name) =>{
+		setSelectedSort(true);
+		setCurrentSort(name);
+		setBtnType("sort");
+		if(selectedSort && name == currentSort){
+			if(iconName == "arrowup"){
+				setIconName("arrowdown");
+			}else{
+				setIconName("arrowup");
+			}
+		}
+	}
+
+	const SortItem = ({ name,  }) => (
+		<Pressable 
+			onPress={ ()=>handleSortItem(name) }
+			style={{flexDirection: 'row', alignItems: 'center', padding: 10, gap:10}}
+		>
+			<AntDesign name={iconName} size={20} color={ name == currentSort ? theme.colors.textColor : theme.colors.altTextColor} />
+			<Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize}} >{name}</Text>
+		</Pressable>
+	);
+
 	
 	const RenderSort = () =>{
 
-		const handleSortItem = (name) =>{
-			setSelectedSort(true);
-			setCurrentSort(name);
-			if(selectedSort && name == currentSort){
-				if(iconName == "arrowup"){
-					setIconName("arrowdown");
-				}else{
-					setIconName("arrowup");
-				}
-			}
-		}
-
-		const SortItem = ({ name,  }) => (
-			<TouchableOpacity 
-				onPress={ ()=>handleSortItem(name) }
-				style={{flexDirection: 'row', alignItems: 'center', padding: 10, gap:10}}
-			>
-				<AntDesign name={iconName} size={20} color={ name == currentSort ? theme.colors.textColor : theme.colors.altTextColor} />
-				<Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize}} >{name}</Text>
-			</TouchableOpacity>
-		);
-	
-	
 		return(
 			<View style={renderStyles.style}>
 				<SortItem name="By Modified Time"/>
@@ -67,26 +69,29 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 			</View>
 		);
 	}
+
+	const handleDisplayItem = (name) =>{
+		if(name !== currentDisplay){
+			setCurrentDisplay(name);
+			setBtnType("display");
+		}
+	}
+
+	const DisplayItem = ({ name, icon  }) => (
+		<Pressable 
+			onPress={ ()=>handleDisplayItem(name) }
+			style={{flexDirection: 'row', alignItems: 'center', padding: 10, gap: 10, borderWidth: 1, borderRadius: 10, paddingLeft: 15, paddingRight: 15, 
+			backgroundColor: currentDisplay == name ? theme.colors.altColor : theme.colors.altTextColor,
+			borderColor:  currentDisplay == name ? '#fff' : theme.colors.borderColor,
+		}}
+		>	
+			{icon}
+			<Text style={{color: currentDisplay == name ? theme.colors.altTextColor : theme.colors.textColor, fontSize: theme.fonts.fontSize}} >{name}</Text>
+		</Pressable>
+	);
 	
 	const RenderDisplay = () => {
-		const handleDisplayItem = (name) =>{
-			if(name !== currentDisplay){
-				setCurrentDisplay(name);
-			}
-		}
-
-		const DisplayItem = ({ name, icon  }) => (
-			<TouchableOpacity 
-				onPress={ ()=>handleDisplayItem(name) }
-				style={{flexDirection: 'row', alignItems: 'center', padding: 10, gap: 10, borderWidth: 1, borderRadius: 10, paddingLeft: 15, paddingRight: 15, 
-				backgroundColor: currentDisplay == name ? theme.colors.altColor : theme.colors.altTextColor,
-				borderColor:  currentDisplay == name ? '#fff' : theme.colors.borderColor,
-			}}
-			>	
-				{icon}
-				<Text style={{color: currentDisplay == name ? theme.colors.altTextColor : theme.colors.textColor, fontSize: theme.fonts.fontSize}} >{name}</Text>
-			</TouchableOpacity>
-		);
+	
 
 		return(
 			<View style={[renderStyles.style, {flexWrap: 'wrap', flexDirection: 'row', marginBottom: 10}]}>
@@ -99,65 +104,77 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 		);
 	}
 
-
-	const RenderFilter = memo( () => {
-
-		const handleFilterItem = (month, index) =>{
-			if(currentFilter !== month){
-				setCurrentFilter(month);
-				// console.log(index)
-				setIndex(index)
-			}
+	const handleFilterItem = (month, index) =>{
+		if(currentFilter !== month){
+			setCurrentFilter(month);
+			// console.log(index)
+			setIndex(index);
+			setBtnType("filter");
 		}
-	
-		return(
-			<View style={[renderStyles.style, { marginBottom: 10, width: '100%'}]}>
-				<FlatList 
-					ref={ref}
-					keyExtractor={(item, index) => index.toString()}
-					showsHorizontalScrollIndicator={false}
-					initialScrollIndex={0}
-					onScrollToIndexFailed={info => {
-						const wait = new Promise(resolve => setTimeout(resolve, 500));
-						wait.then(() => {
-							ref.current?.scrollToIndex({ index: info.index, animated: true,
-							});
-						});
-					}}
-					data={data} 
-					horizontal
-					renderItem={ ({item, index:findex})=>(
-						
-							<TouchableOpacity 
-								onPress={ ()=>{handleFilterItem(item, findex) } } 
-								style={{
-									borderWidth: 1, borderRadius: 10, 
-									padding: 10, marginRight: 7, 
-									paddingLeft: 15, paddingRight: 15,
-									backgroundColor: currentFilter == item ? theme.colors.altColor : theme.colors.altTextColor,
-									borderColor:  currentDisplay == item ? '#fff' : theme.colors.borderColor,
-								}}
-							> 	
-								<View>
-								<Text style={{color: currentFilter == item ? theme.colors.altTextColor : theme.colors.textColor, fontSize: theme.fonts.fontSize,}} >{item}</Text>
+	}
 
-								</View>
-							</TouchableOpacity>
-						
-					) }
-				/>
-			</View>	
-		);
-		
-	});
 
 	useEffect(() => {
-		ref.current?.scrollToIndex({
-			index,
-			animated: true,
-		})
-	}, [index])
+		if(visible){
+			ref.current?.scrollToIndex({
+				index: index,
+				animated: true,
+			
+			});
+		}
+	
+	}, [index, visible])
 
+	// const RenderFilter = memo(() => {
+
+	
+
+	
+	
+	// 	return(
+	// 		<View style={[renderStyles.style, { marginBottom: 10,}]}>
+	// 			<FlatList 
+	// 				ref={ref}
+	// 				initialNumToRender={13}
+	// 				keyExtractor={(item, index) => index.toString()}
+	// 				showsHorizontalScrollIndicator={false}
+	// 				onScrollToIndexFailed={info => {
+	// 					const wait = new Promise(resolve => setTimeout(resolve, 500));
+	// 					wait.then(() => {
+	// 						ref.current?.scrollToIndex({ index: info.index, animated: true,
+	// 						});
+	// 					});
+	// 				}}
+					
+	// 				data={data} 
+	// 				horizontal
+	// 				renderItem={ ({item, index:findex})=>(
+						
+	// 						<TouchableOpacity 
+	// 							key={findex}
+	// 							onPress={ ()=>{handleFilterItem(item) } } 
+	// 							style={{
+	// 								borderWidth: 1, borderRadius: 10, 
+	// 								padding: 10, marginRight: 7, 
+	// 								paddingLeft: 15, paddingRight: 15,
+	// 								backgroundColor: currentFilter == item ? theme.colors.altColor : theme.colors.altTextColor,
+	// 								borderColor:  currentDisplay == item ? '#fff' : theme.colors.borderColor,
+	// 							}}
+	// 						> 	
+	// 							<View>
+	// 							<Text style={{color: currentFilter == item ? theme.colors.altTextColor : theme.colors.textColor, fontSize: theme.fonts.fontSize,}} >{item}</Text>
+
+	// 							</View>
+	// 						</TouchableOpacity>
+						
+	// 				) }
+	// 			/>
+	// 		</View>	
+	// 	);
+		
+	// });
+
+	
     return (
         <Modal
 			onBackdropPress={() => handleModal(false)}
@@ -183,7 +200,45 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 					<Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize + 2, fontWeight: 'bold'}}>Display</Text>
 					<RenderDisplay />
 					<Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize + 2, fontWeight: 'bold'}}>Filter by Month</Text>
-					<RenderFilter />
+					{/* <RenderFilter /> */}
+
+					<View style={[renderStyles.style, { marginBottom: 10,}]}>
+						<FlatList 
+							ref={ref}
+							initialScrollIndex={0}
+							showsHorizontalScrollIndicator={false}
+							onScrollToIndexFailed={info => {
+								const wait = new Promise(resolve => setTimeout(resolve, 500));
+								wait.then(() => {
+									ref.current?.scrollToIndex({ index: info.index, animated: true,
+									});
+								});
+							}}
+							
+							data={data} 
+							horizontal
+							renderItem={ ({item, index:findex})=>(
+								
+								<TouchableOpacity 
+									key={findex}
+									onPress={ ()=>{handleFilterItem(item, findex) } } 
+									style={{
+										borderWidth: 1, borderRadius: 10, 
+										padding: 10, marginRight: 7, 
+										paddingLeft: 15, paddingRight: 15,
+										backgroundColor: currentFilter == item ? theme.colors.altColor : theme.colors.altTextColor,
+										borderColor:  currentDisplay == item ? '#fff' : theme.colors.borderColor,
+									}}
+								> 	
+									<View>
+									<Text style={{color: currentFilter == item ? theme.colors.altTextColor : theme.colors.textColor, fontSize: theme.fonts.fontSize,}} >{item}</Text>
+
+									</View>
+								</TouchableOpacity>
+								
+							) }
+						/>
+					</View>	
 				</View>
 				
 			</View>
