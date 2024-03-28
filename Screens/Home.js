@@ -125,54 +125,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     setSortModal(item)
   }
 
-
-  // //FUNCTIONS FOR DAILY STREAK
-  // const [streakCount, setStreakCount] = useState(0); 
-  // const [streakDate, setStreakDate] = useState();
-
-
-  // const fetchStreakCount = () =>{
-  //   dbSettings.transaction((tx) => {
-  //     tx.executeSql(
-  //     'SELECT dailyStreak, dailyStreakDate FROM settings WHERE id = ?',
-  //     [1],
-  //     (_, result) => {
-  //         const rows = result.rows;
-  //         const dataArray = [];
-  //         for (let i = 0; i < rows.length; i++) {
-  //           const item = rows.item(i);
-  //           dataArray.push(item);
-          
-  //         }
-  //         setStreakCount(dataArray[0].dailyStreak);
-  //         setStreakDate(dataArray[0].dailyStreakDate);  
-        
-  //         console.log("Daily Streak Fetched");
-          
-  //       },
-  //       (_, error) => {
-  //         console.error('Error querying data:', error);
-  //       }
-  //     );
-  //   });
-  // };
-
-  const updateStreakCount = (count, date) =>{
-    dbSettings.transaction((tx) => {
-      tx.executeSql(
-        'UPDATE settings SET dailyStreak = ?, dailyStreakDate = ? WHERE id = ?;',
-        [count, date, 1],
-        (_, result) => {
-          console.log('Data SETTINGS:dailyStreak updated successfully');
-          fetchStreakCount();
-        },
-        (_, error) => {
-          console.error('Error updating SETTINGS:dailyStreak data:', error);
-        }
-        );
-    });
-  }
-
   // NAVIGATION FUNCTIONS
 
   const openBrp = () => {
@@ -241,8 +193,8 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     if(type == "journal"){
       db.transaction((tx) => {
         tx.executeSql(
-          "SELECT * FROM entries WHERE settingState = ? AND type = ? OR type = ? ORDER BY modifiedDate DESC;",
-          [ "normal", "journal", "sermon"],
+          "SELECT * FROM entries WHERE type = ? OR type = ? ORDER BY modifiedDate DESC;",
+          ["journal", "sermon"],
           (_, result) => {
             const rows = result.rows;
             setJournalCount(rows.length);
@@ -262,8 +214,8 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     } else{
       db.transaction((tx) => {
         tx.executeSql(
-          "SELECT * FROM entries WHERE type = ? AND settingState = ? ORDER BY modifiedDate DESC;",
-          ["opm", "normal"],
+          "SELECT * FROM entries WHERE type = ? ORDER BY modifiedDate DESC;",
+          ["opm",],
           (_, result) => {
             const rows = result.rows;
             setOpmCount(rows.length);
@@ -285,8 +237,8 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   const fetchAllData = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM entries WHERE settingState = ? ORDER BY ? DESC;",
-        ["normal", "modifiedDate"],
+        "SELECT * FROM entries ORDER BY ? DESC;",
+        ["modifiedDate"],
         (txObj, result) => {
           const rows = result.rows;
           const dataArray = [];
@@ -403,24 +355,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   };
 
 
-  // USE EFFECTS
-  
-  //for checking if the entry today is created
-  // useEffect(() => {
-  
-  //   const prevDate = new Date(streakDate).getDate();
-  //   if( today.day - prevDate == 1 || streakDate == "none" ){
-  //     if(notesId.includes(todayVerse?.id)){
-  //       updateStreakCount(streakCount + 1, Date.now());
-  //     }
-  //   }
-  //   else if(today.day - prevDate > 2){
-  //     setStreakCount(0);
-  //   }
-    
-  // }, [streakCount, streakDate, notesId, updateStreakCount, today.day]);
-
-
   useEffect(() => {
     setupEntriesDatabase();
 
@@ -434,33 +368,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     }
   }, [isFocused]);
 
-  // useEffect(() => {
-  //   navigation.setOptions({
-  //     headerRight: () => (
-  //       <TouchableOpacity
-  //         style={{
-  //           gap: 10,
-  //           alignItems: "center",
-  //           flexDirection: "row",
-  //           backgroundColor: globalStyle?.bgBody,
-  //           borderRadius: 20,
-  //           paddingLeft: 12,
-  //           paddingRight: 12,
-  //           padding: 5,
-  //         }}
-  //       >
-  //         <FontAwesome5 name="fire" size={20} color={globalStyle?.borderColor}
-  //         />
-  //         <Text
-  //           style={{ fontSize: 20, fontWeight: "bold", color: globalStyle?.borderColor,}}
-  //         >{streakCount}
-  //         </Text>
-  //       </TouchableOpacity>
-  //     ),
-  //   });
-  // }, [navigation, streakCount]);
 
-  
   return (
   <>
     {/*MAIN VIEW*/}

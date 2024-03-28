@@ -9,7 +9,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import * as SQLite from 'expo-sqlite';
 
 //for DB of settings
-const dbSettings = SQLite.openDatabase("settings3.db");
+const dbSettings = SQLite.openDatabase("settings.db");
 
 // Expo Splash Screen
 
@@ -29,7 +29,7 @@ export default function App() {
   const [fontSize, setFontSize] = useState("small");
   const [sort, setSort] = useState("modifiedTime");
   const [display, setDisplay] = useState("list");
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState("All");
 
   const customTheme = theme == "light" 
     ? {
@@ -107,7 +107,7 @@ export default function App() {
   };
 
   const fetchDefaultSettings = () =>{
-    //console.log("called");
+    console.log("called");
     dbSettings.transaction((tx) => {
       tx.executeSql(
       'SELECT * FROM settings WHERE id = ?',
@@ -121,7 +121,7 @@ export default function App() {
         
           }
           setTheme(dataArray[0].currentTheme);
-          setFontSize(dataArray[0].fontSize)
+          setFontSize(dataArray[0].fontSize);
           setAppIsReady(true);
           console.log("Settings are fetched")
         
@@ -138,7 +138,7 @@ export default function App() {
     dbSettings.transaction((tx) => {
       tx.executeSql(
       'INSERT INTO settings (currentTheme, fontSize, defaultSort, defaultDisplay, defaultFilter, notifTime) VALUES (?, ?, ?, ?, ?, ?);',
-      ["light", "Small", "modifiedDate", "list", new Date.getMonth(), "6",],
+      ["light", "small", "modifiedDate", "list", "All", "6",],
       (tx, results) => {
         console.log("Success default Settings are SET!!!");
       },
@@ -225,7 +225,6 @@ export default function App() {
         );
     });
   }
-
 
 
  // ===============================  USE EFFECTS ==============================================
