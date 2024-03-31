@@ -241,8 +241,8 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     if(type == "journal"){
       db.transaction((tx) => {
         tx.executeSql(
-          "SELECT * FROM entries WHERE settingState = ? AND type = ? OR type = ? ORDER BY modifiedDate DESC;",
-          [ "normal", "journal", "sermon"],
+          "SELECT * FROM entries WHERE type = ? OR type = ? ORDER BY modifiedDate DESC;",
+          [ "journal", "sermon"],
           (_, result) => {
             const rows = result.rows;
             setJournalCount(rows.length);
@@ -254,7 +254,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
             setNotesJournal(dataArray);
           },
           (_, error) => {
-            console.error('Error querying data:', error);
+            console.error('FETCH: Error querying data:', error);
           }
         );
       });
@@ -262,8 +262,8 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     } else{
       db.transaction((tx) => {
         tx.executeSql(
-          "SELECT * FROM entries WHERE type = ? AND settingState = ? ORDER BY modifiedDate DESC;",
-          ["opm", "normal"],
+          "SELECT * FROM entries WHERE type = ? ORDER BY modifiedDate DESC;",
+          ["opm",],
           (_, result) => {
             const rows = result.rows;
             setOpmCount(rows.length);
@@ -275,7 +275,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
             setNotesOPM(dataArray);
           },
           (_, error) => {
-            console.error('Error querying data:', error);
+            console.error(' FETCH: Error querying data:', error);
           }
         );
       });
@@ -285,8 +285,8 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   const fetchAllData = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM entries WHERE settingState = ? ORDER BY ? DESC;",
-        ["normal", "modifiedDate"],
+        "SELECT * FROM entries ORDER BY modifiedDate DESC;",
+        [],
         (txObj, result) => {
           const rows = result.rows;
           const dataArray = [];
@@ -305,7 +305,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
           console.log("Fetched All Data")
         },
         (_, error) => {
-          console.error('Error querying data:', error);
+          console.error('FETCH ALL: Error querying data:', error);
         }
       );
     });

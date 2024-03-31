@@ -107,7 +107,7 @@ export default function App() {
   };
 
   const fetchDefaultSettings = () =>{
-    //console.log("called");
+    console.log("called");
     dbSettings.transaction((tx) => {
       tx.executeSql(
       'SELECT * FROM settings WHERE id = ?',
@@ -138,7 +138,7 @@ export default function App() {
     dbSettings.transaction((tx) => {
       tx.executeSql(
       'INSERT INTO settings (currentTheme, fontSize, defaultSort, defaultDisplay, defaultFilter, notifTime) VALUES (?, ?, ?, ?, ?, ?);',
-      ["light", "Small", "modifiedDate", "list", new Date.getMonth(), "6",],
+      ["light", "Small", "modifiedDate", "list", "All", "6",],
       (tx, results) => {
         console.log("Success default Settings are SET!!!");
       },
