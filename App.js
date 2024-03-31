@@ -86,7 +86,7 @@ export default function App() {
             // Table doesn't exist, create it
             dbSettings.transaction((tx) => {
               tx.executeSql(
-                'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY AUTOINCREMENT, currentTheme TEXT, fontSize TEXT, defaultSort TEXT, deafaultDisplay TEXT, defaultFilter TEXT, notifTime TEXT);',
+                'CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY AUTOINCREMENT, currentTheme TEXT, fontSize TEXT, defaultSort TEXT, defaultDisplay TEXT, defaultFilter TEXT, notifTime TEXT);',
                 [],
                 (_, result) => { 
                   console.log('Table Settings: created successfully'); 
@@ -144,7 +144,7 @@ export default function App() {
       },
       (error) => {
          // Handle error
-        console.log(error);
+        console.log( "error insert" + error);
       }
       );
     });
