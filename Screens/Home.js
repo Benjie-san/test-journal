@@ -125,38 +125,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     setSortModal(item)
   }
 
-
-  // //FUNCTIONS FOR DAILY STREAK
-  // const [streakCount, setStreakCount] = useState(0); 
-  // const [streakDate, setStreakDate] = useState();
-
-
-  // const fetchStreakCount = () =>{
-  //   dbSettings.transaction((tx) => {
-  //     tx.executeSql(
-  //     'SELECT dailyStreak, dailyStreakDate FROM settings WHERE id = ?',
-  //     [1],
-  //     (_, result) => {
-  //         const rows = result.rows;
-  //         const dataArray = [];
-  //         for (let i = 0; i < rows.length; i++) {
-  //           const item = rows.item(i);
-  //           dataArray.push(item);
-          
-  //         }
-  //         setStreakCount(dataArray[0].dailyStreak);
-  //         setStreakDate(dataArray[0].dailyStreakDate);  
-        
-  //         console.log("Daily Streak Fetched");
-          
-  //       },
-  //       (_, error) => {
-  //         console.error('Error querying data:', error);
-  //       }
-  //     );
-  //   });
-  // };
-
   const updateStreakCount = (count, date) =>{
     dbSettings.transaction((tx) => {
       tx.executeSql(
@@ -335,7 +303,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     });
   };
 
-
   async function openBrpDatabase() {
     if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
       await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
@@ -405,21 +372,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
   // USE EFFECTS
   
-  //for checking if the entry today is created
-  // useEffect(() => {
-  
-  //   const prevDate = new Date(streakDate).getDate();
-  //   if( today.day - prevDate == 1 || streakDate == "none" ){
-  //     if(notesId.includes(todayVerse?.id)){
-  //       updateStreakCount(streakCount + 1, Date.now());
-  //     }
-  //   }
-  //   else if(today.day - prevDate > 2){
-  //     setStreakCount(0);
-  //   }
-    
-  // }, [streakCount, streakDate, notesId, updateStreakCount, today.day]);
-
 
   useEffect(() => {
     setupEntriesDatabase();
@@ -427,6 +379,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   }, []);
 
   useEffect(() => {
+
     if(isFocused){
       fetchAllData();
       fetchData("journal");
@@ -434,33 +387,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     }
   }, [isFocused]);
 
-  // useEffect(() => {
-  //   navigation.setOptions({
-  //     headerRight: () => (
-  //       <TouchableOpacity
-  //         style={{
-  //           gap: 10,
-  //           alignItems: "center",
-  //           flexDirection: "row",
-  //           backgroundColor: globalStyle?.bgBody,
-  //           borderRadius: 20,
-  //           paddingLeft: 12,
-  //           paddingRight: 12,
-  //           padding: 5,
-  //         }}
-  //       >
-  //         <FontAwesome5 name="fire" size={20} color={globalStyle?.borderColor}
-  //         />
-  //         <Text
-  //           style={{ fontSize: 20, fontWeight: "bold", color: globalStyle?.borderColor,}}
-  //         >{streakCount}
-  //         </Text>
-  //       </TouchableOpacity>
-  //     ),
-  //   });
-  // }, [navigation, streakCount]);
-
-  
   return (
   <>
     {/*MAIN VIEW*/}

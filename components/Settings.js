@@ -12,10 +12,10 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
   const [fontSize, setFontSize] = useState(currentFontSize);
   const [fontSizeChecked, setfontSizeChecked] = useState(currentFontSize);
 
-  const handleThemeSetting = (name, item) =>{
-		setChecked(item);
-    handleTheme(item);
-    setThemeSetting(item);
+  const handleThemeSetting = (name) =>{
+		setChecked(name);
+    handleTheme(name);
+    setThemeSetting(name);
     setThemeModal(false);
 
 	}
@@ -86,24 +86,24 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
 
       <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, paddingBottom: 10,}}>Set Theme:</Text>
       
-      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleThemeSetting("Light", "light")}>
+      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleThemeSetting("Light")}>
         <RadioButton
           color={theme.colors.altColor}
           uncheckedColor={theme.colors.textColor}
           value={"light"} 
-          onPress={ () => handleThemeSetting("Light", "light") } 
-          status={ checked == "light" ? 'checked' : 'unchecked' }
+          onPress={ () => handleThemeSetting("Light") } 
+          status={ checked == "Light" ? 'checked' : 'unchecked' }
          
         />
         <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>Light Mode</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleThemeSetting("Dark", "dark")} >
+      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleThemeSetting("Dark")} >
         <RadioButton
           value={"dark"} 
           color={theme.colors.altColor}
-          onPress={ () => handleThemeSetting("Dark", "dark") } 
-          status={ checked == "dark" ? 'checked' : 'unchecked' }
+          onPress={ () => handleThemeSetting("Dark") } 
+          status={ checked == "Dark" ? 'checked' : 'unchecked' }
           uncheckedColor={theme.colors.textColor}
         />
         <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>Dark Mode</Text>

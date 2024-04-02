@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Provider as PaperProvider,  MD3LightTheme as DefaultTheme,  } from 'react-native-paper'; //if there's no provider it returns an error
 
@@ -9,7 +9,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import * as SQLite from 'expo-sqlite';
 
 //for DB of settings
-const dbSettings = SQLite.openDatabase("settings3.db");
+const dbSettings = SQLite.openDatabase("settings1.db");
 
 // Expo Splash Screen
 
@@ -25,24 +25,25 @@ export default function App() {
 
   const [appIsReady, setAppIsReady] = useState(false);
   // Styles
-  const [theme, setTheme] = useState("light");
-  const [fontSize, setFontSize] = useState("small");
-  const [sort, setSort] = useState("modifiedTime");
-  const [display, setDisplay] = useState("list");
-  const [filter, setFilter] = useState("");
+  const [theme, setTheme] = useState("Light");
+  const [fontSize, setFontSize] = useState("Small");
+  const sort = useRef("By Modified Time");
+  const display = useRef("List");
+  const filter = useRef("All");
 
-  const customTheme = theme == "light" 
+  const customTheme = theme == "Light" 
     ? {
         ...DefaultTheme,
         colors: {...LightScheme,},
-        fonts:{ fontSize: fontSize == "small" ? 16 : fontSize == "medium" ? 18 : 20},
+        fonts:{ fontSize: fontSize == "Small" ? 16 : fontSize == "Medium" ? 18 : 20},
         animation: { scale: 1.0, },
+        sortSetting: sort,
       }
     :  
       {
       ...DefaultTheme,
       colors: {...DarkScheme,},
-      fonts:{ fontSize: 16,},
+      fonts:{ fontSize: fontSize == "Small" ? 16 : fontSize == "Medium" ? 18 : 20},
       animation: { scale: 1.0, },
       };
 
@@ -59,17 +60,17 @@ export default function App() {
   
   const handleSort = (item) => {
     updateSort(item);
-    setSort(item)
+    sort.current = item;
   }
   
   const handleDisplay = (item) => {
-    updateDisplay();
-    setDisplay(item)
+    updateDisplay(item);
+    display.current = item
   }
   
   const handleFilter = (item) => {
     updateFilter(item);
-    setFilter(item)
+    filter.current = item;
   }
   
  // =================== DB FOR SETTINGS ==============================================
@@ -106,8 +107,25 @@ export default function App() {
     });
   };
 
+  const insertDefaultSettings = () => {
+    console.log("insert called")
+    dbSettings.transaction((tx) => {
+      tx.executeSql(
+      'INSERT INTO settings (currentTheme, fontSize, defaultSort, defaultDisplay, defaultFilter, notifTime) VALUES (?, ?, ?, ?, ?, ?);',
+      ["Light", "Small", "By Modified Time", "List", "All", "6",],
+      (tx, results) => {
+        console.log("Success default Settings are SET!!!");
+        fetchDefaultSettings();
+      },
+      (error) => {
+         // Handle error
+        console.log("Error INSERT Settings", error);
+      }
+      );
+    });
+  }
+
   const fetchDefaultSettings = () =>{
-    console.log("called");
     dbSettings.transaction((tx) => {
       tx.executeSql(
       'SELECT * FROM settings WHERE id = ?',
@@ -129,23 +147,6 @@ export default function App() {
         (_, error) => {
           console.error('Error Fetching Settings:', error);
         }
-      );
-    });
-  }
-
-  const insertDefaultSettings = () => {
-    console.log("insert called")
-    dbSettings.transaction((tx) => {
-      tx.executeSql(
-      'INSERT INTO settings (currentTheme, fontSize, defaultSort, defaultDisplay, defaultFilter, notifTime) VALUES (?, ?, ?, ?, ?, ?);',
-      ["light", "Small", "modifiedDate", "list", "All", "6",],
-      (tx, results) => {
-        console.log("Success default Settings are SET!!!");
-      },
-      (error) => {
-         // Handle error
-        console.log("Error INSERT Settings", error);
-      }
       );
     });
   }
@@ -187,7 +188,6 @@ export default function App() {
         [sort, 1],
         (_, result) => {
           console.log('Sort updated successfully');
-          setSort(sort);  
         },
         (_, error) => {
           console.error('Error updating Sort:', error);
@@ -202,7 +202,6 @@ export default function App() {
         [display, 1],
         (_, result) => {
           console.log('Display updated successfully');
-          setDisplay(display);  
         },
         (_, error) => {
           console.error('Error updating Display:', error);
@@ -217,7 +216,6 @@ export default function App() {
         [filter, 1],
         (_, result) => {
           console.log('Filter updated successfully');
-          setFilter(filter);  
         },
         (_, error) => {
           console.error('Error updating Filter:', error);
@@ -225,6 +223,7 @@ export default function App() {
         );
     });
   }
+
 
 
 

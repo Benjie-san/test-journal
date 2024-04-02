@@ -14,9 +14,9 @@ const months = ["All", "Jan", "Feb", "Mar", "Apr", "May",  "Jun", "Jul", "Aug", 
 export default function SortModal({visible, handleModal, fetchData, fetchAllData, currentSortSetting, currentDisplaySetting, currentFilterSetting, handleSort, handleDisplay, handleFilter }) {
     const theme = useTheme();
 	const [selectedSort, setSelectedSort] = useState(true);
-	const [currentSort, setCurrentSort] = useState("By Modified Time");
-	const [currentDisplay, setCurrentDisplay] = useState("List");
-	const [currentFilter, setCurrentFilter] = useState("All");
+	const [currentSort, setCurrentSort] = useState(currentSortSetting.current);
+	const [currentDisplay, setCurrentDisplay] = useState(currentDisplaySetting.current);
+	const [currentFilter, setCurrentFilter] = useState(currentFilterSetting.current);
 	const [iconName, setIconName] = useState("arrowup");
 	const [data, setData] = useState(months)
 	const ref = useRef(null);
@@ -41,6 +41,7 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 		const handleSortItem = (name) =>{
 			setSelectedSort(true);
 			setCurrentSort(name);
+			handleSort(name)
 			setBtnType("sort");
 			if(selectedSort && name == currentSort){
 				if(iconName == "arrowup"){
@@ -74,6 +75,7 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 		const handleDisplayItem = (name) =>{
 			if(name !== currentDisplay){
 				setCurrentDisplay(name);
+				handleDisplay(name)
 			}
 		}
 	
@@ -94,7 +96,7 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 			<View style={[renderStyles.style, {flexWrap: 'wrap', flexDirection: 'row', marginBottom: 10}]}>
 		
 				<DisplayItem name="List" icon={ <Foundation name="list" size={20} color={currentDisplay == "List" ? theme.colors.altTextColor : theme.colors.textColor} /> }/>
-				<DisplayItem name="Details" icon={<FontAwesome5 name="equals" size={20} color={currentDisplay == "Details" ? theme.colors.altTextColor : theme.colors.textColor} />} />
+				<DisplayItem name="Details" icon={ <FontAwesome5 name="equals" size={20} color={currentDisplay == "Details" ? theme.colors.altTextColor : theme.colors.textColor} />} />
 				<DisplayItem name="Grid" icon={<Fontisto name="nav-icon-grid" size={16} color={currentDisplay == "Grid" ? theme.colors.altTextColor : theme.colors.textColor} />} />
 				<DisplayItem name="Large Grid" icon={<MaterialCommunityIcons name="view-grid" size={22} color={currentDisplay == "Large Grid"  ? theme.colors.altTextColor : theme.colors.textColor}  />} />	
 			</View>
@@ -104,7 +106,7 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 	const handleFilterItem = (month, index) =>{
 		if(currentFilter !== month){
 			setCurrentFilter(month);
-			
+			handleFilter(month);
 			setIndex(index);
 		}
 	}
