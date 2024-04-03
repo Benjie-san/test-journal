@@ -21,7 +21,7 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
 	}
 
   const handleFontSizeSettings = (item) =>{
-    handleFontSize(item.toLowerCase());
+    handleFontSize(item);
     setfontSizeChecked(item);
     setFontSize(item);
     setFontSizeModal(false)
@@ -90,17 +90,17 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
         <RadioButton
           color={theme.colors.altColor}
           uncheckedColor={theme.colors.textColor}
-          value={"light"} 
+          value={"Light"} 
           onPress={ () => handleThemeSetting("Light") } 
           status={ checked == "Light" ? 'checked' : 'unchecked' }
-         
+        
         />
         <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>Light Mode</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.selectionBtn} onPress={() => handleThemeSetting("Dark")} >
         <RadioButton
-          value={"dark"} 
+          value={"Dark"} 
           color={theme.colors.altColor}
           onPress={ () => handleThemeSetting("Dark") } 
           status={ checked == "Dark" ? 'checked' : 'unchecked' }
@@ -116,10 +116,10 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
 
       <TouchableOpacity style={styles.selectionBtn} onPress={() => handleFontSizeSettings("Small")}>
         <RadioButton
-          value={"small"} 
+          value={"Small"} 
           color={theme.colors.altColor}
           onPress={ () => handleFontSizeSettings("Small") } 
-          status={ fontSizeChecked == "small" ? 'checked' : 'unchecked' } 
+          status={ fontSizeChecked == "Small" ? 'checked' : 'unchecked' } 
           uncheckedColor={theme.colors.textColor}
           />
         <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>Small</Text>
@@ -127,10 +127,10 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
 
       <TouchableOpacity style={styles.selectionBtn} onPress={() => handleFontSizeSettings("Medium")}>
         <RadioButton
-          value={"medium"}
+          value={"Medium"}
           color={theme.colors.altColor}
           onPress={ () => handleFontSizeSettings("Medium") } 
-          status={ fontSizeChecked == "medium" ? 'checked' : 'unchecked' }
+          status={ fontSizeChecked == "Medium" ? 'checked' : 'unchecked' }
           uncheckedColor={theme.colors.textColor}
         />
         <Text style={{fontSize: theme.fonts.fontSize, color:  theme.colors.textColor}}>Medium</Text>
@@ -138,10 +138,10 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
 
       <TouchableOpacity style={styles.selectionBtn} onPress={() => handleFontSizeSettings("Large")}>
         <RadioButton
-          value={"large"} 
+          value={"Large"} 
           color={theme.colors.altColor}
           onPress={ () => handleFontSizeSettings("Large") } 
-          status={ fontSizeChecked == "large" ? 'checked' : 'unchecked' }
+          status={ fontSizeChecked == "Large" ? 'checked' : 'unchecked' }
           uncheckedColor={theme.colors.textColor}
         />
         <Text style={{fontSize: theme.fonts.fontSize, color:  theme.colors.textColor}}>Large</Text>

@@ -37,7 +37,6 @@ export default function App() {
         colors: {...LightScheme,},
         fonts:{ fontSize: fontSize == "Small" ? 16 : fontSize == "Medium" ? 18 : 20},
         animation: { scale: 1.0, },
-        sortSetting: sort,
       }
     :  
       {

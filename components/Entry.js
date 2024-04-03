@@ -420,8 +420,8 @@ const deleteEntry = () => {
 const updateEntry = () => {
     db.transaction((tx) => {
         tx.executeSql(
-        'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ?, WHERE dataId = ?;',
-        [date, title, question, scripture, observation, application, prayer, status, Date.now(), parseInt(dataId) ],
+        'UPDATE entries SET date = ?, title = ?, question = ?, scripture = ?, observation = ?, application = ?, prayer = ?, status = ?, modifiedDate = ? WHERE dataId = ?;',
+        [date, title, question, scripture, observation, application, prayer, status, Date.now(), parseInt(dataId)],
         (_, result) => {
             console.log('Data updated successfully');
             fetchEntry(dataId);         
@@ -444,8 +444,8 @@ const saveEntry = () => {
         if(type=="journal" || type == "sermon"){
             db.transaction((tx) => {
                 tx.executeSql(
-                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, settingState) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-                [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), parseInt(itemId), months[index], "normal"],
+                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, createdDate ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), parseInt(itemId), months[index], Date.now(),],
                 (tx, results) => {
                     console.log("Success added entry to DB!!!");
                     fetchEntry(itemId);
@@ -454,7 +454,7 @@ const saveEntry = () => {
                 },
                 (error) => {
                 // Handle error
-                console.log(error);
+                console.log("Save Entry ERROR:", error);
                 }
                 );
             });
@@ -462,8 +462,8 @@ const saveEntry = () => {
         else{
             db.transaction((tx) => {
                 tx.executeSql(
-                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, settingState) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-                [date, title, question, scripture, observation, application, prayer,  '#8CFF31', type, Date.now(), Number(dataId), months[index], "normal"],
+                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, createdDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), Number(dataId), months[index], Date.now()],
                 (tx, results) => {
                 console.log("Success!!!");
                     fetchEntry(dataId);
@@ -473,7 +473,7 @@ const saveEntry = () => {
                 },
                 (error) => {
                 // Handle error
-                console.log(error);
+                console.log( "Save Entry ERROR:", error);
                 }
                 );
             });

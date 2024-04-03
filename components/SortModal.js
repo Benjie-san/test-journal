@@ -39,10 +39,19 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 	const RenderSort = () =>{
 
 		const handleSortItem = (name) =>{
+			if(name == "By Modified Time"){
+				fetchData("modifiedDate")
+				fetchAllData("modifiedDate");
+			} else { 
+				fetchData("createdDate");
+				fetchAllData("createdDate"); 
+			}
+
 			setSelectedSort(true);
 			setCurrentSort(name);
 			handleSort(name)
 			setBtnType("sort");
+			
 			if(selectedSort && name == currentSort){
 				if(iconName == "arrowup"){
 					setIconName("arrowdown");

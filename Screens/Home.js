@@ -104,7 +104,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   //for dates
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const todayDate = new Date();
-  const today ={
+  const today = {
     day: todayDate.getDate(),
     month: months[todayDate.getMonth()],
     year: todayDate.getFullYear(),
@@ -205,78 +205,18 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     openDisplayEntry(item);
   }
 
-  const fetchData = (type) => {
-    if(type == "journal"){
-      db.transaction((tx) => {
-        tx.executeSql(
-          "SELECT * FROM entries WHERE type = ? OR type = ? ORDER BY modifiedDate DESC;",
-          [ "journal", "sermon"],
-          (_, result) => {
-            const rows = result.rows;
-            setJournalCount(rows.length);
-            const dataArray = [];
-            for (let i = 0; i < rows.length; i++) {
-              const item = rows.item(i);
-              dataArray.push(item);
-            }
-            setNotesJournal(dataArray);
-          },
-          (_, error) => {
-            console.error('FETCH: Error querying data:', error);
-          }
-        );
-      });
-      
-    } else{
-      db.transaction((tx) => {
-        tx.executeSql(
-          "SELECT * FROM entries WHERE type = ? ORDER BY modifiedDate DESC;",
-          ["opm",],
-          (_, result) => {
-            const rows = result.rows;
-            setOpmCount(rows.length);
-            const dataArray = [];
-            for (let i = 0; i < rows.length; i++) {
-              const item = rows.item(i);
-              dataArray.push(item);
-            }
-            setNotesOPM(dataArray);
-          },
-          (_, error) => {
-            console.error(' FETCH: Error querying data:', error);
-          }
-        );
-      });
-    }
-  };
-
-  const fetchAllData = () => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM entries ORDER BY modifiedDate DESC;",
-        [],
-        (txObj, result) => {
-          const rows = result.rows;
-          const dataArray = [];
-          const dataArray2 = [];
-
-          setAllCount(rows.length);
-          for (let i = 0; i < rows.length; i++) {
-            const item = rows.item(i);
-            dataArray.push(item);
-            dataArray2.push(parseInt(item.dataId));
-
-          }
-          setNotes(dataArray);
-          setNotesId(dataArray2);
-          setNoteListLoading(false);
-          console.log("Fetched All Data")
-        },
-        (_, error) => {
-          console.error('FETCH ALL: Error querying data:', error);
-        }
+  //for fetching todays passage
+  async function openBrpDatabase() {
+    if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
+      await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
+      }
+    else{
+      await FileSystem.downloadAsync(
+            Asset.fromModule(require('../assets/brpDatabase.db')).uri,
+            FileSystem.documentDirectory + 'SQLite/brpDatabase.db'
       );
-    });
+  }
+    return SQLite.openDatabase("brpDatabase.db");
   };
 
   const fetchTodayVerse = async () => {
@@ -303,18 +243,88 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     });
   };
 
-  async function openBrpDatabase() {
-    if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
-      await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
-      }
-    else{
-      await FileSystem.downloadAsync(
-            Asset.fromModule(require('../assets/brpDatabase.db')).uri,
-            FileSystem.documentDirectory + 'SQLite/brpDatabase.db'
-      );
-  }
-    return SQLite.openDatabase("brpDatabase.db");
+
+  //for fetching entries
+  const fetchData = (type, sort) => {
+    if(type == "journal"){
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM entries WHERE type = ? OR type = ? ORDER BY modifiedDate DESC;",
+          [ "journal", "sermon"],
+          (_, result) => {
+            const rows = result.rows;
+            setJournalCount(rows.length);
+            const dataArray = [];
+            for (let i = 0; i < rows.length; i++) {
+              const item = rows.item(i);
+              dataArray.push(item);
+            }
+            setNotesJournal(dataArray);
+          },
+          (_, error) => {
+            console.error('FETCH: Error querying data:', error);
+          }
+        );
+      });
+      
+    } else{
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM entries WHERE type = ? ORDER BY modifiedDate DESC;",
+          ["opm"],
+          (_, result) => {
+            const rows = result.rows;
+            setOpmCount(rows.length);
+            const dataArray = [];
+            for (let i = 0; i < rows.length; i++) {
+              const item = rows.item(i);
+              dataArray.push(item);
+            }
+            setNotesOPM(dataArray);
+          },
+          (_, error) => {
+            console.error(' FETCH: Error querying data:', error);
+          }
+        );
+      });
+    }
   };
+
+  const fetchAllData = (sort = "modifiedDate") => {
+    let query = "";
+    if(sort == "modifiedDate"){
+      query = "SELECT * FROM entries ORDER BY modifiedDate DESC;"
+    } else{
+      query = "SELECT * FROM entries ORDER BY createdDate DESC;"
+
+    }
+    db.transaction((tx) => {
+      tx.executeSql(
+        query, [],
+        (txObj, result) => {
+          const rows = result.rows;
+          const dataArray = [];
+          const dataArray2 = [];
+
+          setAllCount(rows.length);
+          for (let i = 0; i < rows.length; i++) {
+            const item = rows.item(i);
+            dataArray.push(item);
+            dataArray2.push(parseInt(item.dataId));
+
+          }
+          setNotes(dataArray);
+          setNotesId(dataArray2);
+          setNoteListLoading(false);
+          console.log("Fetched All Data")
+        },
+        (_, error) => {
+          console.error('FETCH ALL: Error querying data:', error);
+        }
+      );
+    });
+  };
+
 
   //creating the table
   const setupEntriesDatabase = () => {
@@ -331,7 +341,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
             // Table doesn't exist, create it
             db.transaction((tx) => {
               tx.executeSql(
-                'CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, title TEXT, question TEXT, scripture TEXT, observation TEXT, application TEXT, prayer TEXT, status TEXT, type TEXT, modifiedDate TEXT, dataId TEXT, month TEXT, settingState TEXT);',
+                'CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, title TEXT, question TEXT, scripture TEXT, observation TEXT, application TEXT, prayer TEXT, status TEXT, type TEXT, modifiedDate TEXT, dataId TEXT, month TEXT, createdDate TEXT);',
                 [],
                 (_, result) => {
                   console.log('Table entries: created successfully');
