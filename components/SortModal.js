@@ -10,6 +10,8 @@ import { Fontisto } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import styles from '../styles/passageStyle';
 const months = ["All", "Jan", "Feb", "Mar", "Apr", "May",  "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+const monthsComplete = ["January", "February", "March", "April", "May",  "June", "July", "August", "September", "October", "November", "December"];
+
 
 export default function SortModal({visible, handleModal, fetchData, fetchAllData, currentSortSetting, currentDisplaySetting, currentFilterSetting, handleSort, handleDisplay, handleFilter }) {
     const theme = useTheme();
@@ -40,11 +42,11 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 
 		const handleSortItem = (name) =>{
 			if(name == "By Modified Time"){
-				fetchData("modifiedDate")
+				fetchData("modifiedDate", currentFilter)
 				fetchAllData("modifiedDate");
 			} else { 
 				fetchData("createdDate");
-				fetchAllData("createdDate"); 
+				fetchAllData("createdDate", currentFilter); 
 			}
 
 			setSelectedSort(true);
@@ -117,6 +119,12 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 			setCurrentFilter(month);
 			handleFilter(month);
 			setIndex(index);
+			if(month == "All"){
+				fetchAllData(month);
+			}else{
+				fetchAllData(currentSort, monthsComplete[months.indexOf(month)-1]);
+
+			}
 		}
 	}
 

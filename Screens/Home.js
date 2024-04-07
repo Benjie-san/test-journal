@@ -245,7 +245,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
 
   //for fetching entries
-  const fetchData = (type, sort) => {
+  const fetchData = (type, filter) => {
     if(type == "journal"){
       db.transaction((tx) => {
         tx.executeSql(
@@ -290,14 +290,23 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     }
   };
 
-  const fetchAllData = (sort = "modifiedDate") => {
+  const fetchAllData = (sort, filter) => {
     let query = "";
     if(sort == "modifiedDate"){
-      query = "SELECT * FROM entries ORDER BY modifiedDate DESC;"
+      if(filter == "All"){
+        query = "SELECT * FROM entries ORDER BY modifiedDate DESC;"
+      } else {
+        query = `SELECT * FROM entries WHERE month = ${filter} ORDER BY modifiedDate DESC;`
+      }
     } else{
-      query = "SELECT * FROM entries ORDER BY createdDate DESC;"
-
+      if(filter == "All"){
+        query = "SELECT * FROM entries ORDER BY createdDate DESC;"
+      } else {
+        query = `SELECT * FROM entries WHERE month = ${filter} ORDER BY createdDate DESC;`
+      }
     }
+
+
     db.transaction((tx) => {
       tx.executeSql(
         query, [],
@@ -382,6 +391,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
   // USE EFFECTS
   
+  console.log(currentFilter.current)
 
   useEffect(() => {
     setupEntriesDatabase();
@@ -391,7 +401,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   useEffect(() => {
 
     if(isFocused){
-      fetchAllData();
+      fetchAllData(currentSort.current, currentFilter.current);
       fetchData("journal");
       fetchData("opm");
     }
