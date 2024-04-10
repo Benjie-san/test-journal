@@ -42,10 +42,13 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 
 		const handleSortItem = (name) =>{
 			if(name == "By Modified Time"){
-				fetchData("modifiedDate", currentFilter)
 				fetchAllData("modifiedDate");
+				fetchData("journal", "modifiedDate", currentFilter)
+				fetchData("opm", "modifiedDate", currentFilter)
+
 			} else { 
-				fetchData("createdDate");
+				fetchData("journal", "createdDate", currentFilter)
+				fetchData("opm", "createdDate", currentFilter)
 				fetchAllData("createdDate", currentFilter); 
 			}
 
@@ -121,9 +124,13 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 			setIndex(index);
 			if(month == "All"){
 				fetchAllData(currentSort, "All");
+				fetchData("journal", currentSort, "All");
+				fetchData("opm", currentSort, "All");
+
 			}else{
 				fetchAllData(currentSort, monthsComplete[months.indexOf(month)-1]);
-
+				fetchData("journal", currentSort, monthsComplete[months.indexOf(month)-1]);
+				fetchData("opm", currentSort, monthsComplete[months.indexOf(month)-1]);
 			}
 		}
 	}

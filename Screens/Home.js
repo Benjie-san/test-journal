@@ -245,55 +245,96 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
 
   //for fetching entries
-  const fetchData = (type, filter) => {
+  const fetchData = (type, filter, sort) => {
     if(type == "journal"){
-      db.transaction((tx) => {
-        tx.executeSql(
-          "SELECT * FROM entries WHERE type = ? OR type = ? ORDER BY modifiedDate DESC;",
-          [ "journal", "sermon"],
-          (_, result) => {
-            const rows = result.rows;
-            setJournalCount(rows.length);
-            const dataArray = [];
-            for (let i = 0; i < rows.length; i++) {
-              const item = rows.item(i);
-              dataArray.push(item);
+      if(filter == "All"){
+        db.transaction((tx) => {
+          tx.executeSql(
+            "SELECT * FROM entries WHERE type = ? ORDER BY ? DESC;", ["journal", sort],
+            (_, result) => {
+              const rows = result.rows;
+              setJournalCount(rows.length);
+              const dataArray = [];
+              for (let i = 0; i < rows.length; i++) {
+                const item = rows.item(i);
+                dataArray.push(item);
+              }
+              setNotesJournal(dataArray);
+            },
+            (_, error) => {
+              console.error('FETCH: Error querying data:', error);
             }
-            setNotesJournal(dataArray);
-          },
-          (_, error) => {
-            console.error('FETCH: Error querying data:', error);
-          }
-        );
-      });
-      
+          );
+        });
+      }else{
+        db.transaction((tx) => {
+          tx.executeSql(
+            "SELECT * FROM entries WHERE type = ? AND month = ? ORDER BY ? DESC;", ["journal", filter, sort],
+            (_, result) => {
+              const rows = result.rows;
+              setJournalCount(rows.length);
+              const dataArray = [];
+              for (let i = 0; i < rows.length; i++) {
+                const item = rows.item(i);
+                dataArray.push(item);
+              }
+              setNotesJournal(dataArray);
+            },
+            (_, error) => {
+              console.error('FETCH: Error querying data:', error);
+            }
+          );
+        });
+      }
     } else{
-      db.transaction((tx) => {
-        tx.executeSql(
-          "SELECT * FROM entries WHERE type = ? ORDER BY modifiedDate DESC;",
-          ["opm"],
-          (_, result) => {
-            const rows = result.rows;
-            setOpmCount(rows.length);
-            const dataArray = [];
-            for (let i = 0; i < rows.length; i++) {
-              const item = rows.item(i);
-              dataArray.push(item);
+      if(filter == "All"){
+        db.transaction((tx) => {
+          tx.executeSql(
+            "SELECT * FROM entries WHERE type = ? ORDER BY modifiedDate DESC;",
+            ["opm", sort],
+            (_, result) => {
+              const rows = result.rows;
+              setOpmCount(rows.length);
+              const dataArray = [];
+              for (let i = 0; i < rows.length; i++) {
+                const item = rows.item(i);
+                dataArray.push(item);
+              }
+              setNotesOPM(dataArray);
+            },
+            (_, error) => {
+              console.error(' FETCH: Error querying data:', error);
             }
-            setNotesOPM(dataArray);
-          },
-          (_, error) => {
-            console.error(' FETCH: Error querying data:', error);
-          }
-        );
-      });
+          );
+        });
+      }else{
+        db.transaction((tx) => {
+          tx.executeSql(
+            "SELECT * FROM entries WHERE type = ? AND month = ? ORDER BY ? DESC;", ["opm", filter, sort],
+          
+            (_, result) => {
+              const rows = result.rows;
+              setOpmCount(rows.length);
+              const dataArray = [];
+              for (let i = 0; i < rows.length; i++) {
+                const item = rows.item(i);
+                dataArray.push(item);
+              }
+              setNotesOPM(dataArray);
+            },
+            (_, error) => {
+              console.error(' FETCH: Error querying data:', error);
+            }
+          );
+        });
+      }
+    
     }
   };
   
 
   const fetchAllData = (sort, filter) => {
-
-
+    console.log(sort)
     if(filter == "All"){
       db.transaction((tx) => {
         tx.executeSql(
@@ -417,8 +458,8 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
     if(isFocused){
       fetchAllData(currentSort.current, currentFilter.current);
-      fetchData("journal");
-      fetchData("opm");
+      fetchData("journal", currentSort.current, currentFilter.current);
+      fetchData("opm", currentSort.current, currentFilter.current);
     }
   }, [isFocused]);
 
