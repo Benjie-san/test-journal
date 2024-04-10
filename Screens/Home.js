@@ -289,49 +289,66 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
       });
     }
   };
+  
 
   const fetchAllData = (sort, filter) => {
-    let query = "";
-    if(sort == "modifiedDate"){
-      if(filter == "All"){
-        query = "SELECT * FROM entries ORDER BY modifiedDate DESC;"
-      } else {
-        query = `SELECT * FROM entries WHERE month = ${filter} ORDER BY modifiedDate DESC;`
-      }
-    } else{
-      if(filter == "All"){
-        query = "SELECT * FROM entries ORDER BY createdDate DESC;"
-      } else {
-        query = `SELECT * FROM entries WHERE month = ${filter} ORDER BY createdDate DESC;`
-      }
+
+
+    if(filter == "All"){
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM entries ORDER BY ? DESC;", [sort],
+          (txObj, result) => {
+            const rows = result.rows;
+            const dataArray = [];
+            const dataArray2 = [];
+  
+            setAllCount(rows.length);
+            for (let i = 0; i < rows.length; i++) {
+              const item = rows.item(i);
+              dataArray.push(item);
+              dataArray2.push(parseInt(item.dataId));
+  
+            }
+            setNotes(dataArray);
+            setNotesId(dataArray2);
+            setNoteListLoading(false);
+            console.log("Fetched All Data")
+          },
+          (_, error) => {
+            console.error('FETCH ALL1: Error querying data:', error);
+          }
+        );
+      });
+    }else{
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM entries WHERE month = ? ORDER BY ? DESC;", [filter, sort],
+          (txObj, result) => {
+            const rows = result.rows;
+            const dataArray = [];
+            const dataArray2 = [];
+  
+            setAllCount(rows.length);
+            for (let i = 0; i < rows.length; i++) {
+              const item = rows.item(i);
+              dataArray.push(item);
+              dataArray2.push(parseInt(item.dataId));
+  
+            }
+            setNotes(dataArray);
+            setNotesId(dataArray2);
+            setNoteListLoading(false);
+            console.log("Fetched All Data")
+          },
+          (_, error) => {
+            console.error('FETCH ALL2: Error querying data:', error);
+          }
+        );
+      });
     }
 
-
-    db.transaction((tx) => {
-      tx.executeSql(
-        query, [],
-        (txObj, result) => {
-          const rows = result.rows;
-          const dataArray = [];
-          const dataArray2 = [];
-
-          setAllCount(rows.length);
-          for (let i = 0; i < rows.length; i++) {
-            const item = rows.item(i);
-            dataArray.push(item);
-            dataArray2.push(parseInt(item.dataId));
-
-          }
-          setNotes(dataArray);
-          setNotesId(dataArray2);
-          setNoteListLoading(false);
-          console.log("Fetched All Data")
-        },
-        (_, error) => {
-          console.error('FETCH ALL: Error querying data:', error);
-        }
-      );
-    });
+ 
   };
 
 
@@ -390,8 +407,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
 
   // USE EFFECTS
-  
-  console.log(currentFilter.current)
 
   useEffect(() => {
     setupEntriesDatabase();

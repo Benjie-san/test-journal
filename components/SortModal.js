@@ -120,7 +120,7 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 			handleFilter(month);
 			setIndex(index);
 			if(month == "All"){
-				fetchAllData(month);
+				fetchAllData(currentSort, "All");
 			}else{
 				fetchAllData(currentSort, monthsComplete[months.indexOf(month)-1]);
 
