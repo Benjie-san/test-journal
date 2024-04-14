@@ -8,12 +8,17 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Tab = createMaterialTopTabNavigator();
 
-const FlatListComponent = ({notes, noteListLoading, handleDisplayEntryFetch, }) => {
+const FlatListComponent = ({notes, noteListLoading, handleDisplayEntryFetch, display }) => {
   const theme = useTheme();
   return(
   <View style={[styles.flex, {backgroundColor: theme.colors.tertiary}]}>
     
-
+    { display == "List" ? (<Text>LIST</Text>) 
+    : display == "Details" ? (<Text>DETAILS</Text>) 
+    : display == "Grid" ? (<Text>GRID</Text>) 
+    : display == "Large Grid" ? (<Text>LARGE GRID</Text>) 
+    : null
+    }
     {noteListLoading ? <ActivityIndicator style={styles.flex} size={'large'}/> :
     (<View style={[ styles.notelist, {backgroundColor: theme.colors.secondary}]}>
       {notes.length === 0 ?
@@ -35,22 +40,22 @@ const FlatListComponent = ({notes, noteListLoading, handleDisplayEntryFetch, }) 
 )
   }
 
-const AllEntries = ({notes, noteListLoading, handleDisplayEntryFetch, }) => {
+const AllEntries = ({notes, noteListLoading, handleDisplayEntryFetch,  display}) => {
   return( 
-    <FlatListComponent notes={notes} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch} />
+    <FlatListComponent display={display} notes={notes} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch} />
   );
 
 };
 
-const JournalEntries = ({notesJournal, noteListLoading, handleDisplayEntryFetch, }) => {
+const JournalEntries = ({notesJournal, noteListLoading, handleDisplayEntryFetch, display }) => {
   return(
-    <FlatListComponent notes={notesJournal} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch}/>
+    <FlatListComponent display={display} notes={notesJournal} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch}/>
   );
 };
   
-const OPMEntries = ({notesOPM, noteListLoading, handleDisplayEntryFetch, }) => {
+const OPMEntries = ({notesOPM, noteListLoading, handleDisplayEntryFetch, display }) => {
   return(
-    <FlatListComponent notes={notesOPM} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch}  />
+    <FlatListComponent display={display} notes={notesOPM} noteListLoading={noteListLoading}  handleDisplayEntryFetch={handleDisplayEntryFetch}  />
   );
 };
 
@@ -71,14 +76,14 @@ const SortBtn = ({name, count, focused}) => {
   )
 }
 
-const TopBar = ({navigation, route, notes, notesJournal, notesOPM, noteListLoading, handleDisplayEntryFetch, sortButtonCount, }) => {
+const TopBar = ({navigation, route, notes, notesJournal, notesOPM, noteListLoading, handleDisplayEntryFetch, sortButtonCount, display}) => {
   const theme = useTheme();
 
-  const RenderAll = () => <AllEntries  notes={notes} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch}  />
+  const RenderAll = () => <AllEntries display={display} notes={notes} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch}  />
 
-  const RenderJournal = () => <JournalEntries  notesJournal={notesJournal} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} />
+  const RenderJournal = () => <JournalEntries display={display} notesJournal={notesJournal} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} />
 
-  const RenderOPM = () => <OPMEntries   notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch}/>
+  const RenderOPM = () => <OPMEntries  display={display} notesOPM={notesOPM} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch}/>
   
   return (
     <>

@@ -245,7 +245,8 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
 
   //for fetching entries
-  const fetchData = (type, filter, sort) => {
+  const fetchData = (type, sort, filter) => {
+  
     if(type == "journal"){
       if(filter == "All"){
         db.transaction((tx) => {
@@ -290,7 +291,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
       if(filter == "All"){
         db.transaction((tx) => {
           tx.executeSql(
-            "SELECT * FROM entries WHERE type = ? ORDER BY modifiedDate DESC;",
+            "SELECT * FROM entries WHERE type = ? ORDER BY ? DESC;",
             ["opm", sort],
             (_, result) => {
               const rows = result.rows;
@@ -311,7 +312,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
         db.transaction((tx) => {
           tx.executeSql(
             "SELECT * FROM entries WHERE type = ? AND month = ? ORDER BY ? DESC;", ["opm", filter, sort],
-          
             (_, result) => {
               const rows = result.rows;
               setOpmCount(rows.length);
@@ -334,7 +334,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   
 
   const fetchAllData = (sort, filter) => {
-    console.log(sort)
     if(filter == "All"){
       db.transaction((tx) => {
         tx.executeSql(
@@ -454,12 +453,14 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
   }, []);
 
+  console.log(currentDisplay.current)
+
   useEffect(() => {
 
     if(isFocused){
-      fetchAllData(currentSort.current, currentFilter.current);
-      fetchData("journal", currentSort.current, currentFilter.current);
-      fetchData("opm", currentSort.current, currentFilter.current);
+      fetchAllData(currentSort.current == "By Modified Time" ? "modifiedDate" : "createdDate", currentFilter.current);
+      fetchData("journal", currentSort.current == "By Modified Time" ? "modifiedDate" : "createdDate", currentFilter.current);
+      fetchData("opm", currentSort.current == "By Modified Time" ? "modifiedDate" : "createdDate", currentFilter.current);
     }
   }, [isFocused]);
 
@@ -511,6 +512,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     </View>
 
     <TopBar 
+      display={currentDisplay.current}
       navigation={navigation} route={route} 
       notes={notes}  notesJournal={notesJournal}  notesOPM={notesOPM} noteListLoading={noteListLoading} 
       handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount}  

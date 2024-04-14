@@ -43,13 +43,13 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 		const handleSortItem = (name) =>{
 			if(name == "By Modified Time"){
 				fetchAllData("modifiedDate");
-				fetchData("journal", "modifiedDate", currentFilter)
-				fetchData("opm", "modifiedDate", currentFilter)
+				fetchData("journal", "modifiedDate");
+				fetchData("opm", "modifiedDate")
 
 			} else { 
-				fetchData("journal", "createdDate", currentFilter)
-				fetchData("opm", "createdDate", currentFilter)
-				fetchAllData("createdDate", currentFilter); 
+				fetchData("journal", "createdDate" )
+				fetchData("opm", "createdDate" )
+				fetchAllData("createdDate" ); 
 			}
 
 			setSelectedSort(true);
@@ -87,10 +87,16 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 	const RenderDisplay = () => {
 	
 		const handleDisplayItem = (name) =>{
+			
 			if(name !== currentDisplay){
 				setCurrentDisplay(name);
 				handleDisplay(name)
 			}
+			setTimeout(() => {
+				handleModal(false)
+
+			}, 800);
+			
 		}
 	
 		const DisplayItem = ({ name, icon  }) => (
@@ -123,14 +129,14 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 			handleFilter(month);
 			setIndex(index);
 			if(month == "All"){
-				fetchAllData(currentSort, "All");
-				fetchData("journal", currentSort, "All");
-				fetchData("opm", currentSort, "All");
+				fetchAllData(currentSort == "By Modified Time" ? "modifiedDate" : "createdDate", "All");
+				fetchData("journal", currentSort == "By Modified Time" ? "modifiedDate" : "createdDate", "All");
+				fetchData("opm", currentSort == "By Modified Time" ? "modifiedDate" : "createdDate", "All");
 
 			}else{
-				fetchAllData(currentSort, monthsComplete[months.indexOf(month)-1]);
-				fetchData("journal", currentSort, monthsComplete[months.indexOf(month)-1]);
-				fetchData("opm", currentSort, monthsComplete[months.indexOf(month)-1]);
+				fetchAllData(currentSort == "By Modified Time" ? "modifiedDate" : "createdDate", monthsComplete[months.indexOf(month)-1]);
+				fetchData("journal", currentSort == "By Modified Time" ? "modifiedDate" : "createdDate", monthsComplete[months.indexOf(month)-1]);
+				fetchData("opm", currentSort == "By Modified Time" ? "modifiedDate" : "createdDate", monthsComplete[months.indexOf(month)-1]);
 			}
 		}
 	}
