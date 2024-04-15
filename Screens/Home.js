@@ -20,6 +20,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+
 const dbSettings = SQLite.openDatabase("settings4.db");
 const db = SQLite.openDatabase('_journal_database.db');
 
@@ -103,6 +104,9 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
   //for dates
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const months1 = ["All", "Jan", "Feb", "Mar", "Apr", "May",  "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+const monthsComplete = ["January", "February", "March", "April", "May",  "June", "July", "August", "September", "October", "November", "December"];
+
   const todayDate = new Date();
   const today = {
     day: todayDate.getDate(),
@@ -245,152 +249,132 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
 
   //for fetching entries
+  const dataFetcher = (query, dependencies, type) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        query, dependencies,
+        (_, result) => {
+          const rows = result.rows;
+
+          if(type == "journal"){
+            setJournalCount(rows.length);
+          }else{ setOpmCount(rows.length) }
+
+          const dataArray = [];
+          for (let i = 0; i < rows.length; i++) {
+            const item = rows.item(i);
+            dataArray.push(item);
+          }
+
+          if(type == "journal"){
+            setNotesJournal(dataArray);
+          }else{
+            setNotesOPM(dataArray);
+          }
+
+        },
+        (_, error) => {
+          console.error('FETCH JOURNAL: Error querying data:', error);
+        }
+      );
+    });
+  }
+
   const fetchData = (type, sort, filter) => {
-    console.log(sort);
-  
     if(type == "journal"){
       if(filter == "All"){
-        db.transaction((tx) => {
-          tx.executeSql(
-            "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY modifiedDate DESC;", [ "normal", "journal"],
-            (_, result) => {
-              const rows = result.rows;
-              setJournalCount(rows.length);
-              const dataArray = [];
-              for (let i = 0; i < rows.length; i++) {
-                const item = rows.item(i);
-                dataArray.push(item);
-              }
-              setNotesJournal(dataArray);
-            },
-            (_, error) => {
-              console.error('FETCH JOURNAL 1: Error querying data:', error);
-            }
-          );
-        });
-      }else{
-        db.transaction((tx) => {
-          tx.executeSql(
-            "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY modifiedDate DESC;", ["normal", "journal", filter,],
-            (_, result) => {
-              const rows = result.rows;
-              setJournalCount(rows.length);
-              const dataArray = [];
-              for (let i = 0; i < rows.length; i++) {
-                const item = rows.item(i);
-                dataArray.push(item);
-              }
-              setNotesJournal(dataArray);
-            },
-            (_, error) => {
-              console.error('FETCH JOURNAL 2: Error querying data:', error);
-            }
-          );
-        });
+        if(sort == "By Modified Time"){
+          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY modifiedDate DESC;", ["normal", "journal"], type);
+        }else{
+          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY createdDate DESC;", ["normal", "journal"], type);
+
+        }
+      
       }
-    } else{
+      else{
+
+        if(sort == "By Modified Time"){
+          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY modifiedDate DESC;", ["normal", "journal", filter], type);
+        }
+        else{
+          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY createdDate DESC;", ["normal", "journal", filter], type);
+        }
+
+      }
+    } 
+    else{
       if(filter == "All"){
-        db.transaction((tx) => {
-          tx.executeSql(
-            "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY modifiedDate DESC;",
-            ["normal", "opm"],
-            (_, result) => {
-              const rows = result.rows;
-              setOpmCount(rows.length);
-              const dataArray = [];
-              for (let i = 0; i < rows.length; i++) {
-                const item = rows.item(i);
-                dataArray.push(item);
-              }
-              setNotesOPM(dataArray);
-            },
-            (_, error) => {
-              console.error(' FETCH OPM 1: Error querying data:', error);
-            }
-          );
-        });
-      }else{
-        db.transaction((tx) => {
-          tx.executeSql(
-            "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY modifiedDate DESC;", ["normal", "opm", filter],
-            (_, result) => {
-              const rows = result.rows;
-              setOpmCount(rows.length);
-              const dataArray = [];
-              for (let i = 0; i < rows.length; i++) {
-                const item = rows.item(i);
-                dataArray.push(item);
-              }
-              setNotesOPM(dataArray);
-            },
-            (_, error) => {
-              console.error(' FETCH OPM 2: Error querying data:', error);
-            }
-          );
-        });
+        if(sort == "By Modified Time"){
+          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY modifiedDate DESC;", ["normal", "opm"], type);
+        }else{
+          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY createdDate DESC;", ["normal", "opm"], type);
+
+        }
+      }
+      else{
+        if(sort == "By Modified Time"){
+          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY modifiedDate DESC;",  ["normal", "opm", filter], type);
+        }
+        else{
+          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY createdDate DESC;",  ["normal", "opm", filter], type);
+
+        }
       }
     
     }
   };
-  
+
+  //for fetching all entries
+  const allDataFetcher = (query, dependencies) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        query, dependencies,
+        (txObj, result) => {
+          const rows = result.rows;
+          const dataArray = [];
+          const dataArray2 = [];
+
+          setAllCount(rows.length);
+          for (let i = 0; i < rows.length; i++) {
+            const item = rows.item(i);
+            dataArray.push(item);
+            dataArray2.push(parseInt(item.dataId));
+
+          }
+          setNotes(dataArray);
+          setNotesId(dataArray2);
+          setNoteListLoading(false);
+          console.log("Fetched All Data")
+        },
+        (_, error) => {
+          console.error('FETCH ALL1: Error querying data:', error);
+        }
+      );
+    });
+  }
 
   const fetchAllData = (sort, filter) => {
-    console.log(sort);
+    console.log(filter)
     if(filter == "All"){
-      db.transaction((tx) => {
-        tx.executeSql(
-          "SELECT * FROM entries WHERE settingState = ? ORDER BY modifiedDate DESC;", ["normal"],
-          (txObj, result) => {
-            const rows = result.rows;
-            const dataArray = [];
-            const dataArray2 = [];
+
+      if(sort == "By Modified Time"){
+        allDataFetcher( "SELECT * FROM entries WHERE settingState = ? ORDER BY modifiedDate DESC;", ["normal"] );
+      }
+      else{
+        allDataFetcher( "SELECT * FROM entries WHERE settingState = ? ORDER BY createdDate DESC;", ["normal"] );
+      }
   
-            setAllCount(rows.length);
-            for (let i = 0; i < rows.length; i++) {
-              const item = rows.item(i);
-              dataArray.push(item);
-              dataArray2.push(parseInt(item.dataId));
-  
-            }
-            setNotes(dataArray);
-            setNotesId(dataArray2);
-            setNoteListLoading(false);
-            console.log("Fetched All Data")
-          },
-          (_, error) => {
-            console.error('FETCH ALL1: Error querying data:', error);
-          }
-        );
-      });
     }else{
-      db.transaction((tx) => {
-        tx.executeSql(
-          "SELECT * FROM entries WHERE settingState = ? ORDER BY modifiedDate DESC;", ["normal"],
-          (txObj, result) => {
-            const rows = result.rows;
-            const dataArray = [];
-            const dataArray2 = [];
-  
-            setAllCount(rows.length);
-            for (let i = 0; i < rows.length; i++) {
-              const item = rows.item(i);
-              dataArray.push(item);
-              dataArray2.push(parseInt(item.dataId));
-  
-            }
-            setNotes(dataArray);
-            setNotesId(dataArray2);
-            setNoteListLoading(false);
-            console.log("Fetched All Data")
-          },
-          (_, error) => {
-            console.error('FETCH ALL2: Error querying data:', error);
-          }
-        );
-      });
+
+      if(sort == "By Modified Time"){
+          allDataFetcher(  "SELECT * FROM entries WHERE settingState = ? AND month = ? ORDER BY modifiedDate DESC;", ["normal", filter] );
+      }
+      else{
+          allDataFetcher(  "SELECT * FROM entries WHERE settingState = ? AND month = ? ORDER BY createdDate DESC;", ["normal", filter]  );
+      }
+
     }
 
- 
   };
 
 
@@ -459,9 +443,9 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   useEffect(() => {
 
     if(isFocused){
-      fetchAllData(currentSort.current == "By Modified Time" ? "modifiedDate" : "createdDate", currentFilter.current);
-      fetchData("journal", currentSort.current == "By Modified Time" ? "modifiedDate" : "createdDate", currentFilter.current);
-      fetchData("opm", currentSort.current == "By Modified Time" ? "modifiedDate" : "createdDate", currentFilter.current);
+      fetchAllData(currentSort.current,  monthsComplete[months1.indexOf(currentFilter.current)-1]);
+      fetchData("journal", currentSort.current, monthsComplete[months1.indexOf(currentFilter.current)-1]);
+      fetchData("opm", currentSort.current, monthsComplete[months1.indexOf(currentFilter.current)-1]);
     }
   }, [isFocused]);
 

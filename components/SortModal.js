@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, FlatList, Pressable } from 'react-native';
 import React,{ useState, useEffect, useRef, memo } from 'react';
 import Modal from "react-native-modal";
-import { useTheme } from 'react-native-paper'; 
+import { useTheme, RadioButton } from 'react-native-paper'; 
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
@@ -15,11 +15,10 @@ const monthsComplete = ["January", "February", "March", "April", "May",  "June",
 
 export default function SortModal({visible, handleModal, fetchData, fetchAllData, currentSortSetting, currentDisplaySetting, currentFilterSetting, handleSort, handleDisplay, handleFilter }) {
     const theme = useTheme();
-	const [selectedSort, setSelectedSort] = useState(true);
 	const [currentSort, setCurrentSort] = useState(currentSortSetting.current);
+	const sortStatus = useRef(currentSortSetting.current);
 	const [currentDisplay, setCurrentDisplay] = useState(currentDisplaySetting.current);
 	const [currentFilter, setCurrentFilter] = useState(currentFilterSetting.current);
-	const [iconName, setIconName] = useState("arrowup");
 	const [data, setData] = useState(months)
 	const ref = useRef(null);
 	const [index, setIndex] = useState(0);
@@ -41,37 +40,36 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 	const RenderSort = () =>{
 
 		const handleSortItem = (name) =>{
-			if(name == "By Modified Time"){
-				fetchAllData("modifiedDate");
-				fetchData("journal", "modifiedDate", currentFilter);
-				fetchData("opm", "modifiedDate", currentFilter)
 
-			} else { 
-				fetchAllData("createdDate"); 
-				fetchData("journal", "createdDate", currentFilter)
-				fetchData("opm", "createdDate", currentFilter )
-			}
-
-			setSelectedSort(true);
 			setCurrentSort(name);
-			handleSort(name)
-			setBtnType("sort");
-			
-			if(selectedSort && name == currentSort){
-				if(iconName == "arrowup"){
-					setIconName("arrowdown");
-				}else{
-					setIconName("arrowup");
-				}
+			sortStatus.current = name;
+			handleSort(name);
+
+			if( name == "By Modified Time"){
+				fetchAllData("By Modified Time", currentFilter);
+				fetchData("journal", "By Modified Time", currentFilter);
+				fetchData("opm", "By Modified Time",  currentFilter);
+			} 
+			else { 
+				fetchAllData("By Created Time", currentFilter); 
+				fetchData("journal", "By Created Time", currentFilter);
+				fetchData("opm","By Created Time", currentFilter);
 			}
+	
 		}
 	
-		const SortItem = ({ name,  }) => (
+		const SortItem = ({ name }) => (
 			<Pressable 
 				onPress={ ()=>handleSortItem(name) }
-				style={{flexDirection: 'row', alignItems: 'center', padding: 10, gap:10}}
+				style={{flexDirection: 'row', alignItems: 'center', gap:5}}
 			>
-				<AntDesign name={iconName} size={20} color={ name == currentSort ? theme.colors.textColor : theme.colors.altTextColor} />
+				<RadioButton
+					color={theme.colors.altColor}
+					uncheckedColor={theme.colors.textColor}
+					value={name} 
+					onPress={ ()=>handleSortItem(name) }
+					status={ sortStatus.current == name ? 'checked' : 'unchecked' }
+				/>
 				<Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize}} >{name}</Text>
 			</Pressable>
 		);
@@ -141,13 +139,11 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 		}
 	}
 
-
 	useEffect(() => {
 		if(visible){
 			ref.current?.scrollToIndex({
 				index: index,
 				animated: true,
-			
 			});
 		}
 	
@@ -171,7 +167,7 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
             hideModalContentWhileAnimating
 			style={[styles.modal,]}
 		>
-			<View style={[styles.modalContent, {backgroundColor: theme.colors.primary, height: 450}]}>
+			<View style={[styles.modalContent, {backgroundColor: theme.colors.primary, height: 400}]}>
 				<View style={{backgroundColor: theme.colors.borderColor, width: 60, height: 5, borderRadius: 3, alignSelf: 'center'}} ></View>
 				<View style={{padding: 10}}>
 					<Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize + 2, fontWeight: 'bold'}} >Sort</Text>

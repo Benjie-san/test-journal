@@ -75,7 +75,7 @@ const FlatListItems = ({item, handleDisplayEntryFetch, display}) => {
                 elevation: 2, 
                 gap: 5,
                 padding: 14,
-                margin: 2,
+                margin: 3,
                 borderRadius: 5,
                 overflow:'hidden',
                 }
