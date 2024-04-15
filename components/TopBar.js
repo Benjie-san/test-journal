@@ -8,36 +8,59 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Tab = createMaterialTopTabNavigator();
 
+
+const RenderFlatlist = ({notes, noteListLoading, handleDisplayEntryFetch, display}) => {
+  const theme = useTheme();
+
+  return(
+    <>
+    {noteListLoading ? <ActivityIndicator style={styles.flex} size={'large'}/> :
+      (<View style={[ styles.notelist, {backgroundColor: theme.colors.secondary}]}>
+        {notes.length === 0 ?
+          (<Text style={{fontSize: theme.fonts.fontSize+14, paddingBottom: 150, color: theme.colors.textColor}}>No Entries Found</Text>)
+          :
+          ( <FlatList
+              style={{width:'100%',}}
+              contentContainerStyle={{
+                flexGrow: 1/2,
+                alignContent:'flex-start',
+              }}
+              data={ notes } 
+              keyExtractor={(item, index) => index.toString()}
+              numColumns={ 
+                display == "Grid" ? 3 :
+                display == "Large Grid" ? 2 : 1
+              }
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <FlatListItems item={item} handleDisplayEntryFetch={handleDisplayEntryFetch} display={display}/>
+              )}
+            />)
+        }
+      </View>)
+      } 
+    </>
+  );
+}
+<RenderFlatlist />
 const FlatListComponent = ({notes, noteListLoading, handleDisplayEntryFetch, display }) => {
   const theme = useTheme();
   return(
-  <View style={[styles.flex, {backgroundColor: theme.colors.tertiary}]}>
-    
-    { display == "List" ? (<Text>LIST</Text>) 
-    : display == "Details" ? (<Text>DETAILS</Text>) 
-    : display == "Grid" ? (<Text>GRID</Text>) 
-    : display == "Large Grid" ? (<Text>LARGE GRID</Text>) 
-    : null
-    }
-    {noteListLoading ? <ActivityIndicator style={styles.flex} size={'large'}/> :
-    (<View style={[ styles.notelist, {backgroundColor: theme.colors.secondary}]}>
-      {notes.length === 0 ?
-        (<Text style={{fontSize: theme.fonts.fontSize+14, paddingBottom: 150, color: theme.colors.textColor}}>No Entries Found</Text>)
-        :
-        ( <FlatList
-            style={{width: '100%'}}
-            data={ notes } 
-            keyExtractor={(item, index) => index.toString()}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <FlatListItems item={item} handleDisplayEntryFetch={handleDisplayEntryFetch}/>
-            )}
-          />)
+    <View style={[styles.flex, {backgroundColor: theme.colors.tertiary}]}>
+      
+      { display == "List" ?
+        (<RenderFlatlist notes={notes} display={display} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} />) 
+      : display == "Details" ? 
+        (<RenderFlatlist notes={notes} display={display} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} />) 
+      : display == "Grid" ? 
+        (<RenderFlatlist notes={notes} display={display} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} />) 
+      : display == "Large Grid" ? 
+        (<RenderFlatlist notes={notes} display={display} noteListLoading={noteListLoading} handleDisplayEntryFetch={handleDisplayEntryFetch} />) 
+      : null
       }
-    </View>)
-    } 
-  </View>
-)
+      
+    </View>
+  )
   }
 
 const AllEntries = ({notes, noteListLoading, handleDisplayEntryFetch,  display}) => {
@@ -165,15 +188,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding:10,
-  },
-  entry:{
-    marginBottom: 5,
-    borderRadius: 5,
-    padding: 14,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
   },
 
 });

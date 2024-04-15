@@ -125,21 +125,21 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     setSortModal(item)
   }
 
-  const updateStreakCount = (count, date) =>{
-    dbSettings.transaction((tx) => {
-      tx.executeSql(
-        'UPDATE settings SET dailyStreak = ?, dailyStreakDate = ? WHERE id = ?;',
-        [count, date, 1],
-        (_, result) => {
-          console.log('Data SETTINGS:dailyStreak updated successfully');
-          fetchStreakCount();
-        },
-        (_, error) => {
-          console.error('Error updating SETTINGS:dailyStreak data:', error);
-        }
-        );
-    });
-  }
+  // const updateStreakCount = (count, date) =>{
+  //   dbSettings.transaction((tx) => {
+  //     tx.executeSql(
+  //       'UPDATE settings SET dailyStreak = ?, dailyStreakDate = ? WHERE id = ?;',
+  //       [count, date, 1],
+  //       (_, result) => {
+  //         console.log('Data SETTINGS:dailyStreak updated successfully');
+  //         fetchStreakCount();
+  //       },
+  //       (_, error) => {
+  //         console.error('Error updating SETTINGS:dailyStreak data:', error);
+  //       }
+  //       );
+  //   });
+  // }
 
   // NAVIGATION FUNCTIONS
 
@@ -246,12 +246,13 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
   //for fetching entries
   const fetchData = (type, sort, filter) => {
+    console.log(sort);
   
     if(type == "journal"){
       if(filter == "All"){
         db.transaction((tx) => {
           tx.executeSql(
-            "SELECT * FROM entries WHERE type = ? ORDER BY ? DESC;", ["journal", sort],
+            "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY modifiedDate DESC;", [ "normal", "journal"],
             (_, result) => {
               const rows = result.rows;
               setJournalCount(rows.length);
@@ -263,14 +264,14 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
               setNotesJournal(dataArray);
             },
             (_, error) => {
-              console.error('FETCH: Error querying data:', error);
+              console.error('FETCH JOURNAL 1: Error querying data:', error);
             }
           );
         });
       }else{
         db.transaction((tx) => {
           tx.executeSql(
-            "SELECT * FROM entries WHERE type = ? AND month = ? ORDER BY ? DESC;", ["journal", filter, sort],
+            "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY modifiedDate DESC;", ["normal", "journal", filter,],
             (_, result) => {
               const rows = result.rows;
               setJournalCount(rows.length);
@@ -282,7 +283,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
               setNotesJournal(dataArray);
             },
             (_, error) => {
-              console.error('FETCH: Error querying data:', error);
+              console.error('FETCH JOURNAL 2: Error querying data:', error);
             }
           );
         });
@@ -291,8 +292,8 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
       if(filter == "All"){
         db.transaction((tx) => {
           tx.executeSql(
-            "SELECT * FROM entries WHERE type = ? ORDER BY ? DESC;",
-            ["opm", sort],
+            "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY modifiedDate DESC;",
+            ["normal", "opm"],
             (_, result) => {
               const rows = result.rows;
               setOpmCount(rows.length);
@@ -304,14 +305,14 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
               setNotesOPM(dataArray);
             },
             (_, error) => {
-              console.error(' FETCH: Error querying data:', error);
+              console.error(' FETCH OPM 1: Error querying data:', error);
             }
           );
         });
       }else{
         db.transaction((tx) => {
           tx.executeSql(
-            "SELECT * FROM entries WHERE type = ? AND month = ? ORDER BY ? DESC;", ["opm", filter, sort],
+            "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY modifiedDate DESC;", ["normal", "opm", filter],
             (_, result) => {
               const rows = result.rows;
               setOpmCount(rows.length);
@@ -323,7 +324,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
               setNotesOPM(dataArray);
             },
             (_, error) => {
-              console.error(' FETCH: Error querying data:', error);
+              console.error(' FETCH OPM 2: Error querying data:', error);
             }
           );
         });
@@ -334,10 +335,11 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   
 
   const fetchAllData = (sort, filter) => {
+    console.log(sort);
     if(filter == "All"){
       db.transaction((tx) => {
         tx.executeSql(
-          "SELECT * FROM entries ORDER BY ? DESC;", [sort],
+          "SELECT * FROM entries WHERE settingState = ? ORDER BY modifiedDate DESC;", ["normal"],
           (txObj, result) => {
             const rows = result.rows;
             const dataArray = [];
@@ -363,7 +365,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     }else{
       db.transaction((tx) => {
         tx.executeSql(
-          "SELECT * FROM entries WHERE month = ? ORDER BY ? DESC;", [filter, sort],
+          "SELECT * FROM entries WHERE settingState = ? ORDER BY modifiedDate DESC;", ["normal"],
           (txObj, result) => {
             const rows = result.rows;
             const dataArray = [];
@@ -407,7 +409,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
             // Table doesn't exist, create it
             db.transaction((tx) => {
               tx.executeSql(
-                'CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, title TEXT, question TEXT, scripture TEXT, observation TEXT, application TEXT, prayer TEXT, status TEXT, type TEXT, modifiedDate TEXT, dataId TEXT, month TEXT, createdDate TEXT);',
+                'CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, title TEXT, question TEXT, scripture TEXT, observation TEXT, application TEXT, prayer TEXT, status TEXT, type TEXT, modifiedDate TEXT, dataId TEXT, month TEXT, settingState TEXT, createdDate TEXT);',
                 [],
                 (_, result) => {
                   console.log('Table entries: created successfully');
@@ -453,7 +455,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
   }, []);
 
-  console.log(currentDisplay.current)
 
   useEffect(() => {
 

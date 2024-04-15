@@ -138,7 +138,11 @@ export default function App() {
         
           }
           setTheme(dataArray[0].currentTheme);
-          setFontSize(dataArray[0].fontSize)
+          setFontSize(dataArray[0].fontSize);
+          sort.current = dataArray[0].defaultSort;
+          display.current = dataArray[0].defaultDisplay;
+          filter.current = dataArray[0].defaultFilter;
+
           setAppIsReady(true);
           console.log("Settings are fetched")
         

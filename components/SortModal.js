@@ -43,13 +43,13 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 		const handleSortItem = (name) =>{
 			if(name == "By Modified Time"){
 				fetchAllData("modifiedDate");
-				fetchData("journal", "modifiedDate");
-				fetchData("opm", "modifiedDate")
+				fetchData("journal", "modifiedDate", currentFilter);
+				fetchData("opm", "modifiedDate", currentFilter)
 
 			} else { 
-				fetchData("journal", "createdDate" )
-				fetchData("opm", "createdDate" )
-				fetchAllData("createdDate" ); 
+				fetchAllData("createdDate"); 
+				fetchData("journal", "createdDate", currentFilter)
+				fetchData("opm", "createdDate", currentFilter )
 			}
 
 			setSelectedSort(true);

@@ -3,8 +3,37 @@ import { TouchableOpacity, Text, StyleSheet, View} from 'react-native';
 import { useTheme } from 'react-native-paper';
 
 
-const FlatListItems = ({item, handleDisplayEntryFetch}) => {
+const FlatListItems = ({item, handleDisplayEntryFetch, display}) => {
     const theme = useTheme();
+    const renderLayout = {
+        list:{
+            width:'99%',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        details:{
+            height: 80,
+            width:'99%',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        grid:{
+            width: '32%',
+            flexGrow: 0,
+            flexWrap: 'wrap',
+            flexDirection: 'column',
+            alignItems: 'center',
+        },
+        largeGrid:{
+            width: '49%',
+            flexGrow: 0,
+            flexWrap: 'wrap',
+            flexDirection: 'column',
+
+        },
+	};
 
     const formatLastModified = (timestamp) => {
         const lastModifiedTime = new Date(timestamp);
@@ -36,13 +65,52 @@ const FlatListItems = ({item, handleDisplayEntryFetch}) => {
     return (
 
         <TouchableOpacity
-            style={ [styles.entry, {backgroundColor: theme.colors.primary, elevation: 2, gap: 5}] }
+            style={ [
+                display == "List" ? renderLayout.list : 
+                display == "Details" ? renderLayout.details : 
+                display == "Grid" ? renderLayout.grid : 
+                display == "Large Grid" ? renderLayout.largeGrid : null, 
+                {
+                backgroundColor: theme.colors.primary, 
+                elevation: 2, 
+                gap: 5,
+                padding: 14,
+                margin: 2,
+                borderRadius: 5,
+                overflow:'hidden',
+                }
+            ]}
             onPress={ ()=> handleDisplayEntryFetch(item) }
-        >
-    
-            <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden', flex: 1}}>{item.title}</Text>
-
-            <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+        >           
+            { 
+            display == "List" ? 
+                (<>
+                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden', flex: 1}}>{item.title}</Text>
+                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                </>) 
+            :
+            display == "Grid" ? 
+                (<>
+                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden', flex: 1}}>{item.title}</Text>
+                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                </>) 
+            :
+            display == "Details" ? 
+                (<>
+                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden', flex: 1}}>{item.scripture}</Text>
+                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden', flex: 1}}>{item.title}</Text>
+                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                </>) 
+            :
+            display == "Large Grid" ? 
+                (<>
+                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden', flex: 1}}>{item.scripture}</Text>
+                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden', flex: 1}}>{item.title}</Text>
+                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                </>) 
+            : null
+            }
+            
         </TouchableOpacity>
     )
 
@@ -56,21 +124,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    notelist:{
-        flex: 1,
-        width: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding:10,
-    },
+
     entry:{
-        marginBottom: 5,
-        borderRadius: 5,
-        padding: 14,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: '#fff',
     },
 
 });

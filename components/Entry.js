@@ -444,8 +444,8 @@ const saveEntry = () => {
         if(type=="journal" || type == "sermon"){
             db.transaction((tx) => {
                 tx.executeSql(
-                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, createdDate ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-                [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), parseInt(itemId), months[index], Date.now(),],
+                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, createdDate, settingState ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), parseInt(itemId), months[index], Date.now(), "normal"],
                 (tx, results) => {
                     console.log("Success added entry to DB!!!");
                     fetchEntry(itemId);
@@ -462,8 +462,8 @@ const saveEntry = () => {
         else{
             db.transaction((tx) => {
                 tx.executeSql(
-                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, createdDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-                [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), Number(dataId), months[index], Date.now()],
+                'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, createdDate, settingState) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+                [date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), Number(dataId), months[index], Date.now(), "normal"],
                 (tx, results) => {
                 console.log("Success!!!");
                     fetchEntry(dataId);
