@@ -124,7 +124,7 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 	const handleFilterItem = (month, index) =>{
 		if(currentFilter !== month){
 			setCurrentFilter(month);
-			handleFilter(month);
+			handleFilter(month == "Äll" ? "All" : monthsComplete[months.indexOf(month)-1]);
 			setIndex(index);
 			if(month == "All"){
 				fetchAllData(currentSort == "By Modified Time" ? "modifiedDate" : "createdDate", "All");

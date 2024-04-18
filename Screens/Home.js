@@ -105,7 +105,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   //for dates
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const months1 = ["All", "Jan", "Feb", "Mar", "Apr", "May",  "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
-const monthsComplete = ["January", "February", "March", "April", "May",  "June", "July", "August", "September", "October", "November", "December"];
 
   const todayDate = new Date();
   const today = {
@@ -128,22 +127,6 @@ const monthsComplete = ["January", "February", "March", "April", "May",  "June",
   const handleSortModal = (item) =>{
     setSortModal(item)
   }
-
-  // const updateStreakCount = (count, date) =>{
-  //   dbSettings.transaction((tx) => {
-  //     tx.executeSql(
-  //       'UPDATE settings SET dailyStreak = ?, dailyStreakDate = ? WHERE id = ?;',
-  //       [count, date, 1],
-  //       (_, result) => {
-  //         console.log('Data SETTINGS:dailyStreak updated successfully');
-  //         fetchStreakCount();
-  //       },
-  //       (_, error) => {
-  //         console.error('Error updating SETTINGS:dailyStreak data:', error);
-  //       }
-  //       );
-  //   });
-  // }
 
   // NAVIGATION FUNCTIONS
 
@@ -354,7 +337,7 @@ const monthsComplete = ["January", "February", "March", "April", "May",  "June",
   }
 
   const fetchAllData = (sort, filter) => {
-    console.log(filter)
+ 
     if(filter == "All"){
 
       if(sort == "By Modified Time"){
@@ -443,9 +426,9 @@ const monthsComplete = ["January", "February", "March", "April", "May",  "June",
   useEffect(() => {
 
     if(isFocused){
-      fetchAllData(currentSort.current,  monthsComplete[months1.indexOf(currentFilter.current)-1]);
-      fetchData("journal", currentSort.current, monthsComplete[months1.indexOf(currentFilter.current)-1]);
-      fetchData("opm", currentSort.current, monthsComplete[months1.indexOf(currentFilter.current)-1]);
+      fetchAllData(currentSort.current, currentFilter.current);
+      fetchData("journal", currentSort.current,  currentFilter.current);
+      fetchData("opm", currentSort.current, currentFilter.current );
     }
   }, [isFocused]);
 
@@ -479,29 +462,26 @@ const monthsComplete = ["January", "February", "March", "April", "May",  "June",
         }
 
       </View>
-
         
-    <View style={{backgroundColor: theme.colors.primary, width: "100%", padding: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: theme.colors.borderColor, borderBottomWidth: 1, borderBottomColor: theme.colors.borderColor, }} > 
+      <View style={{backgroundColor: theme.colors.primary, width: "100%", padding: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: theme.colors.borderColor, borderBottomWidth: 1, borderBottomColor: theme.colors.borderColor, }} > 
 
-      <Text style={{textAlign: 'center', fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}} >Recent Entries</Text>
+        <Text style={{textAlign: 'center', fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}} >Recent Entries</Text>
 
-      <TouchableOpacity onPress={ ()=> handleSortModal(true) } style={{backgroundColor: theme.colors.secondary, padding: 5, borderRadius: 5,}}>
+        <TouchableOpacity onPress={ ()=> handleSortModal(true) } style={{backgroundColor: theme.colors.secondary, padding: 5, borderRadius: 5,}}>
 
-        <MaterialCommunityIcons name="sort" size={24} color={theme.colors.textColor} />
+          <MaterialCommunityIcons name="sort" size={24} color={theme.colors.textColor} />
 
-      </TouchableOpacity>
-    </View>
-
-
+        </TouchableOpacity>
+      </View>
 
     </View>
 
-    <TopBar 
-      display={currentDisplay.current}
-      navigation={navigation} route={route} 
-      notes={notes}  notesJournal={notesJournal}  notesOPM={notesOPM} noteListLoading={noteListLoading} 
-      handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount}  
-    />
+      <TopBar 
+        display={currentDisplay.current}
+        navigation={navigation} route={route} 
+        notes={notes}  notesJournal={notesJournal}  notesOPM={notesOPM} noteListLoading={noteListLoading} 
+        handleDisplayEntryFetch={handleDisplayEntryFetch} sortButtonCount={sortButtonCount}  
+      />
       
   
       <Navbar onPressAddEntry={handleVisibleAddModal} />
@@ -523,7 +503,7 @@ const monthsComplete = ["January", "February", "March", "April", "May",  "June",
       />
 
 
-    </>
+  </>
   )
 }
 

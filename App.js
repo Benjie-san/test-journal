@@ -142,7 +142,7 @@ export default function App() {
           sort.current = dataArray[0].defaultSort;
           display.current = dataArray[0].defaultDisplay;
           filter.current = dataArray[0].defaultFilter;
-
+     
           setAppIsReady(true);
           console.log("Settings are fetched")
         
@@ -227,12 +227,8 @@ export default function App() {
     });
   }
 
-
-
-
  // ===============================  USE EFFECTS ==============================================
 
-  
   //for splash screen
   useEffect(() => {
     if(appIsReady){
