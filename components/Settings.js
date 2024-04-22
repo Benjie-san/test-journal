@@ -179,7 +179,6 @@ const styles = StyleSheet.create({
   settings:{
     flex: 1,
     textAlign: 'left',
-    borderWidth: 1,
     width: '100%',
   },
   itemSettings:{

@@ -337,7 +337,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   }
 
   const fetchAllData = (sort, filter) => {
- 
     if(filter == "All"){
 
       if(sort == "By Modified Time"){
@@ -381,6 +380,9 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
                 (_, result) => {
                   console.log('Table entries: created successfully');
                   fetchTodayVerse();
+                  fetchAllData(currentSort.current, currentFilter.current);
+                  fetchData("journal", currentSort.current,  currentFilter.current);
+                  fetchData("opm", currentSort.current, currentFilter.current );
                 },
                 (_, error) => {
                   console.error('Error creating table entries:', error);
@@ -424,13 +426,13 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
 
   useEffect(() => {
-
     if(isFocused){
       fetchAllData(currentSort.current, currentFilter.current);
       fetchData("journal", currentSort.current,  currentFilter.current);
       fetchData("opm", currentSort.current, currentFilter.current );
     }
   }, [isFocused]);
+
 
   return (
   <>

@@ -9,7 +9,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import * as SQLite from 'expo-sqlite';
 
 //for DB of settings
-const dbSettings = SQLite.openDatabase("settings1.db");
+const dbSettings = SQLite.openDatabase("settings2.db");
 
 // Expo Splash Screen
 
@@ -240,6 +240,8 @@ export default function App() {
   useEffect(() => {
     setupSettingsDatabase();
   }, []);
+
+  console.log(filter.current)
 
   return (
     <>

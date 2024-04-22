@@ -441,7 +441,7 @@ const saveEntry = () => {
 				'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, createdDate, settingState ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
 				[date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), parseInt(itemId), months[index], Date.now(), "normal"],
 				(tx, results) => {
-						console.log("Success added entry to DB!!!");
+						console.log("Success added Journal entry!!!");
 						fetchEntry(itemId);
 						setCurrentState("update");
 						setDisableSave(false);
@@ -457,9 +457,9 @@ const saveEntry = () => {
 			db.transaction((tx) => {
 				tx.executeSql(
 				'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, createdDate, settingState) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-				[date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), Number(dataId), months[index], Date.now(), "normal"],
+				[date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), parseInt(dataId), months[index], Date.now(), "normal"],
 				(tx, results) => {
-				console.log("Success!!!");
+				console.log("Success added OPM entry!!!");
 					fetchEntry(dataId);
 					setCurrentState("update");
 					setDisableSave(false);
@@ -513,38 +513,6 @@ const setItems = (currentEntry) => {
     setSettingState(currentEntry?.settingState);
 }
 
-const checker = () =>{
-    idChecker();
-    let num = "opm"+Math.floor(Math.random() * 300);
-    if(!entriesId.includes(num)){
-        return setDataId(num);
-    }else{
-        return checker();
-    }
-}
-
-const idChecker = () =>{
-    db.transaction((tx) => {
-        tx.executeSql(
-            "SELECT * FROM entries;",
-        [],
-            (_, result) => {
-                const rows = result.rows;
-                let dataArray2 = [];
-                for (let i = 0; i < rows.length; i++) {
-                    const item = rows.item(i);
-                    dataArray2.push(item.dataId);
-                }
-                setEntriesId(dataArray2);
-            
-            },
-            (_, error) => {
-                console.log("id checker error: " + error)
-            }
-        );
-    });
-}
-
 const handleEntry = () => {
     setDisableSave(true);
     if(currentState == "add"){
@@ -560,11 +528,12 @@ const handleEntry = () => {
 }
 
 useEffect(() => {
-    if(currentState == "opm"){
-        idChecker();
-        checker();
+	let date = new Date();
+    if(type == "opm"){
+		setDataId( parseInt(String(date.getMonth()+1) + String(date.getDate())  + String(date.getHours())  + String(date.getMinutes())) );
     }
-}, [currentState])
+
+}, []);
 
 useEffect(() => {
     const interval = setTimeout(() => {

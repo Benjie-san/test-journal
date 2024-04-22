@@ -10,7 +10,7 @@ import { Fontisto } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import styles from '../styles/passageStyle';
 const months = ["All", "Jan", "Feb", "Mar", "Apr", "May",  "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
-const monthsComplete = ["January", "February", "March", "April", "May",  "June", "July", "August", "September", "October", "November", "December"];
+const monthsComplete = ["All", "January", "February", "March", "April", "May",  "June", "July", "August", "September", "October", "November", "December"];
 
 
 export default function SortModal({visible, handleModal, fetchData, fetchAllData, currentSortSetting, currentDisplaySetting, currentFilterSetting, handleSort, handleDisplay, handleFilter }) {
@@ -19,9 +19,9 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 	const sortStatus = useRef(currentSortSetting.current);
 	const [currentDisplay, setCurrentDisplay] = useState(currentDisplaySetting.current);
 	const [currentFilter, setCurrentFilter] = useState(currentFilterSetting.current);
-	const [data, setData] = useState(months)
+	const [data, setData] = useState(monthsComplete)
 	const ref = useRef(null);
-	const [index, setIndex] = useState(0);
+	const [index, setIndex] = useState(monthsComplete.indexOf(currentFilter));
 	const [btnType, setBtnType] = useState("");
 
     const toggleModal = () =>{
@@ -92,8 +92,7 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 			}
 			setTimeout(() => {
 				handleModal(false)
-
-			}, 800);
+			}, 500);
 			
 		}
 	
@@ -122,24 +121,29 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 	}
 
 	const handleFilterItem = (month, index) =>{
+	
 		if(currentFilter !== month){
 			setCurrentFilter(month);
-			handleFilter(month == "Äll" ? "All" : monthsComplete[months.indexOf(month)-1]);
+			handleFilter(month == "All" ? "All" : month);
 			setIndex(index);
 			if(month == "All"){
-				fetchAllData(currentSort == "By Modified Time" ? "modifiedDate" : "createdDate", "All");
-				fetchData("journal", currentSort == "By Modified Time" ? "modifiedDate" : "createdDate", "All");
-				fetchData("opm", currentSort == "By Modified Time" ? "modifiedDate" : "createdDate", "All");
+				fetchAllData(currentSort, "All");
+				fetchData("journal", currentSort, "All");
+				fetchData("opm", currentSort, "All");
 
 			}else{
-				fetchAllData(currentSort == "By Modified Time" ? "modifiedDate" : "createdDate", monthsComplete[months.indexOf(month)-1]);
-				fetchData("journal", currentSort == "By Modified Time" ? "modifiedDate" : "createdDate", monthsComplete[months.indexOf(month)-1]);
-				fetchData("opm", currentSort == "By Modified Time" ? "modifiedDate" : "createdDate", monthsComplete[months.indexOf(month)-1]);
+				fetchAllData(currentSort, month);
+				fetchData("journal", currentSort, month);
+				fetchData("opm", currentSort, months);
 			}
 		}
 	}
 
+	//monthsComplete[months.indexOf(month)-1]
+
+
 	useEffect(() => {
+		console.log(index)
 		if(visible){
 			ref.current?.scrollToIndex({
 				index: index,
@@ -149,7 +153,6 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 	
 	}, [index, visible])
 
-	
     return (
         <Modal
 			onBackdropPress={() => handleModal(false)}
@@ -201,7 +204,7 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 										borderWidth: 1, borderRadius: 10, 
 										padding: 10, marginRight: 7, 
 										paddingLeft: 15, paddingRight: 15,
-										backgroundColor: currentFilter == item ? theme.colors.altColor : theme.colors.altTextColor,
+										backgroundColor:  currentFilter == item ? theme.colors.altColor : theme.colors.altTextColor,
 										borderColor:  currentDisplay == item ? '#fff' : theme.colors.borderColor,
 									}}
 								> 	
