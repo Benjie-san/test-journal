@@ -289,14 +289,17 @@ const [alertModalVisible, setAlertModalVisible] = useState(false);
 const [message, setMessage] = useState("");
 
 const handleAlertModalVisible = (item) =>{
-
-	if (currentState == "add"){
+	let isEmpty = [title, question, observation, application, prayer];
+	if (currentState == "add" && !isEmpty.every((item)=>item=="") ){
 		setMessage("Entry Saved");
+		setAlertModalVisible(item);
+
 	} 
 	if (currentState == "update"){
 		setMessage("Entry Updated");
+		setAlertModalVisible(item);
+
 	}
-	setAlertModalVisible(item);
 }
 
 // HANDLE FUNCTIONS
@@ -305,19 +308,6 @@ const handleDateModal = () => {
 }
 
 // when closed is pressed
-const handleBackButton = () =>{
-	if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
-
-		updateEntry();
-		handleModal(false);
-	}else{
-		handleModal(false);
-
-	}
-	if(route.name == "Home" ){
-		fetchAllData();
-	}
-}
 
 const onChangeDate = ({type}, selectedDate) =>{
 	if(type == "set"){   
@@ -432,7 +422,7 @@ const updateEntry = () => {
 //saving entry
 const saveEntry = () => {
 	// adding entry to db
-	let isEmpty = [date, title, question, observation, application, prayer];
+	let isEmpty = [title, question, observation, application, prayer];
 	if(!isEmpty.every((item)=>item=="")){
 
 		if(type=="journal" || type == "sermon"){

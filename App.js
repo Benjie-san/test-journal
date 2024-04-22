@@ -241,8 +241,6 @@ export default function App() {
     setupSettingsDatabase();
   }, []);
 
-  console.log(filter.current)
-
   return (
     <>
 

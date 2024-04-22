@@ -9,7 +9,6 @@ import { Foundation } from '@expo/vector-icons';
 import { Fontisto } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import styles from '../styles/passageStyle';
-const months = ["All", "Jan", "Feb", "Mar", "Apr", "May",  "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
 const monthsComplete = ["All", "January", "February", "March", "April", "May",  "June", "July", "August", "September", "October", "November", "December"];
 
 
@@ -22,7 +21,6 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 	const [data, setData] = useState(monthsComplete)
 	const ref = useRef(null);
 	const [index, setIndex] = useState(monthsComplete.indexOf(currentFilter));
-	const [btnType, setBtnType] = useState("");
 
     const toggleModal = () =>{
         handleModal(!visible)
@@ -134,16 +132,14 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 			}else{
 				fetchAllData(currentSort, month);
 				fetchData("journal", currentSort, month);
-				fetchData("opm", currentSort, months);
+				fetchData("opm", currentSort, month);
 			}
 		}
 	}
 
 	//monthsComplete[months.indexOf(month)-1]
 
-
 	useEffect(() => {
-		console.log(index)
 		if(visible){
 			ref.current?.scrollToIndex({
 				index: index,
@@ -192,7 +188,6 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 									});
 								});
 							}}
-							
 							data={data} 
 							horizontal
 							renderItem={ ({item, index:findex})=>(
@@ -203,7 +198,7 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 									style={{
 										borderWidth: 1, borderRadius: 10, 
 										padding: 10, marginRight: 7, 
-										paddingLeft: 15, paddingRight: 15,
+										paddingLeft: 10, paddingRight: 10,
 										backgroundColor:  currentFilter == item ? theme.colors.altColor : theme.colors.altTextColor,
 										borderColor:  currentDisplay == item ? '#fff' : theme.colors.borderColor,
 									}}

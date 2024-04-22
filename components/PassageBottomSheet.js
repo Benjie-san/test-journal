@@ -169,7 +169,7 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 			style={styles.modal}
 		>
 			<View style={[styles.modalContent, {backgroundColor: theme.colors.primary, height: 500}]}>
-				
+			<View style={{backgroundColor: theme.colors.borderColor, width: 60, height: 5, borderRadius: 3, alignSelf: 'center'}} ></View>
 				<View style={styles.center}>
 					
 					<View style={[styles.header,]} >
@@ -192,22 +192,27 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 					</View>
 
 					<TranslationModal visible={translationPickerModalVisible} handleModal={handleTranslationPickerModal} handleTranslation={handleTranslation} />
+
+					<View style={{backgroundColor: theme.colors.borderColor, width: "100%", height: 1, alignSelf: 'center',}} ></View>
 			
 					<ScrollView contentContainerStyle={[styles.verseView, styles.center,]}
 					>
-					{ fetchedVerse.length > 0 ? (
-						<>
-						{
-							fetchedVerse.map( (item, index) => (
-								<View key={index} style={[{flexDirection: 'row', alignItems:'center', justifyContent: 'flex-start', paddingBottom: 5, width: '100%',  gap: 10}]}>
-									<Text style={[styles.verseText, { fontSize: theme.fonts.fontSiz, color: theme.colors.textColor, alignSelf: 'flex-start', padding: 5,}]}>{verseNumber[index]}</Text>
-									<Text style={[styles.verseText, {fontSize: theme.fonts.fontSiz, color: theme.colors.textColor,  padding: 5, width: '90%'}]}>{item}</Text>
-								</View>
-							))
+						<TouchableOpacity activeOpacity={1} > 
+							{ fetchedVerse.length > 0 ? (
+							<>
+							{
+								fetchedVerse.map( (item, index) => (
+									<View key={index} style={[{flexDirection: 'row', alignItems:'center', justifyContent: 'flex-start', paddingBottom: 5, width: '100%',  gap: 5}]}>
+										<Text style={[styles.verseText, { fontSize: theme.fonts.fontSize, color: theme.colors.textColor, alignSelf: 'flex-start', padding: 5,}]}>{verseNumber[index]}</Text>
+										<Text style={[styles.verseText, {fontSize: theme.fonts.fontSize, color: theme.colors.textColor,  padding: 5, width: '90%'}]}>{item}</Text>
+									</View>
+								))
+							}
+							</>
+							) : ( <Text style={{fontSize: theme.fonts.fontSize, paddingBottom: 150, color: theme.colors.textColor}} >No Verses Found</Text> ) 
 						}
-						</>
-						) : ( <Text style={{fontSize: theme.fonts.fontSize, paddingBottom: 150, color: theme.colors.textColor}} >No Verses Found</Text> ) 
-					}
+						</TouchableOpacity>
+					
 						
 					</ScrollView>
 

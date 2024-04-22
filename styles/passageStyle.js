@@ -12,7 +12,6 @@ const styles = StyleSheet.create({
 	},
 	modalContent: {
 		paddingTop: 12,
-		paddingHorizontal: 12,
 		borderTopRightRadius: 20,
 		borderTopLeftRadius: 20,
 		
@@ -37,12 +36,12 @@ const styles = StyleSheet.create({
 	},
 	header:{
 		flexDirection: 'row',
-		alignItems: 'center',
+		alignItems: 'baseline',
 		justifyContent: 'space-between',
 		width: '100%',
-		height: 60,
+		height: 50,
+		padding: 10,
 		gap: 5,
-		padding: 15,
 	},
 	headerBtn:{
 		padding: 10,
@@ -61,7 +60,7 @@ const styles = StyleSheet.create({
 		
 	},
 	verseView:{
-		padding: 10,
+		padding: 5,
 	},
 	verseText:{
 		textAlign: 'left',

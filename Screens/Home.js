@@ -104,8 +104,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
   //for dates
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const months1 = ["All", "Jan", "Feb", "Mar", "Apr", "May",  "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
-
   const todayDate = new Date();
   const today = {
     day: todayDate.getDate(),
@@ -288,18 +286,18 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     else{
       if(filter == "All"){
         if(sort == "By Modified Time"){
-          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY modifiedDate DESC;", ["normal", "opm"], type);
+          dataFetcher( 'SELECT * FROM entries WHERE settingState="normal" AND type = ? ORDER BY modifiedDate DESC;', ["opm"], type);
         }else{
-          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY createdDate DESC;", ["normal", "opm"], type);
+          dataFetcher( 'SELECT * FROM entries WHERE settingState="normal" AND type = ? ORDER BY createdDate DESC;', ["opm"], type);
 
         }
       }
       else{
         if(sort == "By Modified Time"){
-          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY modifiedDate DESC;",  ["normal", "opm", filter], type);
+          dataFetcher( 'SELECT * FROM entries WHERE settingState="normal" AND type = ? AND month = ? ORDER BY modifiedDate DESC;',  ["opm", filter], type);
         }
         else{
-          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY createdDate DESC;",  ["normal", "opm", filter], type);
+          dataFetcher( 'SELECT * FROM entries WHERE settingState="normal" AND type = ? AND month = ? ORDER BY createdDate DESC;',  ["opm", filter], type);
 
         }
       }
@@ -337,22 +335,22 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   }
 
   const fetchAllData = (sort, filter) => {
+   
     if(filter == "All"){
-
       if(sort == "By Modified Time"){
-        allDataFetcher( "SELECT * FROM entries WHERE settingState = ? ORDER BY modifiedDate DESC;", ["normal"] );
+        allDataFetcher( 'SELECT * FROM entries WHERE settingState="normal" ORDER BY modifiedDate DESC;', [] );
       }
       else{
-        allDataFetcher( "SELECT * FROM entries WHERE settingState = ? ORDER BY createdDate DESC;", ["normal"] );
+        allDataFetcher( 'SELECT * FROM entries WHERE settingState="normal" ORDER BY createdDate DESC;', [] );
       }
   
     }else{
 
       if(sort == "By Modified Time"){
-          allDataFetcher(  "SELECT * FROM entries WHERE settingState = ? AND month = ? ORDER BY modifiedDate DESC;", ["normal", filter] );
+          allDataFetcher(  'SELECT * FROM entries WHERE settingState="normal" AND month = ? ORDER BY modifiedDate DESC;', [filter] );
       }
       else{
-          allDataFetcher(  "SELECT * FROM entries WHERE settingState = ? AND month = ? ORDER BY createdDate DESC;", ["normal", filter]  );
+          allDataFetcher(  'SELECT * FROM entries WHERE settingState="normal" AND month = ? ORDER BY createdDate DESC;', [filter] );
       }
 
     }
