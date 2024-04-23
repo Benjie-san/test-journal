@@ -1,4 +1,4 @@
-import { Text, View, TextInput, Pressable, TouchableOpacity, ScrollView, KeyboardAvoidingView, Share, AppState, ActivityIndicator} from 'react-native';
+import { Text, View, TextInput, Pressable, TouchableOpacity, ScrollView, KeyboardAvoidingView, Share, AppState, ActivityIndicator, Alert} from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
@@ -6,12 +6,12 @@ import * as SQLite from 'expo-sqlite';
 
 import { useTheme } from 'react-native-paper';
 
-
 // Icons
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 // Navigation
 import { useIsFocused } from '@react-navigation/native';
@@ -27,46 +27,21 @@ const months = ["January","February","March","April","May","June","July","August
 
 const MenuModal = ({visible, handleCloseModal, status, entry, type, handleStatus, handleSettingState, settingState}) => {
     const theme = useTheme(); //for theme
-    const [confirmationModal, setConfirmationModal] = useState(false);
-    const [confirmationTitle, setConfirmationTitle] = useState("");
-    const [confirmationMessage, setConfirmationMessage] = useState("");
-
-    const handleTrashModal = (item) => {
-        setConfirmationModal(item);
-        if(item == true){
-            if(settingState == "trash"){
-                setConfirmationTitle("Restore");
-                setConfirmationMessage("Are you sure want to restore the entry from trash?");
     
-            }else{
-                setConfirmationTitle("Trash");
-                setConfirmationMessage("Are you sure want to move the entry to trash?");
-    
-            }
-        }
-    } 
-
-    const handleArchiveModal = (item) => {
-        setConfirmationModal(item);
-        if(item == true){
-            if(settingState == "archive"){
-                setConfirmationTitle("Unarchive");
-                setConfirmationMessage("Are you sure want to remove the entry from archive?");
-            }else{
-                setConfirmationTitle("Archive");
-                setConfirmationMessage("Are you sure want to move the entry to archive?");
-            }
-        }
-    
-    } 
-
-    const handleDeleteModal = (item) => {
-        setConfirmationModal(item);
-        if(item == true){
-            setConfirmationTitle("Delete");
-            setConfirmationMessage("Are you sure want to permanently delete the entry?");
-        }
-    } 
+	const alertModal = (title, message) => 	Alert.alert(
+		title,
+		message,
+		[
+		{ text: "Cancel", style: 'cancel', onPress: () => {} },
+		{
+			text: 'Confirm',
+			style: 'destructive',
+			// If the user confirmed, then we dispatch the action we blocked earlier
+			// This will continue the action that had triggered the removal of the screen
+			onPress: () => handleSettingState(title),
+		},
+		]
+	);
 
     const onShare = async () => {
         let message = "";
@@ -98,13 +73,25 @@ const MenuModal = ({visible, handleCloseModal, status, entry, type, handleStatus
 
     const handlePressBtn = (item) =>{
         if(item == "Delete"){
-            handleDeleteModal(true);
+            //handleDeleteModal(true);
+			alertModal("Delete", "Are you sure want to permanently delete the entry?")
+
         }
         else if(item == "Archive"){
-            handleArchiveModal(true);
+            //handleArchiveModal(true);
+			if(settingState == "archive"){
+				alertModal("Unarchive", "Are you sure want to remove the entry from archive?")
+            }else{
+				alertModal("Archive", "Are you sure want to move the entry to archive?")
+            }
         }
         else if(item == "Trash"){
-            handleTrashModal(true);
+            //handleTrashModal(true);
+			if(settingState == "trash"){
+				alertModal("Restore", "Are you sure want to restore the entry from trash?")    
+            }else{
+				alertModal("Trash", "Are you sure want to move the entry to trash?")        
+            }
         }
         else if(item == "#fff"){
             handleStatus("#8CFF31");
@@ -193,17 +180,6 @@ return(
 				</View>
 		</View>
 		</Modal>
-
-		{/* Modals */}
-
-		{/*Trash*/}
-		<ConfirmationModal visible={confirmationModal} title={confirmationTitle} message={confirmationMessage} settingState="trash" handleSettingState={handleSettingState} handleModal={handleTrashModal}  />
-		
-		{/*Delete*/}
-		<ConfirmationModal visible={confirmationModal} title={confirmationTitle} message={confirmationMessage} settingState="delete" handleSettingState={handleSettingState} handleModal={handleDeleteModal}  />
-		
-		{/*Archive*/}
-		<ConfirmationModal visible={confirmationModal} title={confirmationTitle} message={confirmationMessage} settingState="archive" handleSettingState={handleSettingState} handleModal={handleArchiveModal}  />
 	</>
 );
 }
@@ -242,6 +218,8 @@ const [settingState, setSettingState] = useState("");
 const [entriesId, setEntriesId] = useState([]);
 
 const [entryLoading, setEntryLoading] = useState(false);
+
+const changed = useRef(false);
 
 //for system buttons
 const appState = useRef(AppState.currentState);
@@ -302,10 +280,22 @@ const handleAlertModalVisible = (item) =>{
 	}
 }
 
+const [discardModal, setDiscardModal] = useState(false);
+const eventDiscard = useRef(null);
+
+const handleDiscardModal = (item) =>{
+	setDiscardModal(item)
+}
+
+const handleDiscard = (item) =>{
+	return item
+}
+
 // HANDLE FUNCTIONS
 const handleDateModal = () => {
 	setDateModalVisible(!dateModalVisible)
 }
+
 
 // when closed is pressed
 
@@ -325,6 +315,7 @@ const handleChangeDate = (item) =>{
 }
 
 const handleChangeText = (text, valueFor) =>{
+	changed.current = true;
 	switch(valueFor){
 		case 'title': setTitle(text) ;break;
 		case 'question': setQuestion(text) ;break;
@@ -412,6 +403,7 @@ const updateEntry = () => {
 				console.log('Data updated successfully');
 				fetchEntry(dataId);         
 				setDisableSave(false);
+				changed.current = false;
 			},
 			(_, error) => {
 					console.error('Error updating data:', error);
@@ -435,6 +427,7 @@ const saveEntry = () => {
 						fetchEntry(itemId);
 						setCurrentState("update");
 						setDisableSave(false);
+						changed.current = false;
 				},
 				(error) => {
 				// Handle error
@@ -453,6 +446,8 @@ const saveEntry = () => {
 					fetchEntry(dataId);
 					setCurrentState("update");
 					setDisableSave(false);
+					changed.current = false;
+
 
 				},
 				(error) => {
@@ -480,6 +475,7 @@ const fetchEntry = (id) =>{
                 }
                 setEntryLoading(true);
                 setItems(...dataArray);
+				changed.current = false;
             },
             (_, error) => {
                 console.log("fetch error: ", error)
@@ -516,6 +512,8 @@ const handleEntry = () => {
     handleAlertModalVisible(true);
     
 }
+
+
 
 useEffect(() => {
 	let date = new Date();
@@ -556,7 +554,6 @@ useEffect(() => {
 
 }, [alertModalVisible ]);
 
-
 //for drawer when pressed
 useEffect(() => {
     const subscription = AppState.addEventListener('change', nextAppState => {
@@ -584,10 +581,41 @@ useEffect(() => {
     };
 }, [isFocused, currentState, saveEntry, updateEntry]);
 
+useEffect( () =>
+	navigation.addListener('beforeRemove', (e) => {
+	if (changed.current == false) {
+		// If we don't have unsaved changes, then we don't need to do anything
+		return;
+	}
+
+	// Prevent default behavior of leaving the screen
+	e.preventDefault();
+	handleDiscardModal(true);
+
+	// Prompt the user before leaving the screen
+	Alert.alert(
+		'Discard Entry?',
+		'You have unsaved changes. Are you sure to discard them and leave the screen?',
+		[
+		{ text: "Don't leave", style: 'cancel', onPress: () => {} },
+		{
+			text: 'Discard',
+			style: 'destructive',
+			// If the user confirmed, then we dispatch the action we blocked earlier
+			// This will continue the action that had triggered the removal of the screen
+			onPress: () => navigation.dispatch(e.data.action),
+		},
+		]
+	);
+
+}),[navigation, changed, ]);
+
+
 //HEADER
 useEffect(() => {
     navigation.setOptions({
         headerStyle: {backgroundColor: theme.colors.primary},
+	
         headerTitle: () => (
             <Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, fontWeight: 'bold'}}>{entryType == "sermon" ? "Sermon Note" : entryType == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
         ),
@@ -610,6 +638,7 @@ useEffect(() => {
         
     });
 }, [navigation, entryType, handleEntry, currentState]);
+
 
 return (
 	<>
@@ -711,7 +740,7 @@ return (
 				visible={passageModalVisble} handleModal={handlePassageVisible} 
 				scripture={scripture} type={entryType} handlePassage={handlePassage} 
 			/>
-
+			
 		</View>
 
 		<MenuModal 

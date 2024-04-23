@@ -3,11 +3,16 @@ import { Text, View, TouchableOpacity,} from 'react-native';
 import Modal from "react-native-modal";
 import { useTheme } from 'react-native-paper';
 
-const ConfirmationModal = ({visible, title, message, settingState, handleSettingState, handleModal,}) => {
+const ConfirmationModal = ({visible, title, message, settingState, handleSettingState, handleModal, eventDiscard }) => {
     const theme = useTheme();
 
     const handleFunction = () =>{
-        handleSettingState(title);
+        if(title=="Discard"){
+            eventDiscard();
+        }else{
+            handleSettingState(title);
+        }
+  
         handleModal(false);
     }
     return (
