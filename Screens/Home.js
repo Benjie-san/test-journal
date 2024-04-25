@@ -19,7 +19,7 @@ import { Entypo } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
+//import { usePushNotifications } from '../components/usePushNotifications';
 
 const dbSettings = SQLite.openDatabase("settings4.db");
 const db = SQLite.openDatabase('_journal_database.db');
@@ -86,6 +86,12 @@ const AddModal = ({visible, type, handleModal}) => {
 }
 
 export default function Home({navigation, route, currentSort, currentDisplay, currentFilter, handleSort, handleDisplay, handleFilter }) {
+
+  //expo notif
+  //const { expoPushToken, notification } = usePushNotifications();
+
+  //const data = JSON.stringify(notification, undefined, 2);
+
   const theme = useTheme();
   // import for data
   const [notes, setNotes] = useState([]);// showing all the data
@@ -436,6 +442,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   <>
     {/*MAIN VIEW*/}
     <View style={[styles.homeContainer]}>
+    
       {/*Todays passage*/}
       <View style={[styles.passageToday, {backgroundColor: theme.colors.primary,  borderTopColor: theme.colors.borderColor, borderTopWidth: 1}]}>
 

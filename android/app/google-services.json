@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "516513823768",
+    "project_id": "expopushnotifications-12f04",
+    "storage_bucket": "expopushnotifications-12f04.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:516513823768:android:16f6ba7606958fee89176d",
+        "android_client_info": {
+          "package_name": "com.journal.journal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZjI0UVjx1PVe8idirZGXy7AfiAeFBeIA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

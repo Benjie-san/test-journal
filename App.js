@@ -19,6 +19,29 @@ import NavigationIndex from "./Screens/NavigationIndex";
 import LightScheme from "./styles/lightScheme";
 import DarkScheme from "./styles/darkScheme";
 
+import { registerRootComponent } from 'expo';
+import * as TaskManager from 'expo-task-manager';
+import schedulePushNotification from './components/NotificationTask';
+import * as Notifications from 'expo-notifications';
+
+TaskManager.defineTask('NOTIFICATION_TASK', schedulePushNotification);
+
+Notifications.requestPermissionsAsync()
+  .then((statusObj) => {
+    if (statusObj.status !== 'granted') {
+      return Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Permission Required',
+          body: 'Notification permissions are required to receive scheduled notifications.',
+        },
+        trigger: null,
+      });
+    }else{
+      console.log("use physical device")
+    }
+  })
+  .catch((err) => console.error(err));
+
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
@@ -240,6 +263,11 @@ export default function App() {
   useEffect(() => {
     setupSettingsDatabase();
   }, []);
+
+  //EXPO NOTIF
+
+  
+
 
   return (
     <>
