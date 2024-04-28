@@ -5,6 +5,7 @@ import { Provider as PaperProvider,  MD3LightTheme as DefaultTheme,  } from 'rea
 
 //RN Navigation Imports
 import { NavigationContainer } from "@react-navigation/native";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import * as SQLite from 'expo-sqlite';
 
@@ -19,28 +20,27 @@ import NavigationIndex from "./Screens/NavigationIndex";
 import LightScheme from "./styles/lightScheme";
 import DarkScheme from "./styles/darkScheme";
 
-import { registerRootComponent } from 'expo';
 import * as TaskManager from 'expo-task-manager';
 import schedulePushNotification from './components/NotificationTask';
 import * as Notifications from 'expo-notifications';
 
 TaskManager.defineTask('NOTIFICATION_TASK', schedulePushNotification);
 
-Notifications.requestPermissionsAsync()
-  .then((statusObj) => {
-    if (statusObj.status !== 'granted') {
-      return Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Permission Required',
-          body: 'Notification permissions are required to receive scheduled notifications.',
-        },
-        trigger: null,
-      });
-    }else{
-      console.log("use physical device")
-    }
-  })
-  .catch((err) => console.error(err));
+// Notifications.requestPermissionsAsync()
+//   .then((statusObj) => {
+//     if (statusObj.status !== 'granted') {
+//       return Notifications.scheduleNotificationAsync({
+//         content: {
+//           title: 'Permission Required',
+//           body: 'Notification permissions are required to receive scheduled notifications.',
+//         },
+//         trigger: null,
+//       });
+//     }else{
+//       console.log("use physical device")
+//     }
+//   })
+//   .catch((err) => console.error(err));
 
 SplashScreen.preventAutoHideAsync();
 
@@ -53,6 +53,7 @@ export default function App() {
   const sort = useRef("By Modified Time");
   const display = useRef("List");
   const filter = useRef("All");
+
 
   const customTheme = theme == "Light" 
     ? {
@@ -165,7 +166,6 @@ export default function App() {
           sort.current = dataArray[0].defaultSort;
           display.current = dataArray[0].defaultDisplay;
           filter.current = dataArray[0].defaultFilter;
-     
           setAppIsReady(true);
           console.log("Settings are fetched")
         
@@ -274,20 +274,22 @@ export default function App() {
 
       <PaperProvider theme={customTheme}>
       <StatusBar/>
-        <NavigationContainer>
-          <NavigationIndex 
-            currentTheme={theme} 
-            currentFontSize={fontSize}
-            currentSort={sort}
-            currentDisplay={display}
-            currentFilter={filter}
-            handleTheme={handleTheme} 
-            handleFontSize={handleFontSize} 
-            handleSort={handleSort} 
-            handleDisplay={handleDisplay} 
-            handleFilter={handleFilter} 
-          />
-        </NavigationContainer>
+        <SafeAreaProvider>
+          <NavigationContainer>
+            <NavigationIndex 
+              currentTheme={theme} 
+              currentFontSize={fontSize}
+              currentSort={sort}
+              currentDisplay={display}
+              currentFilter={filter}
+              handleTheme={handleTheme} 
+              handleFontSize={handleFontSize} 
+              handleSort={handleSort} 
+              handleDisplay={handleDisplay} 
+              handleFilter={handleFilter} 
+            />
+          </NavigationContainer>
+        </SafeAreaProvider>
       </PaperProvider>
     </>
   );

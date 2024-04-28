@@ -38,11 +38,9 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
 	const RenderSort = () =>{
 
 		const handleSortItem = (name) =>{
-
 			setCurrentSort(name);
 			sortStatus.current = name;
 			handleSort(name);
-
 			if( name == "By Modified Time"){
 				fetchAllData("By Modified Time", currentFilter);
 				fetchData("journal", "By Modified Time", currentFilter);
@@ -166,7 +164,7 @@ export default function SortModal({visible, handleModal, fetchData, fetchAllData
             hideModalContentWhileAnimating
 			style={[styles.modal,]}
 		>
-			<View style={[styles.modalContent, {backgroundColor: theme.colors.primary, height: 400}]}>
+			<View style={[styles.modalContent, {backgroundColor: theme.colors.primary, height: 400, padding: 10}]}>
 				<View style={{backgroundColor: theme.colors.borderColor, width: 60, height: 5, borderRadius: 3, alignSelf: 'center'}} ></View>
 				<View style={{padding: 10}}>
 					<Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize + 2, fontWeight: 'bold'}} >Sort</Text>

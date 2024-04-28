@@ -54,10 +54,10 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
             </TouchableOpacity>
             
           </View>
-
+{/* 
         <View style={[styles.hr]}></View>
-        
-          <View style={[styles.itemSettings]} >
+         */}
+          {/* <View style={[styles.itemSettings]} >
             <Text style={{color: theme.colors.altColor, fontSize:  theme.fonts.fontSize+4}} >Sort</Text>
 
             <TouchableOpacity>
@@ -75,7 +75,7 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
               <Text  style={{fontSize:  theme.fonts.fontSize+2, color: theme.colors.textColor}} >Default Notification Time</Text>
               <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, opacity: 0.8}} >6 AM</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
 
       </View>
 

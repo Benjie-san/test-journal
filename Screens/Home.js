@@ -21,6 +21,10 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 //import { usePushNotifications } from '../components/usePushNotifications';
 
+import {
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+
 const dbSettings = SQLite.openDatabase("settings4.db");
 const db = SQLite.openDatabase('_journal_database.db');
 
@@ -50,7 +54,7 @@ const AddModal = ({visible, type, handleModal}) => {
         <View style={{
             backgroundColor: theme.colors.primary,
             borderWidth: 1,
-            borderColor: theme.colors.borderColor,
+            borderColor: theme.colors.textColor,
             padding: 20,
             borderRadius: 10,
             alignItems:'left',
@@ -93,12 +97,15 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   //const data = JSON.stringify(notification, undefined, 2);
 
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   // import for data
   const [notes, setNotes] = useState([]);// showing all the data
   const [notesJournal, setNotesJournal] = useState([]);// showing all the data
   const [notesOPM, setNotesOPM] = useState([]);// showing all the data
 
   const [notesId, setNotesId] = useState([]);
+  const [entriesId, setEntriesId] = useState([]);
+
 
   const isFocused = useIsFocused();
 
@@ -273,7 +280,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
         if(sort == "By Modified Time"){
           dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY modifiedDate DESC;", ["normal", "journal"], type);
         }else{
-          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY createdDate DESC;", ["normal", "journal"], type);
+          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY createdDate ASC;", ["normal", "journal"], type);
 
         }
       
@@ -284,7 +291,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
           dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY modifiedDate DESC;", ["normal", "journal", filter], type);
         }
         else{
-          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY createdDate DESC;", ["normal", "journal", filter], type);
+          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY createdDate ASC;", ["normal", "journal", filter], type);
         }
 
       }
@@ -294,7 +301,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
         if(sort == "By Modified Time"){
           dataFetcher( 'SELECT * FROM entries WHERE settingState="normal" AND type = ? ORDER BY modifiedDate DESC;', ["opm"], type);
         }else{
-          dataFetcher( 'SELECT * FROM entries WHERE settingState="normal" AND type = ? ORDER BY createdDate DESC;', ["opm"], type);
+          dataFetcher( 'SELECT * FROM entries WHERE settingState="normal" AND type = ? ORDER BY createdDate ASC;', ["opm"], type);
 
         }
       }
@@ -303,7 +310,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
           dataFetcher( 'SELECT * FROM entries WHERE settingState="normal" AND type = ? AND month = ? ORDER BY modifiedDate DESC;',  ["opm", filter], type);
         }
         else{
-          dataFetcher( 'SELECT * FROM entries WHERE settingState="normal" AND type = ? AND month = ? ORDER BY createdDate DESC;',  ["opm", filter], type);
+          dataFetcher( 'SELECT * FROM entries WHERE settingState="normal" AND type = ? AND month = ? ORDER BY createdDate ASC;',  ["opm", filter], type);
 
         }
       }
@@ -340,14 +347,37 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     });
   }
 
+  const allEntriesFetcher = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM entries", [],
+        (txObj, result) => {
+          const rows = result.rows;
+          const dataArray = [];
+          setAllCount(rows.length);
+          for (let i = 0; i < rows.length; i++) {
+            const item = rows.item(i);
+            dataArray.push(parseInt(item.dataId));
+          }
+          setEntriesId(dataArray);
+          console.log("Fetched All Entires")
+        },
+        (_, error) => {
+          console.error('FETCH ALL1: Error querying data:', error);
+        }
+      );
+    });
+  }
+
   const fetchAllData = (sort, filter) => {
-   
+    allEntriesFetcher();
     if(filter == "All"){
       if(sort == "By Modified Time"){
         allDataFetcher( 'SELECT * FROM entries WHERE settingState="normal" ORDER BY modifiedDate DESC;', [] );
       }
       else{
-        allDataFetcher( 'SELECT * FROM entries WHERE settingState="normal" ORDER BY createdDate DESC;', [] );
+
+        allDataFetcher( 'SELECT * FROM entries WHERE settingState="normal" ORDER BY createdDate ASC;', [] );
       }
   
     }else{
@@ -356,7 +386,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
           allDataFetcher(  'SELECT * FROM entries WHERE settingState="normal" AND month = ? ORDER BY modifiedDate DESC;', [filter] );
       }
       else{
-          allDataFetcher(  'SELECT * FROM entries WHERE settingState="normal" AND month = ? ORDER BY createdDate DESC;', [filter] );
+          allDataFetcher(  'SELECT * FROM entries WHERE settingState="normal" AND month = ? ORDER BY createdDate ASC;', [filter] );
       }
 
     }
@@ -420,12 +450,10 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     });
   };
 
-
   // USE EFFECTS
 
   useEffect(() => {
     setupEntriesDatabase();
-
   }, []);
 
 
@@ -441,10 +469,16 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   return (
   <>
     {/*MAIN VIEW*/}
-    <View style={[styles.homeContainer]}>
+    <View style={[styles.homeContainer, { 
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
+        }]}
+    >
     
       {/*Todays passage*/}
-      <View style={[styles.passageToday, {backgroundColor: theme.colors.primary,  borderTopColor: theme.colors.borderColor, borderTopWidth: 1}]}>
+      <View style={[styles.passageToday, {backgroundColor: theme.colors.primary, }]}>
 
         { verseLoading ? <ActivityIndicator style={{width: '40%'}} /> : (
           <View style={[{flexDirection: 'column'}]}>
@@ -455,7 +489,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
         ) }
 
-        { notesId.includes(todayVerse?.id) ?
+        { entriesId.includes(todayVerse?.id) ?
           (<Pressable disabled style={[styles.addEntryShortcut,]}>
               <AntDesign name="check" size={20} color="white" />
               <Text style={{fontSize: theme.fonts.fontSize+2, color: "#ffffff",  paddingRight: 5}}>Entry Added</Text>

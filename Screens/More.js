@@ -40,7 +40,7 @@ export default function More({navigation}) {
           
         </View>
 
-        <View style={styles.moreViewRow}>
+        {/* <View style={styles.moreViewRow}>
           <TouchableOpacity style={styles.moreBtn}>
               <MaterialIcons name="menu-book" size={28}  color={theme.colors.textColor} />
               <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Tutorial</Text>
@@ -57,7 +57,7 @@ export default function More({navigation}) {
           </TouchableOpacity>
           
 
-        </View>
+        </View> */}
 
 
 

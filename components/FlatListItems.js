@@ -5,6 +5,8 @@ import { useTheme } from 'react-native-paper';
 
 const FlatListItems = ({item, handleDisplayEntryFetch, display}) => {
     const theme = useTheme();
+    const themeFontSize = theme.fonts.fontSize;
+    const themeTextColor =  theme.colors.textColor;
     const renderLayout = {
         list:{
             width:'99%',
@@ -13,25 +15,29 @@ const FlatListItems = ({item, handleDisplayEntryFetch, display}) => {
             alignItems: 'center',
         },
         details:{
-            height: 80,
             width:'99%',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            flexDirection: 'column',
+            justifyContent: 'flex-start',
+            flexGrow: 0,
+            flexWrap: 'wrap',
+            alignItems: 'flex-start',
+            textAlign: 'left',
         },
         grid:{
             width: '32%',
             flexGrow: 0,
             flexWrap: 'wrap',
             flexDirection: 'column',
-            alignItems: 'center',
+            alignItems: 'flex-start',
+
         },
         largeGrid:{
             width: '49%',
             flexGrow: 0,
             flexWrap: 'wrap',
             flexDirection: 'column',
-
+            alignItems: 'flex-start',        
+            padding: 2,
         },
 	};
 
@@ -85,28 +91,28 @@ const FlatListItems = ({item, handleDisplayEntryFetch, display}) => {
             { 
             display == "List" ? 
                 (<>
-                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden', flex: 1}}>{item.title}</Text>
-                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                    <Text style={{color: themeTextColor, fontSize: themeFontSize, overflow:'hidden', flex: 1}}>{item.title}</Text>
+                    <Text style={{color: themeTextColor, fontSize: themeFontSize-1, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
                 </>) 
             :
             display == "Grid" ? 
                 (<>
-                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden', flex: 1}}>{item.title}</Text>
-                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                    <Text style={{color: themeTextColor, fontSize: themeFontSize, overflow:'hidden', flex: 1}}>{item.title}</Text>
+                    <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
                 </>) 
             :
             display == "Details" ? 
                 (<>
-                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden', flex: 1}}>{item.scripture}</Text>
-                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden', flex: 1}}>{item.title}</Text>
-                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                    <Text style={{color: themeTextColor, fontSize: themeFontSize+2, overflow:'hidden', flex: 1, fontWeight: 'bold'}}>{item.scripture}</Text>
+                    <Text style={{color: themeTextColor, fontSize: themeFontSize, overflow:'hidden', flex: 1, }}>{item.title}</Text>
+                    <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
                 </>) 
             :
             display == "Large Grid" ? 
                 (<>
-                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden', flex: 1}}>{item.scripture}</Text>
-                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden', flex: 1}}>{item.title}</Text>
-                    <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                    <Text style={{color: themeTextColor, fontSize: themeFontSize+1, overflow:'hidden', flex: 1, fontWeight: 'bold'}}>{item.scripture}</Text>
+                    <Text style={{color: themeTextColor, fontSize: themeFontSize, overflow:'hidden', flex: 1}}>{item.title}</Text>
+                    <Text style={{color: themeTextColor, fontSize: themeFontSize-1, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
                 </>) 
             : null
             }

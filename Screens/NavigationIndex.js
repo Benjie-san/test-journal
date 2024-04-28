@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, Platform } from "react-native";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
+//import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Home, Brp, Search, More} from "./index";
@@ -17,15 +18,15 @@ import Entry from '../components/Entry';
 
 import { useTheme } from 'react-native-paper';
 
+//const Tab = createBottomTabNavigator();
 const Tab = createMaterialBottomTabNavigator();
+
 const HomeStack = createNativeStackNavigator();
 const SearchStack = createNativeStackNavigator();
 const MoreStack = createNativeStackNavigator();
 
-export default function NavigationIndex ({currentTheme, currentFontSize, currentSort, currentDisplay, currentFilter, handleTheme, handleFontSize, handleSort, handleDisplay, handleFilter}) {
-
+export default function NavigationIndex ({ currentTheme, currentFontSize, currentSort, currentDisplay, currentFilter, handleTheme, handleFontSize, handleSort, handleDisplay, handleFilter}) {
     const theme = useTheme();
-    
     const RenderHome = (props) => ( 
         <Home {...props} 
             currentSort={currentSort} currentDisplay={currentDisplay} currentFilter={currentFilter}
@@ -56,7 +57,7 @@ export default function NavigationIndex ({currentTheme, currentFontSize, current
             <HomeStack.Screen   
                 name="HomeStack"
                 component={RenderHome}
-                options={{ headerTitle: "Journal 2024", headerTitleAlign: "center",
+                options={{ headerShown: false, headerTitleAlign: "center",
                 }}
             />  
 
@@ -145,7 +146,6 @@ export default function NavigationIndex ({currentTheme, currentFontSize, current
                     component={StackHome}
                     name="Home"
                     options={{
-                        tabBarLabel: "Home",
                         tabBarIcon: ({ focused }) => {
                             return (
                                 <View style={{ alignItems: "center", justifyContent: "center" }}>
