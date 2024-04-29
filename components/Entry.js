@@ -1,8 +1,9 @@
-import { Text, View, TextInput, Pressable, TouchableOpacity, ScrollView, KeyboardAvoidingView, Share, AppState, ActivityIndicator, Alert} from 'react-native';
+import { Text, View, TextInput, Pressable, TouchableOpacity, ScrollView, KeyboardAvoidingView, Share, AppState, ActivityIndicator, Alert, useWindowDimensions} from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
 import * as SQLite from 'expo-sqlite';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 import { useTheme } from 'react-native-paper';
 
@@ -187,8 +188,10 @@ return(
 export default function Entry({navigation, route }){
 const theme = useTheme(); //for theme
 const isFocused = useIsFocused();
-
+const [inputFocused, setInputFocused] = useState(false);
 const {entryId, verse, entryType, index, itemId, state} = route.params;
+const { width, height} = useWindowDimensions();
+
 //for showing modals
 const [dateModalVisible, setDateModalVisible] = useState(false);
 const [menuVisible, setMenuVisible] = useState(false);
@@ -642,15 +645,23 @@ useEffect(() => {
 
 return (
 	<>
-		<View style={{flex:1, margin: 0, backgroundColor: theme.colors.secondary}} >
+		<View style={{ 
+				flex: 1,
+				margin: 0, 
+				backgroundColor: theme.colors.secondary, 
+			}} 
+		>
 		
 			{/*FORMS*/}
 			{ entryLoading ? (
 				<View style={[styles.modal, {backgroundColor: theme.colors.secondary,}]}>
-
-					<ScrollView style={{flex: 1}} >
-						<View style={[styles.flex]}> 
-			
+					
+						<KeyboardAwareScrollView
+							style={{ backgroundColor: theme.colors.secondary }}
+							resetScrollToCoords={{ x: 0, y: 0 }}
+							scrollEnabled={true}
+						> 
+							
 							<View style={styles.touchableContainer}>
 					
 									{/*DATE*/}
@@ -698,7 +709,14 @@ return (
 							{/*OBSERVATION*/}
 							<View style={styles.inputContainer}>
 								<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
-								<TextInput style={[styles.input, { fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "observation") } value={observation}  multiline={true} />
+								<TextInput 
+									style={[styles.input, { fontSize: theme.fonts.fontSize,}]} 
+									editable 
+									onChangeText={ text => handleChangeText(text, "observation") } 
+									value={observation}  
+									multiline={true} 	
+									
+								/>
 							</View>
 
 							{/*APPLICATION*/}
@@ -708,7 +726,7 @@ return (
 							</View>
 
 							{/*PRAYER*/}
-							<KeyboardAvoidingView behavior='padding' style={styles.inputContainer} >
+							<View style={styles.inputContainer} >
 								<Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize}}>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
 								<TextInput style={[styles.input, { fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
 
@@ -723,12 +741,12 @@ return (
 									</TouchableOpacity>
 								</View>
 
-							</KeyboardAvoidingView>
+							</View>
 
 						
-						</View>
-					</ScrollView>
-
+						
+						</KeyboardAwareScrollView>
+						
 				</View>
 
 				) : (<ActivityIndicator style={[styles.flex]} size={'large'}/>) 

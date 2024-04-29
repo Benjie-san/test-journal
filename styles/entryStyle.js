@@ -39,6 +39,7 @@ const styles = StyleSheet.create({
       width: "48%",
    },
    input:{    
+      flex:1,
       borderRadius: 5,
       backgroundColor: '#bfbfbf',
       width: "100%",
