@@ -450,6 +450,20 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     });
   };
 
+  const filterSetter = (filter) =>{
+    if(filter !== "All" && filter !== "December"){
+      if(filter !== today.month && today.day == 1 ){
+        return today.month;
+      } 
+      else{
+        return filter;
+      }
+    }
+    else{
+      return filter;
+    }
+  }
+
   // USE EFFECTS
 
   useEffect(() => {
@@ -459,9 +473,11 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
   useEffect(() => {
     if(isFocused){
-      fetchAllData(currentSort.current, currentFilter.current);
-      fetchData("journal", currentSort.current,  currentFilter.current);
-      fetchData("opm", currentSort.current, currentFilter.current );
+
+      fetchAllData(currentSort.current, filterSetter(currentFilter.current));
+      fetchData("journal", currentSort.current,  filterSetter(currentFilter.current));
+      fetchData("opm", currentSort.current, filterSetter(currentFilter.current) );
+ 
     }
   }, [isFocused]);
 
@@ -474,7 +490,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
         paddingBottom: insets.bottom,
         paddingLeft: insets.left,
         paddingRight: insets.right,
-        }]}
+      }]}
     >
     
       {/*Todays passage*/}

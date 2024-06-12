@@ -5,11 +5,12 @@ import { createMaterialBottomTabNavigator } from "@react-navigation/material-bot
 //import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Home, Brp, Search, More} from "./index";
+import { Home, Brp, Search, More, Bible} from "./index";
 
 //icon imports
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { FontAwesome5 } from '@expo/vector-icons';
 
 import Settings from "../components/Settings";
 import Archive from "../components/Archive";
@@ -20,13 +21,16 @@ import { useTheme } from 'react-native-paper';
 
 //const Tab = createBottomTabNavigator();
 const Tab = createMaterialBottomTabNavigator();
-
 const HomeStack = createNativeStackNavigator();
+const BibleStack = createNativeStackNavigator();
+
 const SearchStack = createNativeStackNavigator();
 const MoreStack = createNativeStackNavigator();
 
 export default function NavigationIndex ({ currentTheme, currentFontSize, currentSort, currentDisplay, currentFilter, handleTheme, handleFontSize, handleSort, handleDisplay, handleFilter}) {
     const theme = useTheme();
+
+    // RENDER OF COMPONENTS AND PASSING SOME PROPS
     const RenderHome = (props) => ( 
         <Home {...props} 
             currentSort={currentSort} currentDisplay={currentDisplay} currentFilter={currentFilter}
@@ -35,12 +39,14 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
     );
     const RenderEntry = (props) => ( <Entry {...props} /> );
     const RenderBrp = (props) => <Brp {...props}/>;
+    const RenderBible = (props) => <Bible {...props}/>;
     const RenderSearch = (props) => ( <Search {...props} />);
     const RenderMore = (props) => ( <More {...props} /> );
     const RenderSettings = (props) => (<Settings {...props} currentTheme={currentTheme} currentFontSize={currentFontSize} handleTheme={handleTheme} handleFontSize={handleFontSize}  />);
     const RenderArchive = (props) => ( <Archive {...props}   /> );
     const RenderTrash = (props) => ( <Trash {...props}   /> );
 
+    //STACKS OF COMPONENTS
     const StackHome = () => (
         <HomeStack.Navigator
             screenOptions={{ 
@@ -69,6 +75,31 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
 
             <HomeStack.Screen name="Entry" component={RenderEntry} />
         </HomeStack.Navigator>
+    );
+
+    const StackBible = () => (
+        <BibleStack.Navigator
+            screenOptions={{ 
+                headerStyle: {
+                    backgroundColor: theme.colors.primary,
+                },
+                headerTitleStyle:{
+                    color: theme.colors.textColor,
+                },
+                animation:'slide_from_right',
+                headerTintColor: theme.colors.textColor,
+               
+            }}
+        >
+
+            <BibleStack.Screen name="BibleStack" component={RenderBible} options={{ 
+                tabBarStyle: {
+                    display: "none",
+                },
+                tabBarButton: () => null,
+            }} />
+        
+        </BibleStack.Navigator>
     );
 
     const StackSearch = () => (
@@ -137,40 +168,20 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
     );
 
     return(
-            <Tab.Navigator
-                initialRouteName="Home"
-                activeColor="#1d9bf0"
-                barStyle={{ backgroundColor: theme.colors.primary}}
-            >
-                <Tab.Screen
-                    component={StackHome}
-                    name="Home"
-                    options={{
-                        tabBarIcon: ({ focused }) => {
-                            return (
-                                <View style={{ alignItems: "center", justifyContent: "center" }}>
-                                    <Ionicons
-                                        name={focused ? "md-home" : "md-home-outline"}
-                                        size={24}
-                                        color="#1d9bf0"
-                                    />
-                                </View>
-                            );
-                        },
-                        tabBarHideOnKeyboard: true,
-                    }}
-                />
-                
-                <Tab.Screen
-                component={StackSearch}
-                name="Search"
+        <Tab.Navigator
+            initialRouteName="Home"
+            activeColor="#1d9bf0"
+            barStyle={{ backgroundColor: theme.colors.primary}}
+        >
+            <Tab.Screen
+                component={StackHome}
+                name="Home"
                 options={{
-                    title: "Search",
                     tabBarIcon: ({ focused }) => {
                         return (
                             <View style={{ alignItems: "center", justifyContent: "center" }}>
                                 <Ionicons
-                                    name={focused ? "md-search" : "md-search-outline"}
+                                    name={focused ? "md-home" : "md-home-outline"}
                                     size={24}
                                     color="#1d9bf0"
                                 />
@@ -179,28 +190,64 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
                     },
                     tabBarHideOnKeyboard: true,
                 }}
-                />
+            />
+            
+            {/* <Tab.Screen
+            component={StackBible}
+            name="Bible"
+            options={{
+                title: "Bible",
+                tabBarIcon: ({ }) => {
+                    return (
+                        <View style={{ alignItems: "center", justifyContent: "center" }}>
+                            <FontAwesome5 name="bible" size={24} color="#1d9bf0" />
+                        </View>
+                    );
+                },
+                tabBarHideOnKeyboard: true,
+            }}
+            /> */}
 
-                <Tab.Screen
-                    component={StackMore}
-                    name="More"
-                    options={{
-                        title: "More",
-                        tabBarIcon: ({ focused }) => {
-                            return (
-                                <View style={{ alignItems: "center", justifyContent: "center" }}>
-                                    <MaterialIcons
-                                        name={focused ? "more" : "more-horiz"}
-                                        size={24}
-                                        color="#1d9bf0"
-                                    />
-                                </View>
-                            );
-                        },
-                        tabBarHideOnKeyboard: true,
-                }}
-                />
-            </Tab.Navigator>
+            <Tab.Screen
+            component={StackSearch}
+            name="Search"
+            options={{
+                title: "Search",
+                tabBarIcon: ({ focused }) => {
+                    return (
+                        <View style={{ alignItems: "center", justifyContent: "center" }}>
+                            <Ionicons
+                                name={focused ? "md-search" : "md-search-outline"}
+                                size={24}
+                                color="#1d9bf0"
+                            />
+                        </View>
+                    );
+                },
+                tabBarHideOnKeyboard: true,
+            }}
+            />
+
+            <Tab.Screen
+                component={StackMore}
+                name="More"
+                options={{
+                    title: "More",
+                    tabBarIcon: ({ focused }) => {
+                        return (
+                            <View style={{ alignItems: "center", justifyContent: "center" }}>
+                                <MaterialIcons
+                                    name={focused ? "more" : "more-horiz"}
+                                    size={24}
+                                    color="#1d9bf0"
+                                />
+                            </View>
+                        );
+                    },
+                    tabBarHideOnKeyboard: true,
+            }}
+            />
+        </Tab.Navigator>
     );
 
 }

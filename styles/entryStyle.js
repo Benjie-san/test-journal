@@ -25,6 +25,18 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'left',
       padding: 10,
+      marginBottom: 10,
+
+   },
+   input:{    
+      flex:1,
+      minHeight: 100,
+      maxHeight: 800,
+      borderRadius: 5,
+      backgroundColor: '#bfbfbf',
+      width: "100%",
+      padding: 10,
+   
    },
    touchableContainer:{
       width: "100%",
@@ -32,22 +44,12 @@ const styles = StyleSheet.create({
       textAlign: 'left',
       justifyContent: 'space-between',
       alignItems: 'left',
-      margin: 5,
       padding: 10,
    },
    inputSubContainer:{
       width: "48%",
    },
-   input:{    
-      flex:1,
-      borderRadius: 5,
-      backgroundColor: '#bfbfbf',
-      width: "100%",
-      minHeight: 100,
-      maxHeight: 900,
-      padding: 10,
-      marginBottom: 10,
-   },
+
    border:{
       borderRadius: 10,
       borderWidth: 1,

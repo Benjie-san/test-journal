@@ -190,7 +190,7 @@ const theme = useTheme(); //for theme
 const isFocused = useIsFocused();
 const [inputFocused, setInputFocused] = useState(false);
 const {entryId, verse, entryType, index, itemId, state} = route.params;
-const { width, height} = useWindowDimensions();
+
 
 //for showing modals
 const [dateModalVisible, setDateModalVisible] = useState(false);
@@ -707,10 +707,13 @@ return (
 							}
 
 							{/*OBSERVATION*/}
-							<View style={styles.inputContainer}>
+							<View style={[styles.inputContainer, {}]}>
 								<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
 								<TextInput 
-									style={[styles.input, { fontSize: theme.fonts.fontSize,}]} 
+									style={[styles.input, 
+										{ fontSize: theme.fonts.fontSize,
+}]
+									} 
 									editable 
 									onChangeText={ text => handleChangeText(text, "observation") } 
 									value={observation}  
