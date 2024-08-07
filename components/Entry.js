@@ -4,7 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
 import * as SQLite from 'expo-sqlite';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-
+import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { useTheme } from 'react-native-paper';
 
 // Icons
@@ -20,7 +20,6 @@ import { useIsFocused } from '@react-navigation/native';
 //Component Imports
 import PassageBottomSheet from './PassageBottomSheet';
 import AlertModal from './AlertModal';
-import ConfirmationModal from './ConfirmationModal';
 import styles from '../styles/entryStyle';
 
 const db = SQLite.openDatabase('_journal_database.db');
@@ -188,7 +187,6 @@ return(
 export default function Entry({navigation, route }){
 const theme = useTheme(); //for theme
 const isFocused = useIsFocused();
-const [inputFocused, setInputFocused] = useState(false);
 const {entryId, verse, entryType, index, itemId, state} = route.params;
 
 
@@ -224,6 +222,10 @@ const [entryLoading, setEntryLoading] = useState(false);
 
 const changed = useRef(false);
 
+//for animatiuion of expandable
+const [height, setHeight] = useState(0);
+const [show, setShow] = useState(false);
+
 //for system buttons
 const appState = useRef(AppState.currentState);
 const [appCurrentState, setAppCurrentState] = useState(appState.current);
@@ -242,18 +244,7 @@ const entryToBeShared = {
     passage: passage,
 }
 
-const [backConfirmVisible, setBackConfirmVisible] = useState(false);
-
 const [disableSave, setDisableSave] = useState(false);
-
-
-const handleBackConfirmModal = (item) =>{
-
-	if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){   
-			setBackConfirmVisible(item);
-	}
-
-}
 
 const handlePassage = (item) => {
 	setPassage(item);
@@ -517,6 +508,23 @@ const handleEntry = () => {
 }
 
 
+const onLayout = (event) => {
+	const layoutHeight = event.nativeEvent.layout.height;
+	//const layoutHeight = 500;
+
+		if(layoutHeight > 0 && layoutHeight !== height){
+			setHeight(layoutHeight);
+		}
+}
+
+const animatedStyle = useAnimatedStyle( ()=>{
+	const animatedHeight = show ? withTiming(height) : withTiming(0);
+		return{
+			height: animatedHeight,
+			overflow: 'hidden'
+		}
+});
+
 
 useEffect(() => {
 	let date = new Date();
@@ -542,7 +550,6 @@ useEffect(() => {
     }
 
 }, [currentState, entryLoading, fetchEntry]);
-
 
 useEffect(() => {
     if(alertModalVisible == true){
@@ -661,27 +668,27 @@ return (
 							scrollEnabled={true}
 						> 
 							
-							<View style={styles.touchableContainer}>
-					
-									<View style={styles.inputSubContainer}>
-											<Text style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>Date:</Text>
-											<Pressable style={styles.touchable} onPress={handleDateModal}>
-											<TextInput
-													style={{color: "black", fontSize: theme.fonts.fontSize}}
-													value={date}
-													onChangeText={handleChangeDate}
-													editable={false}
-											/>
-											</Pressable>
+							<View style={styles.inputContainer}>
+								<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>
+									{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }
+								</Text>
+
+								<TouchableOpacity style={{padding: 10, backgroundColor:'#bfbfbf', borderRadius: 5}} onPress={ () => setShow(!show) }>
+
+									<Text>{scripture}</Text>
+
+								</TouchableOpacity>
+
+								
+								<Animated.View style={animatedStyle}>
+    
+									<View onLayout={onLayout} style={{width: '100%', padding: 10, borderRadius: 5,backgroundColor:'#bfbfbf',}}>
+										<Text>{passage}</Text>
 									</View>
 
-									{ dateModalVisible ? (<DateTimePicker mode="date" display="spinner" value={entryDate} onChange={onChangeDate}/>) : null }
-									<View style={styles.inputSubContainer}>
-											<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }</Text>
+								</Animated.View>
 
-											<TextInput style={[styles.touchable, { fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
-
-									</View>
+							
 
 							</View>
 

@@ -37,7 +37,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   const [notesJournal, setNotesJournal] = useState([]);// showing all the data
   const [notesOPM, setNotesOPM] = useState([]);// showing all the data
 
-  const [notesId, setNotesId] = useState([]);
+  //const [notesId, setNotesId] = useState([]);
   const [entriesId, setEntriesId] = useState([]);
 
   const isFocused = useIsFocused();
@@ -174,26 +174,25 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     });
   };
 
-
-  //for fetching entries
-  const dataFetcher = (query, dependencies, type) => {
+  //for fetching entries of Journal & OPM
+  const dataFetcher = (query, dependencies) => {
     db.transaction((tx) => {
       tx.executeSql(
         query, dependencies,
         (_, result) => {
           const rows = result.rows;
-
-          if(type == "journal"){
+      
+          if(dependencies[0] == "journal"){
             setJournalCount(rows.length);
           }else{ setOpmCount(rows.length) }
 
           const dataArray = [];
           for (let i = 0; i < rows.length; i++) {
-            const item = rows.item(i);
+            const item = rows.item(i); //for loop for iterating the objects to an array
             dataArray.push(item);
           }
 
-          if(type == "journal"){
+          if(dependencies[0] == "journal"){
             setNotesJournal(dataArray);
           }else{
             setNotesOPM(dataArray);
@@ -201,53 +200,50 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
         },
         (_, error) => {
-          console.error('FETCH JOURNAL: Error querying data:', error);
+          console.error('DATA FETCHER: Error querying data:', error);
         }
       );
     });
   }
 
   const fetchData = (type, sort, filter) => {
-    if(type == "journal"){
-      if(filter == "All"){
-        if(sort == "By Modified Time"){
-          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY modifiedDate DESC;", ["normal", "journal"], type);
-        }else{
-          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? ORDER BY createdDate ASC;", ["normal", "journal"], type);
-
-        }
-      
+    let query = 'SELECT * FROM entries WHERE settingState="normal" AND type = ? '
+    if(filter == "All"){
+      if(sort == "By Modified Time"){
+        dataFetcher( query + "ORDER BY modifiedDate DESC;", [type]);
       }
       else{
-
-        if(sort == "By Modified Time"){
-          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY modifiedDate DESC;", ["normal", "journal", filter], type);
-        }
-        else{
-          dataFetcher( "SELECT * FROM entries WHERE settingState = ? AND type = ? AND month = ? ORDER BY createdDate ASC;", ["normal", "journal", filter], type);
-        }
-
+        dataFetcher( query + "ORDER BY createdDate ASC;", [type]);
       }
-    } 
+    }
     else{
-      if(filter == "All"){
-        if(sort == "By Modified Time"){
-          dataFetcher( 'SELECT * FROM entries WHERE settingState="normal" AND type = ? ORDER BY modifiedDate DESC;', ["opm"], type);
-        }else{
-          dataFetcher( 'SELECT * FROM entries WHERE settingState="normal" AND type = ? ORDER BY createdDate ASC;', ["opm"], type);
-
-        }
+      if(sort == "By Modified Time"){
+        dataFetcher( query + "AND month = ? ORDER BY modifiedDate DESC;", [type, filter]);
       }
       else{
-        if(sort == "By Modified Time"){
-          dataFetcher( 'SELECT * FROM entries WHERE settingState="normal" AND type = ? AND month = ? ORDER BY modifiedDate DESC;',  ["opm", filter], type);
-        }
-        else{
-          dataFetcher( 'SELECT * FROM entries WHERE settingState="normal" AND type = ? AND month = ? ORDER BY createdDate ASC;',  ["opm", filter], type);
-
-        }
+        dataFetcher( query + "AND month = ? ORDER BY createdDate ASC;", [type, filter]);
       }
-    
+    }
+  };
+
+  const fetchAllData = (sort, filter) => {
+    allEntriesFetcher(); //for checking in today passage
+    let query = 'SELECT * FROM entries WHERE settingState="normal" ';
+    if(filter == "All"){
+      if(sort == "By Modified Time"){
+        allDataFetcher( query + "ORDER BY modifiedDate DESC;", [] );
+      }
+      else{
+        allDataFetcher(  query + 'ORDER BY createdDate ASC;', [] );
+      }
+    }
+    else{
+      if(sort == "By Modified Time"){
+          allDataFetcher(  query + 'AND month = ? ORDER BY modifiedDate DESC', [filter] );
+      }
+      else{
+          allDataFetcher(  query + 'AND month = ? ORDER BY createdDate ASC;', [filter] );
+      }
     }
   };
 
@@ -259,22 +255,22 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
         (txObj, result) => {
           const rows = result.rows;
           const dataArray = [];
-          const dataArray2 = [];
+          //const dataArray2 = [];
 
           setAllCount(rows.length);
           for (let i = 0; i < rows.length; i++) {
             const item = rows.item(i);
             dataArray.push(item);
-            dataArray2.push(parseInt(item.dataId));
+            //dataArray2.push(parseInt(item.dataId));
 
           }
           setNotes(dataArray);
-          setNotesId(dataArray2);
+          //setNotesId(dataArray2);
           setNoteListLoading(false);
           console.log("Fetched All Data")
         },
         (_, error) => {
-          console.error('FETCH ALL1: Error querying data:', error);
+          console.error('FETCH ALL DATA: Error querying data:', error);
         }
       );
     });
@@ -293,7 +289,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
             dataArray.push(parseInt(item.dataId));
           }
           setEntriesId(dataArray);
-          console.log("Fetched All Entires")
+          console.log("Fetched All Entries ID")
         },
         (_, error) => {
           console.error('FETCH ALL1: Error querying data:', error);
@@ -301,30 +297,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
       );
     });
   }
-
-  const fetchAllData = (sort, filter) => {
-    allEntriesFetcher();
-    if(filter == "All"){
-      if(sort == "By Modified Time"){
-        allDataFetcher( 'SELECT * FROM entries WHERE settingState="normal" ORDER BY modifiedDate DESC;', [] );
-      }
-      else{
-
-        allDataFetcher( 'SELECT * FROM entries WHERE settingState="normal" ORDER BY createdDate ASC;', [] );
-      }
-  
-    }else{
-
-      if(sort == "By Modified Time"){
-          allDataFetcher(  'SELECT * FROM entries WHERE settingState="normal" AND month = ? ORDER BY modifiedDate DESC;', [filter] );
-      }
-      else{
-          allDataFetcher(  'SELECT * FROM entries WHERE settingState="normal" AND month = ? ORDER BY createdDate ASC;', [filter] );
-      }
-
-    }
-
-  };
 
 
   //creating the table
