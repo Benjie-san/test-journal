@@ -1,5 +1,5 @@
 //import for react stuffs
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Pressable, ActivityIndicator, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Pressable, ActivityIndicator } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import Modal from "react-native-modal";
 import {Asset} from 'expo-asset';
@@ -12,6 +12,7 @@ import { useTheme } from 'react-native-paper';
 import Navbar from '../components/Navbar';
 import TopBar from '../components/TopBar';
 import SortModal from '../components/SortModal';
+import AddModal from '../components/AddModal';
 
 //import vector-icons
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -25,77 +26,10 @@ import {
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 
-const dbSettings = SQLite.openDatabase("settings4.db");
 const db = SQLite.openDatabase('_journal_database.db');
 
-const AddModal = ({visible, type, handleModal}) => {
-  const theme = useTheme();
-
-  const handlePress = (item) =>{
-    type(item);
-    handleModal();
-  }
-
-  return(
-    <>
-      <Modal
-        isVisible={visible}
-        style={[styles.flex, {margin: 0, flex:1,}]}
-        animationIn="fadeIn"
-        animationOut="fadeOut"
-        onBackButtonPress={handleModal}
-        onBackdropPress={handleModal}
-        backdropOpacity={0.5}
-        animated
-        backdropTransitionOutTiming={0}
-        hideModalContentWhileAnimating
-      >
-      
-        <View style={{
-            backgroundColor: theme.colors.primary,
-            borderWidth: 1,
-            borderColor: theme.colors.textColor,
-            padding: 20,
-            borderRadius: 10,
-            alignItems:'left',
-            flexDirection:'column',
-            justifyContent:"center",
-            width: '70%',
-        }} >
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
-            <MaterialIcons name="post-add" size={28} color={theme.colors.textColor} />           
-            <Text style={{fontSize: theme.fonts.fontSize+6,  color: theme.colors.textColor, }}>Add</Text>
-          </View>
-          
-          <TouchableOpacity 
-            onPress={() => handlePress()} 
-            style={[styles.btn, {alignItems: "left", backgroundColor: theme.colors.secondary, flexDirection: 'row', gap: 5}]}
-          >
-            <Entypo name="book" size={26} color={theme.colors.textColor} />
-            <Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, textAlign:'right'}}>Journal Entry</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            onPress={() => handlePress("opm")} 
-            style={[styles.btn, {alignItems: "left", flexDirection: 'row', gap: 10, backgroundColor:  theme.colors.secondary}]}
-          >
-            <Entypo name="open-book" size={26} color={theme.colors.textColor} />
-            <Text style={{fontSize: theme.fonts.fontSize+2,  color: theme.colors.textColor,}}>OPM Reflection</Text>
-          </TouchableOpacity>
-
-        </View>
-      </Modal>
-    </>
-  );
-}
-
 export default function Home({navigation, route, currentSort, currentDisplay, currentFilter, handleSort, handleDisplay, handleFilter }) {
-
-  //expo notif
-  //const { expoPushToken, notification } = usePushNotifications();
-
-  //const data = JSON.stringify(notification, undefined, 2);
-
+  //for theme
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   // import for data
@@ -105,7 +39,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
   const [notesId, setNotesId] = useState([]);
   const [entriesId, setEntriesId] = useState([]);
-
 
   const isFocused = useIsFocused();
 
@@ -433,6 +366,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
       );
     });
   };
+  
   //option for deleting all entries
   const deleteAllEntries = () => {
     db.transaction((tx) => {
@@ -493,7 +427,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
       }]}
     >
     
-      {/*Todays passage*/}
+      {/*Today's passage*/}
       <View style={[styles.passageToday, {backgroundColor: theme.colors.primary, }]}>
 
         { verseLoading ? <ActivityIndicator style={{width: '40%'}} /> : (
@@ -593,7 +527,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: "100%", 
     height: 'auto', 
-    padding: 15,
+    padding: 10,
     flexDirection: 'row', 
     alignItems: 'center', 
     justifyContent:'space-between'
