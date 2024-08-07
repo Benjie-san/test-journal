@@ -3,7 +3,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
 import * as SQLite from 'expo-sqlite';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { useTheme } from 'react-native-paper';
 
@@ -652,8 +652,7 @@ return (
 			}} 
 		>
 		
-			{/*FORMS*/}
-			{ entryLoading ? (
+			{ !entryLoading ? (<ActivityIndicator style={[styles.flex]} size={'large'}/>) : (
 				<View style={[styles.modal, {backgroundColor: theme.colors.secondary,}]}>
 					
 						<KeyboardAwareScrollView
@@ -664,7 +663,6 @@ return (
 							
 							<View style={styles.touchableContainer}>
 					
-									{/*DATE*/}
 									<View style={styles.inputSubContainer}>
 											<Text style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>Date:</Text>
 											<Pressable style={styles.touchable} onPress={handleDateModal}>
@@ -677,10 +675,7 @@ return (
 											</Pressable>
 									</View>
 
-									{/*DATE MODAL?*/}
 									{ dateModalVisible ? (<DateTimePicker mode="date" display="spinner" value={entryDate} onChange={onChangeDate}/>) : null }
-
-									{/*SCRIPTURE*/}
 									<View style={styles.inputSubContainer}>
 											<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }</Text>
 
@@ -690,13 +685,11 @@ return (
 
 							</View>
 
-							{/*TITLE*/}
 							<View style={styles.inputContainer}>
 								<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
 								<TextInput style={[styles.input, {minHeight: 50, fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
 							</View>
 
-							{/*QUESTION*/}
 							{ entryType != "journal" ?
 								(
 									<View style={styles.inputContainer}>
@@ -705,15 +698,10 @@ return (
 									</View>
 								) : null
 							}
-
-							{/*OBSERVATION*/}
 							<View style={[styles.inputContainer, {}]}>
 								<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
 								<TextInput 
-									style={[styles.input, 
-										{ fontSize: theme.fonts.fontSize,
-}]
-									} 
+									style={[styles.input, { fontSize: theme.fonts.fontSize}]} 
 									editable 
 									onChangeText={ text => handleChangeText(text, "observation") } 
 									value={observation}  
@@ -722,13 +710,11 @@ return (
 								/>
 							</View>
 
-							{/*APPLICATION*/}
 							<View style={styles.inputContainer}>
 								<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
 								<TextInput style={[styles.input,{ fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
 							</View>
 
-							{/*PRAYER*/}
 							<View style={styles.inputContainer} >
 								<Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize}}>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
 								<TextInput style={[styles.input, { fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
@@ -752,7 +738,7 @@ return (
 						
 				</View>
 
-				) : (<ActivityIndicator style={[styles.flex]} size={'large'}/>) 
+			)
 			}
 		
 			<AlertModal message={message} visible={alertModalVisible} />
