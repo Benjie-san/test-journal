@@ -509,8 +509,8 @@ const handleEntry = () => {
 
 
 const onLayout = (event) => {
-	const layoutHeight = event.nativeEvent.layout.height;
-	//const layoutHeight = 500;
+	//const layoutHeight = event.nativeEvent.layout.height;
+	const layoutHeight = passage.toString().length / 1.6;
 
 		if(layoutHeight > 0 && layoutHeight !== height){
 			setHeight(layoutHeight);
@@ -524,6 +524,7 @@ const animatedStyle = useAnimatedStyle( ()=>{
 			overflow: 'hidden'
 		}
 });
+
 
 
 useEffect(() => {
@@ -668,22 +669,30 @@ return (
 							scrollEnabled={true}
 						> 
 							
-							<View style={styles.inputContainer}>
+							<View style={[styles.inputContainer, {borderRadius: 5} ]}>
 								<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>
 									{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }
 								</Text>
-
-								<TouchableOpacity style={{padding: 10, backgroundColor:'#bfbfbf', borderRadius: 5}} onPress={ () => setShow(!show) }>
-
-									<Text>{scripture}</Text>
-
-								</TouchableOpacity>
-
 								
-								<Animated.View style={animatedStyle}>
+									<TouchableOpacity style={{padding: 10, backgroundColor:'#bfbfbf', borderRadius: 5, justifyContent: 'space-between', flexDirection: 'row', alignItems:'center'}} onPress={ () => setShow(!show) }>
+										<Text style={{fontSize: theme.fonts.fontSize}}>{scripture}</Text>
+
+										<TouchableOpacity style={{padding: 5,}}>
+											<Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize}}>ESV</Text>
+										</TouchableOpacity>
+									</TouchableOpacity>
+
+							
+								<Animated.View style={[animatedStyle, {marginTop: 10, borderRadius: 5, backgroundColor:'#bfbfbf'}]}>
     
-									<View onLayout={onLayout} style={{width: '100%', padding: 10, borderRadius: 5,backgroundColor:'#bfbfbf',}}>
-										<Text>{passage}</Text>
+									<View onLayout={onLayout} style={{width: '100%', height: height, gap: 10, padding: 10}}>
+
+										{
+											passage.map( (item, key) => (
+												<Text key={key} style={{fontSize: theme.fonts.fontSize}} >{item}</Text>
+											) )
+										}
+										
 									</View>
 
 								</Animated.View>

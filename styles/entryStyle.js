@@ -25,7 +25,6 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'left',
       padding: 10,
-      marginBottom: 10,
 
    },
    input:{    
