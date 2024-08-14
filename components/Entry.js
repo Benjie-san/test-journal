@@ -507,13 +507,18 @@ const handleEntry = () => {
     
 }
 
+//For Animation of SCRIPTURE EXPANDABLE
 
 const onLayout = (event) => {
 	//const layoutHeight = event.nativeEvent.layout.height;
-	const layoutHeight = passage.toString().length / 1.6;
+	let layoutHeight = passage.toString().length / 1.3;
 
 		if(layoutHeight > 0 && layoutHeight !== height){
-			setHeight(layoutHeight);
+			if(layoutHeight < 50){
+				setHeight(70);
+			}else{
+				setHeight(layoutHeight);
+			}
 		}
 }
 
@@ -668,28 +673,33 @@ return (
 							resetScrollToCoords={{ x: 0, y: 0 }}
 							scrollEnabled={true}
 						> 
-							
-							<View style={[styles.inputContainer, {borderRadius: 5} ]}>
+							{/*SCRIPTURE*/}
+							<View style={[styles.inputContainer, ]}>
 								<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>
 									{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }
 								</Text>
 								
-									<TouchableOpacity style={{padding: 10, backgroundColor:'#bfbfbf', borderRadius: 5, justifyContent: 'space-between', flexDirection: 'row', alignItems:'center'}} onPress={ () => setShow(!show) }>
-										<Text style={{fontSize: theme.fonts.fontSize}}>{scripture}</Text>
+									<TouchableOpacity style={{padding: 10, backgroundColor:'#bfbfbf', borderRadius: 5, justifyContent: 'space-between', flexDirection: 'row', alignItems:'center', }} onPress={ () => setShow(!show) }>
 
-										<TouchableOpacity style={{padding: 5,}}>
-											<Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize}}>ESV</Text>
-										</TouchableOpacity>
+								{/* <Text style={{fontSize: theme.fonts.fontSize}}>{scripture}</Text> */}
+
+								<TextInput style={[{fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
+
+								<TouchableOpacity style={{padding: 5,}}>
+									<Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize}}>ESV</Text>
+								</TouchableOpacity>
+
 									</TouchableOpacity>
 
 							
-								<Animated.View style={[animatedStyle, {marginTop: 10, borderRadius: 5, backgroundColor:'#bfbfbf'}]}>
-    
-									<View onLayout={onLayout} style={{width: '100%', height: height, gap: 10, padding: 10}}>
+								<Animated.View style={[animatedStyle, { borderRadius: 5, flexBasis: 'auto',}]}>
+
+									<View onLayout={onLayout} style={{marginTop: 10,borderRadius: 5, gap: 5, padding: 10,  backgroundColor:'#bfbfbf', flexBasis: 'auto', minHeight: 50}}>
 
 										{
-											passage.map( (item, key) => (
-												<Text key={key} style={{fontSize: theme.fonts.fontSize}} >{item}</Text>
+											passage?.map( (item, key) => (
+													<Text key={key} style={{fontSize: theme.fonts.fontSize, marginBottom: 10}} >{item}</Text>
+												
 											) )
 										}
 										
@@ -697,11 +707,9 @@ return (
 
 								</Animated.View>
 
-							
-
 							</View>
 
-							<View style={styles.inputContainer}>
+							<View style={[styles.inputContainer,]}>
 								<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
 								<TextInput style={[styles.input, {minHeight: 50, fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
 							</View>

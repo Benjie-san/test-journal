@@ -1,5 +1,6 @@
-import { StyleSheet, View, Pressable, Image, TouchableOpacity } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import { StyleSheet, View, Image, TouchableOpacity } from 'react-native';
+
+import Feather from '@expo/vector-icons/Feather';
 
 const Navbar = ({ onPressAddEntry,}) => {
 
@@ -8,7 +9,8 @@ const Navbar = ({ onPressAddEntry,}) => {
       <View style={{borderRadius: 50, width: 60, height: 60, padding: 10,
       margin: 10, alignItems: 'center', justifyContent: 'center'}}>
       <TouchableOpacity onPress={ ()=>onPressAddEntry() } style={[styles.addEntry]}>
-         <Image style={{width: 30, height: 30,}} source={require("../assets/write.png")}/>
+         {/* <Image style={{width: 30, height: 30,}} source={require("../assets/write.png")}/> */}
+         <Feather name="plus" size={30} color="white" />
       </TouchableOpacity>
       </View>
    </View>
