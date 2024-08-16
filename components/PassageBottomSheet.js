@@ -61,10 +61,10 @@ const TranslationModal = ({visible, handleModal, handleTranslation}) => {
             </View>
         </Modal>
     </>
-  );
+	);
 }
 
-export default function PassageBottomSheet({visible, handleModal, scripture, handlePassage, handlePassageTranslation}) {	
+export default function PassageBottomSheet({visible, handleModal, scripture, handlePassage,}) {	
 	const theme = useTheme();
 
 	const [fetchedVerse, setFetchedVerse] = useState([]);
@@ -82,7 +82,6 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 		getVerse(scripture, translations[index])
 		setCurrentTranslation(item);
 	}
-
 
 	const getVerse = (scripture = "Genesis 1:1-3", translation) => {
 		let splitVerse = [];
@@ -144,7 +143,6 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 	
 	}
 
-	//handlePassageTranslation( getVerse() );
 
 	const toggleModal = () =>{
 		handleModal(!visible)

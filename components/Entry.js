@@ -7,6 +7,11 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useTheme } from 'react-native-paper';
 
+// JSON bibles
+import asv from '../constants/asv.json';
+import esv from '../constants/esv.json';
+import tagalog from '../constants/tagab.json';
+
 // Icons
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
@@ -55,7 +60,6 @@ const [passageTranslation, setPassageTranslation] = useState("ESV")
 
 const [currentEntry, setCurrentEntry] = useState();
 
-
 const [currentState, setCurrentState] = useState(state); //handling state in saving
 const [settingState, setSettingState] = useState(""); // for setting the state in archive
 
@@ -90,20 +94,79 @@ const entryToBeShared = {
 
 const [disableSave, setDisableSave] = useState(false);
 
+// bible functions
 const handlePassage = (item) => {
 	setPassage(item);
 }
 
-const handlePassageTranslation = (func) =>{
+const handleExpandable = () =>{
+	setShow(!show)
+}
 
-	//func(scripture, translation);
+const getVerse = (scripture = "Genesis 1:1-3", translation) => {
+	let splitVerse = [];
+	let range = [];
+	let book = "";
+	let chapter = 0;
+	let start = 0;
+	let end = 0;
+	let passage = [];
+	if(scripture !== '' && scripture !== undefined && scripture !== null){
+		let checkVerse = scripture.split(":");
+		if( checkVerse[0] !== scripture ){
+
+			splitVerse = scripture.split(":");
+			book = splitVerse[0].slice(0, splitVerse[0].length-2).trim();
+			chapter = splitVerse[0].slice(splitVerse[0].length-2, splitVerse[0].length).trim();
+
+			let checkStartVerse = splitVerse[1].split("-");
+			if( checkStartVerse[0] !== splitVerse[1]){
+				range = splitVerse[1].split("-");
+				start = parseInt(range[0]);
+				end = parseInt(range[1]);
+			} else{
+				start = parseInt(splitVerse[1]);
+			
+			}
+			if(book == 'Psalm'){
+				book = 'Psalms'
+			}
+
+			translation.verses.forEach(function (item) {
+				if(item.book_name === book && item.chapter === parseInt(chapter) ){
+		
+					if(end !== 0){
+							
+						if(item.verse >= start && item.verse <= end){
+							passage.push(`${item.verse} ${item.text}`);
+						}
+					} else{
+						if (item.verse == start) {
+							passage.push(`${item.verse} ${item.text}`);
+						}
+					}
+				}
+			});
+
+		}
+
+	handlePassage(passage);
+	}
+
+}
+
+const handlePassageTranslation = () =>{
+
 	if(passageTranslation == 'ESV'){
+		getVerse(scripture, asv);
 		setPassageTranslation('ASV');
 	}
 	else if(passageTranslation == 'ASV'){
+		getVerse(scripture, tagalog);
 		setPassageTranslation('Tagalog');
 	}
 	else if(passageTranslation  == 'Tagalog'){
+		getVerse(scripture, esv);
 		setPassageTranslation('ESV');
 	}
 }
@@ -171,7 +234,7 @@ const handleChangeText = (text, valueFor) =>{
 	switch(valueFor){
 		case 'title': setTitle(text) ;break;
 		case 'question': setQuestion(text) ;break;
-		case 'scripture': setScripture(text) ;break;
+		case 'scripture': setScripture(text), setShow(false) ;break;
 		case 'observation': setObservation(text) ;break;
 		case 'application': setApplication(text) ;break;
 		case 'prayer': setPrayer(text) ;break;
@@ -370,9 +433,6 @@ const animatedHeight = useSharedValue(0);
 
 const onLayout = (event) => {
 	const layoutHeight = event.nativeEvent.layout.height;
-	
-	//let layoutHeight = passage.toString().length;
-	console.log(layoutHeight)
 		if(layoutHeight > 0 && layoutHeight !== height){
 			setHeight(layoutHeight);
 		}
@@ -383,6 +443,7 @@ const animatedStyle = useAnimatedStyle( ()=>{
 
 		return{
 			height: animatedHeight.value,
+			overflow: 'hidden',
 		};
 }, [show]);
 
@@ -529,7 +590,7 @@ return (
 									{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }
 								</Text>
 								
-								<TouchableOpacity style={{padding: 10, backgroundColor:'#bfbfbf', borderRadius: 5, justifyContent: 'space-between', flexDirection: 'row', alignItems:'center', }} onPress={ () => setShow(!show) }>
+								<TouchableOpacity style={{padding: 10, backgroundColor:'#bfbfbf', borderRadius: 5, justifyContent: 'space-between', flexDirection: 'row', alignItems:'center', }} onPress={ () => handleExpandable() }>
 
 								{/* <Text style={{fontSize: theme.fonts.fontSize}}>{scripture}</Text> */}
 
@@ -541,9 +602,8 @@ return (
 
 								</TouchableOpacity>
 
-							
-								<Animated.View style={[animatedStyle, {overflow: 'hidden', borderRadius: 5, height: height}]}>
-
+								<Animated.View style={[animatedStyle, { borderRadius: 5, }]}>
+								
 									<View onLayout={onLayout} style={{width: '100%', position: 'absolute', marginTop: 10,borderRadius: 5, gap: 5, padding: 10,  backgroundColor:'#bfbfbf', flexBasis: 'auto', minHeight: 50 }}>
 
 										{
@@ -554,7 +614,7 @@ return (
 										}
 										
 									</View>
-
+								
 								</Animated.View>
 
 							</View>
