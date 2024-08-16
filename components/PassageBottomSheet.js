@@ -64,7 +64,7 @@ const TranslationModal = ({visible, handleModal, handleTranslation}) => {
   );
 }
 
-export default function PassageBottomSheet({visible, handleModal, scripture, handlePassage}) {	
+export default function PassageBottomSheet({visible, handleModal, scripture, handlePassage, handlePassageTranslation}) {	
 	const theme = useTheme();
 
 	const [fetchedVerse, setFetchedVerse] = useState([]);
@@ -82,6 +82,7 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 		getVerse(scripture, translations[index])
 		setCurrentTranslation(item);
 	}
+
 
 	const getVerse = (scripture = "Genesis 1:1-3", translation) => {
 		let splitVerse = [];
@@ -143,6 +144,8 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 	
 	}
 
+	//handlePassageTranslation( getVerse() );
+
 	const toggleModal = () =>{
 		handleModal(!visible)
 	}
@@ -169,7 +172,7 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 			style={styles.modal}
 		>
 			<View style={[styles.modalContent, {backgroundColor: theme.colors.primary, height: 500}]}>
-			<View style={{backgroundColor: theme.colors.borderColor, width: 60, height: 5, borderRadius: 3, alignSelf: 'center'}} ></View>
+				<View style={{backgroundColor: theme.colors.borderColor, width: 60, height: 5, borderRadius: 3, alignSelf: 'center'}} ></View>
 				<View style={styles.center}>
 					
 					<View style={[styles.header,]} >
@@ -178,7 +181,7 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 								{scripture !== '' ? scripture : "Set Scripture first"}
 							</Text>
 							{scripture !== '' ? (
-								<TouchableOpacity onPress={ ()=> handleTranslationPickerModal(true)  } style={[styles.headerBtn, ] } > 
+								<TouchableOpacity onPress={ ()=> handleTranslationPickerModal(true) } style={[styles.headerBtn, ] } > 
 									<Text style={[ {color: theme.colors.altColor, fontSize: theme.fonts.fontSize+1}]}>{currentTranslation}</Text>
 								</TouchableOpacity>
 							) : null }

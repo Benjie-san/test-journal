@@ -1,188 +1,29 @@
-import { Text, View, TextInput, Pressable, TouchableOpacity, ScrollView, KeyboardAvoidingView, Share, AppState, ActivityIndicator, Alert, useWindowDimensions} from 'react-native';
+import { Text, View, TextInput, TouchableOpacity, Share, AppState, ActivityIndicator, Alert} from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
 import * as SQLite from 'expo-sqlite';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useTheme } from 'react-native-paper';
 
 // Icons
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
-import { FontAwesome5 } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
 
 // Navigation
 import { useIsFocused } from '@react-navigation/native';
 
 //Component Imports
+import MenuModal from './MenuModal';
 import PassageBottomSheet from './PassageBottomSheet';
-import AlertModal from './AlertModal';
+import AlertModal from './AlertModal'; // small box that shows up for informing if saved or updated
 import styles from '../styles/entryStyle';
+
 
 const db = SQLite.openDatabase('_journal_database.db');
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-
-const MenuModal = ({visible, handleCloseModal, status, entry, type, handleStatus, handleSettingState, settingState}) => {
-    const theme = useTheme(); //for theme
-    
-	const alertModal = (title, message) => 	Alert.alert(
-		title,
-		message,
-		[
-		{ text: "Cancel", style: 'cancel', onPress: () => {} },
-		{
-			text: 'Confirm',
-			style: 'destructive',
-			// If the user confirmed, then we dispatch the action we blocked earlier
-			// This will continue the action that had triggered the removal of the screen
-			onPress: () => handleSettingState(title),
-		},
-		]
-	);
-
-    const onShare = async () => {
-        let message = "";
-        if(type == "journal"){
-            message =  `Date:\n${entry.date}\n\nScripture:\n${entry.scripture}\n\n${entry.passage.toString()}\n\nTitle:\n${entry.title}\n\nObservation:\n${entry.observation}\n\nApplication:\n${entry.application}\n\nPrayer:\n${entry.prayer}\n`
-        }else if(type == "opm"){
-            message =  `Date:\n${entry.date}\n\nOPM Passage:\n${entry.scripture}\n\nTheme:\n${entry.title}\n\nQuestion:\n${entry.question}\n\nKey Points:\n${entry.observation}\n\nRecommendations:\n${entry.application}\n\nReflection/Realization:\n${entry.prayer}\n\n`
-        } else if(type == "sermon"){
-            message =  `Date:\n${entry.date}\n\nText:\n${entry.scripture}\n\nTheme:\n${entry.title}\n\nQuestion:\n${entry.question}\n\nSermon Points:\n${entry.observation}\n\nRecommendations:\n${entry.application}\n\nReflection:\n${entry.prayer}\n\n`
-        }
-
-        try {
-            const result = await Share.share({
-            message: message,
-            });
-            if (result.action === Share.sharedAction) {
-            if (result.activityType) {
-                // shared with activity type of result.activityType
-            } else {
-                // shared
-            }
-            } else if (result.action === Share.dismissedAction) {
-            // dismissed
-            }
-        } catch (error) {
-            Alert.alert(error.message);
-        }
-    };
-
-    const handlePressBtn = (item) =>{
-        if(item == "Delete"){
-            //handleDeleteModal(true);
-			alertModal("Delete", "Are you sure want to permanently delete the entry?")
-
-        }
-        else if(item == "Archive"){
-            //handleArchiveModal(true);
-			if(settingState == "archive"){
-				alertModal("Unarchive", "Are you sure want to remove the entry from archive?")
-            }else{
-				alertModal("Archive", "Are you sure want to move the entry to archive?")
-            }
-        }
-        else if(item == "Trash"){
-            //handleTrashModal(true);
-			if(settingState == "trash"){
-				alertModal("Restore", "Are you sure want to restore the entry from trash?")    
-            }else{
-				alertModal("Trash", "Are you sure want to move the entry to trash?")        
-            }
-        }
-        else if(item == "#fff"){
-            handleStatus("#8CFF31");
-        }
-        else if(item == "#8CFF31"){
-            handleStatus("#fff");
-        }
-        else if(item == "Share"){
-            onShare();
-        }
-
-        handleCloseModal();
-    }
-
-return(
-	<>
-		<Modal 
-			isVisible={visible}
-			style={{margin: 0}}
-			animationIn="fadeIn"
-			animationOut="fadeOut"
-			onBackButtonPress={handleCloseModal}
-			onBackdropPress={handleCloseModal}
-			backdropOpacity={0}
-		>
-		<View style={{flex: 1}} >
-				<View style={[styles.menuPopup, {backgroundColor: theme.colors.primary}]} >
-
-				<TouchableOpacity 
-					style={[styles.menuItems]}  
-					onPress={() => handlePressBtn(status)} 
-				> 
-					<View  style={{flexDirection: 'row', alignItems: "center", gap: 10,}}> 
-						<AntDesign name="checksquareo" size={theme.fonts.fontSize+4} color={ theme.colors.textColor} />        
-						<Text style={{fontSize: theme.fonts.fontSize+2,  color:  theme.colors.textColor}}>{status === "#8CFF31" ? "Unmark as done" : "Mark as done"}</Text>
-					</View>
-					
-				</TouchableOpacity>
-
-				<TouchableOpacity 
-					onPress={() => handlePressBtn("Archive")} 
-					style={styles.menuItems}  
-				> 
-					<View style={{flexDirection: 'row', alignItems: "center", gap: 10,}}>
-						<Feather name="archive" size={theme.fonts.fontSize+4} color={theme.colors.textColor} />        
-						<Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}}>{settingState == "archive" ? "Unarchive" : "Archive"}</Text>
-					</View>
-				</TouchableOpacity>
-
-				<TouchableOpacity 
-					style={styles.menuItems}  
-					onPress={() => handlePressBtn("Trash")} 
-				> 
-					<View  style={{flexDirection: 'row', alignItems: "center", gap: 10,}}> 
-						{settingState == "trash" ? 
-						(<MaterialIcons name="restore" size={theme.fonts.fontSize+8} color={theme.colors.textColor} />) 
-						:
-						( <Feather name="trash" size={theme.fonts.fontSize+4} color={theme.colors.textColor} /> )}
-						<Text style={{color:  theme.colors.textColor, fontSize: theme.fonts.fontSize+2}}>{settingState == "trash" ? "Restore" : "Trash"}</Text>
-					</View>
-				</TouchableOpacity>
-
-				{settingState == "trash" ? (
-					<TouchableOpacity 
-							style={styles.menuItems}  
-							onPress={() => handlePressBtn("Delete")} 
-					> 
-						<View  style={{flexDirection: 'row', alignItems: "center", gap: 10,}}>   
-								<Feather name="trash" size={theme.fonts.fontSize+4} color="#FA5252" />          
-								<Text style={{color: '#FA5252', fontSize: theme.fonts.fontSize+2}}>Delete</Text>
-						</View>
-					</TouchableOpacity>
-
-				) : null }
-
-				<TouchableOpacity 
-					style={[styles.menuItems, {borderBottomColor: 'transparent'}]}  
-					onPress={() => handlePressBtn("Share")} 
-				> 
-					<View style={{flexDirection: 'row', alignItems: "center", gap: 10,}}>
-						<Feather name="share-2" size={theme.fonts.fontSize+4} color={theme.colors.textColor} />        
-						<Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}}>Share</Text>
-					</View>
-				</TouchableOpacity>
-
-				</View>
-		</View>
-		</Modal>
-	</>
-);
-}
 
 export default function Entry({navigation, route }){
 const theme = useTheme(); //for theme
@@ -205,22 +46,24 @@ const [observation, setObservation] = useState("");
 const [application, setApplication] = useState("");
 const [prayer, setPrayer] = useState("");
 const [question, setQuestion] = useState("");
+//
 const [type, setType] = useState(entryType);
 const [status, setStatus] = useState("");
-const [month, setMonth] = useState("");
-const [day, setDay] = useState("");
+
 const [passage, setPassage] = useState(""); 
+const [passageTranslation, setPassageTranslation] = useState("ESV")
 
 const [currentEntry, setCurrentEntry] = useState();
 
-const [currentState, setCurrentState] = useState(state);
-const [settingState, setSettingState] = useState("");
 
-const [entriesId, setEntriesId] = useState([]);
+const [currentState, setCurrentState] = useState(state); //handling state in saving
+const [settingState, setSettingState] = useState(""); // for setting the state in archive
+
+//const [entriesId, setEntriesId] = useState([]);
 
 const [entryLoading, setEntryLoading] = useState(false);
 
-const changed = useRef(false);
+const changed = useRef(false); // checking if there are changes in the text inputs
 
 //for animatiuion of expandable
 const [height, setHeight] = useState(0);
@@ -233,6 +76,7 @@ const [appCurrentState, setAppCurrentState] = useState(appState.current);
 //for dates
 const [entryDate, setEntryDate] = useState(new Date());
 
+//for sharing
 const entryToBeShared = {
     date: date,
     scripture: scripture,
@@ -248,6 +92,20 @@ const [disableSave, setDisableSave] = useState(false);
 
 const handlePassage = (item) => {
 	setPassage(item);
+}
+
+const handlePassageTranslation = (func) =>{
+
+	//func(scripture, translation);
+	if(passageTranslation == 'ESV'){
+		setPassageTranslation('ASV');
+	}
+	else if(passageTranslation == 'ASV'){
+		setPassageTranslation('Tagalog');
+	}
+	else if(passageTranslation  == 'Tagalog'){
+		setPassageTranslation('ESV');
+	}
 }
 
 const [passageModalVisble, setPassageModalVisible] = useState(false);
@@ -317,7 +175,6 @@ const handleChangeText = (text, valueFor) =>{
 		case 'observation': setObservation(text) ;break;
 		case 'application': setApplication(text) ;break;
 		case 'prayer': setPrayer(text) ;break;
-		
 	}
 }
 
@@ -509,28 +366,27 @@ const handleEntry = () => {
 
 //For Animation of SCRIPTURE EXPANDABLE
 
-const onLayout = (event) => {
-	//const layoutHeight = event.nativeEvent.layout.height;
-	let layoutHeight = passage.toString().length / 1.3;
+const animatedHeight = useSharedValue(0);
 
+const onLayout = (event) => {
+	const layoutHeight = event.nativeEvent.layout.height;
+	
+	//let layoutHeight = passage.toString().length;
+	console.log(layoutHeight)
 		if(layoutHeight > 0 && layoutHeight !== height){
-			if(layoutHeight < 50){
-				setHeight(70);
-			}else{
-				setHeight(layoutHeight);
-			}
+			setHeight(layoutHeight);
 		}
 }
 
 const animatedStyle = useAnimatedStyle( ()=>{
-	const animatedHeight = show ? withTiming(height) : withTiming(0);
+	animatedHeight.value = show ? withTiming(height) : withTiming(0);
+
 		return{
-			height: animatedHeight,
-			overflow: 'hidden'
-		}
-});
+			height: animatedHeight.value,
+		};
+}, [show]);
 
-
+//USE EFFECTS
 
 useEffect(() => {
 	let date = new Date();
@@ -568,7 +424,7 @@ useEffect(() => {
         }
     }
 
-}, [alertModalVisible ]);
+}, [alertModalVisible]);
 
 //for drawer when pressed
 useEffect(() => {
@@ -655,15 +511,9 @@ useEffect(() => {
     });
 }, [navigation, entryType, handleEntry, currentState]);
 
-
 return (
 	<>
-		<View style={{ 
-				flex: 1,
-				margin: 0, 
-				backgroundColor: theme.colors.secondary, 
-			}} 
-		>
+		<View style={{ flex: 1,margin: 0, backgroundColor: theme.colors.secondary, }} >
 		
 			{ !entryLoading ? (<ActivityIndicator style={[styles.flex]} size={'large'}/>) : (
 				<View style={[styles.modal, {backgroundColor: theme.colors.secondary,}]}>
@@ -679,22 +529,22 @@ return (
 									{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }
 								</Text>
 								
-									<TouchableOpacity style={{padding: 10, backgroundColor:'#bfbfbf', borderRadius: 5, justifyContent: 'space-between', flexDirection: 'row', alignItems:'center', }} onPress={ () => setShow(!show) }>
+								<TouchableOpacity style={{padding: 10, backgroundColor:'#bfbfbf', borderRadius: 5, justifyContent: 'space-between', flexDirection: 'row', alignItems:'center', }} onPress={ () => setShow(!show) }>
 
 								{/* <Text style={{fontSize: theme.fonts.fontSize}}>{scripture}</Text> */}
 
-								<TextInput style={[{fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
+									<TextInput style={[{fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
 
-								<TouchableOpacity style={{padding: 5,}}>
-									<Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize}}>ESV</Text>
-								</TouchableOpacity>
-
+									<TouchableOpacity onPress={ () => handlePassageTranslation() } style={{padding: 5,}}>
+										<Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize}}>{passageTranslation}</Text>
 									</TouchableOpacity>
 
-							
-								<Animated.View style={[animatedStyle, { borderRadius: 5, flexBasis: 'auto',}]}>
+								</TouchableOpacity>
 
-									<View onLayout={onLayout} style={{marginTop: 10,borderRadius: 5, gap: 5, padding: 10,  backgroundColor:'#bfbfbf', flexBasis: 'auto', minHeight: 50}}>
+							
+								<Animated.View style={[animatedStyle, {overflow: 'hidden', borderRadius: 5, height: height}]}>
+
+									<View onLayout={onLayout} style={{width: '100%', position: 'absolute', marginTop: 10,borderRadius: 5, gap: 5, padding: 10,  backgroundColor:'#bfbfbf', flexBasis: 'auto', minHeight: 50 }}>
 
 										{
 											passage?.map( (item, key) => (
@@ -743,7 +593,7 @@ return (
 								<Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize}}>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
 								<TextInput style={[styles.input, { fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
 
-								<View style={[styles.flex,{paddingTop: 20,}]}>
+								{/* <View style={[styles.flex,{paddingTop: 20,}]}>
 									<TouchableOpacity 
 										style={[styles.border, {  backgroundColor: theme.colors.secondary, borderColor: theme.colors.borderColor,alignItems: 'center', justifyContent: 'space-evenly', flexDirection: 'row', padding: 10, gap: 5, width: 100,elevation: 5 }]} 
 										onPress={ () => handlePassageVisible(true) }
@@ -752,7 +602,7 @@ return (
 									<Text style={{color: theme.colors.textColor , fontSize: theme.fonts.fontSize}}>Bible</Text>
 
 									</TouchableOpacity>
-								</View>
+								</View> */}
 
 							</View>
 

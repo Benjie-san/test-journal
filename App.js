@@ -29,7 +29,7 @@ export default function App() {
   const [theme, setTheme] = useState("Light");
   const [fontSize, setFontSize] = useState("Small");
   const sort = useRef("By Modified Time");
-  const display = useRef("List");
+  const display = useRef("Details");
   const filter = useRef("All");
 
 
@@ -113,7 +113,7 @@ export default function App() {
     dbSettings.transaction((tx) => {
       tx.executeSql(
       'INSERT INTO settings (currentTheme, fontSize, defaultSort, defaultDisplay, defaultFilter, notifTime) VALUES (?, ?, ?, ?, ?, ?);',
-      ["Light", "Small", "By Modified Time", "List", "All", "6",],
+      ["Light", "Small", "By Modified Time", "Details", "All", "6",],
       (tx, results) => {
         console.log("Success default Settings are SET!!!");
         fetchDefaultSettings();
