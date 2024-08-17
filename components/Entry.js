@@ -35,6 +35,15 @@ const theme = useTheme(); //for theme
 const isFocused = useIsFocused();
 const {entryId, verse, entryType, index, itemId, state} = route.params;
 
+//themes
+
+const basicStyles = {
+	fonts:{
+		color: theme.colors.textColor,  
+		fontSize: theme.fonts.fontSize,
+	}
+}
+
 
 //for showing modals
 const [dateModalVisible, setDateModalVisible] = useState(false);
@@ -104,20 +113,27 @@ const handleExpandable = () =>{
 }
 
 const getVerse = (scripture = "Genesis 1:1-3", translation) => {
-	let splitVerse = [];
-	let range = [];
+	let splitVerse = [], range = [], passage = [];
 	let book = "";
-	let chapter = 0;
-	let start = 0;
-	let end = 0;
-	let passage = [];
+	let chapter = 0, start = 0, end = 0;
 	if(scripture !== '' && scripture !== undefined && scripture !== null){
 		let checkVerse = scripture.split(":");
 		if( checkVerse[0] !== scripture ){
-
+		
 			splitVerse = scripture.split(":");
+			let regex = /\b/;
+			console.log(splitVerse[0].match(regex))
+			// if(splitVerse[0].match(regex)){
+			// 	book = splitVerse[0].slice(0, splitVerse[0].length-3).trim();
+			// 	chapter = splitVerse[0].slice(splitVerse[0].length-3, splitVerse[0].length).trim();
+			// }
+
 			book = splitVerse[0].slice(0, splitVerse[0].length-2).trim();
 			chapter = splitVerse[0].slice(splitVerse[0].length-2, splitVerse[0].length).trim();
+	
+			console.log(book);
+			console.log(chapter);
+
 
 			let checkStartVerse = splitVerse[1].split("-");
 			if( checkStartVerse[0] !== splitVerse[1]){
@@ -307,6 +323,7 @@ const deleteEntry = () => {
 		);
 	});
 }
+
 //updating the entry
 const updateEntry = () => {
 	db.transaction((tx) => {
@@ -325,6 +342,7 @@ const updateEntry = () => {
 			);
 	});
 }
+
 //saving entry
 const saveEntry = () => {
 	// adding entry to db
@@ -586,7 +604,7 @@ return (
 						> 
 							{/*SCRIPTURE*/}
 							<View style={[styles.inputContainer, ]}>
-								<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>
+								<Text  style={basicStyles.fonts}>
 									{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }
 								</Text>
 								
@@ -606,11 +624,13 @@ return (
 								
 									<View onLayout={onLayout} style={{width: '100%', position: 'absolute', marginTop: 10,borderRadius: 5, gap: 5, padding: 10,  backgroundColor:'#bfbfbf', flexBasis: 'auto', minHeight: 50 }}>
 
-										{
-											passage?.map( (item, key) => (
+										{ passage.length > 0 ? 
+											(
+												passage?.map( (item, key) => (
 													<Text key={key} style={{fontSize: theme.fonts.fontSize, marginBottom: 10}} >{item}</Text>
-												
-											) )
+												))
+											):
+											(<Text>No Verse Found</Text>)
 										}
 										
 									</View>
@@ -620,20 +640,20 @@ return (
 							</View>
 
 							<View style={[styles.inputContainer,]}>
-								<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
+								<Text  style={basicStyles.fonts}>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
 								<TextInput style={[styles.input, {minHeight: 50, fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
 							</View>
 
 							{ entryType != "journal" ?
 								(
 									<View style={styles.inputContainer}>
-									<Text  style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize}}>Question:</Text>
+									<Text  style={basicStyles.fonts}>Question:</Text>
 									<TextInput style={[styles.input, {minHeight: 50, fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "question") } value={question} multiline={true} />
 									</View>
 								) : null
 							}
 							<View style={[styles.inputContainer, {}]}>
-								<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
+								<Text  style={basicStyles.fonts}>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
 								<TextInput 
 									style={[styles.input, { fontSize: theme.fonts.fontSize}]} 
 									editable 
@@ -645,12 +665,12 @@ return (
 							</View>
 
 							<View style={styles.inputContainer}>
-								<Text  style={{color: theme.colors.textColor,  fontSize: theme.fonts.fontSize}}>{type === "sermon" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
+								<Text  style={basicStyles.fonts}>{type === "sermon" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
 								<TextInput style={[styles.input,{ fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
 							</View>
 
 							<View style={styles.inputContainer} >
-								<Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize}}>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
+								<Text style={basicStyles.fonts}>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
 								<TextInput style={[styles.input, { fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
 
 								{/* <View style={[styles.flex,{paddingTop: 20,}]}>

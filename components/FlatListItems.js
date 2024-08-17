@@ -77,13 +77,13 @@ const FlatListItems = ({item, handleDisplayEntryFetch, display}) => {
                 display == "Grid" ? renderLayout.grid : 
                 display == "Large Grid" ? renderLayout.largeGrid : null, 
                 {
-                backgroundColor: theme.colors.primary, 
-                elevation: 2, 
-                gap: 5,
-                padding: 14,
-                margin: 3,
-                borderRadius: 5,
-                overflow:'hidden',
+                    backgroundColor: theme.colors.primary, 
+                    elevation: 2, 
+                    gap: 5,
+                    padding: 14,
+                    margin: 3,
+                    borderRadius: 5,
+                    overflow:'hidden',
                 }
             ]}
             onPress={ ()=> handleDisplayEntryFetch(item) }
@@ -105,7 +105,11 @@ const FlatListItems = ({item, handleDisplayEntryFetch, display}) => {
                 (<>
                     <Text style={{color: themeTextColor, fontSize: themeFontSize+2, overflow:'hidden', flex: 1, fontWeight: 'bold'}}>{item.scripture}</Text>
                     <Text style={{color: themeTextColor, fontSize: themeFontSize, overflow:'hidden', flex: 1, }}>{item.title}</Text>
-                    <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                    <View style={{width: '100%', flexDirection: 'row', justifyContent: 'space-between'}}>
+                        <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden',}}>{item.date}</Text>
+                        <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                    </View>
+                
                 </>) 
             :
             display == "Large Grid" ? 

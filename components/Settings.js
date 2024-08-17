@@ -153,7 +153,6 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
   )
 }
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

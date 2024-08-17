@@ -98,8 +98,8 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 			if( checkVerse[0] !== scripture ){
 
 				splitVerse = scripture.split(":");
-				book = splitVerse[0].slice(0, splitVerse[0].length-2).trim();
-				chapter = splitVerse[0].slice(splitVerse[0].length-2, splitVerse[0].length).trim();
+				book = splitVerse[0].slice(0, splitVerse[0].length-3).trim();
+				chapter = splitVerse[0].slice(splitVerse[0].length-3, splitVerse[0].length).trim();
 
 				let checkStartVerse = splitVerse[1].split("-");
 				if( checkStartVerse[0] !== splitVerse[1]){

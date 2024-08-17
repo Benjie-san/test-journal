@@ -1,7 +1,6 @@
 //import for react stuffs
 import { StyleSheet, Text, View, TouchableOpacity, Pressable, ActivityIndicator } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import Modal from "react-native-modal";
 import {Asset} from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 import * as SQLite from 'expo-sqlite';
@@ -11,15 +10,10 @@ import { useTheme } from 'react-native-paper';
 // import for components
 import Navbar from '../components/Navbar';
 import TopBar from '../components/TopBar';
-import SortModal from '../components/SortModal';
 import AddModal from '../components/AddModal';
 
 //import vector-icons
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { Entypo } from '@expo/vector-icons';
-import { MaterialIcons } from '@expo/vector-icons';
-import { FontAwesome5 } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 //import { usePushNotifications } from '../components/usePushNotifications';
 
 import {
@@ -28,7 +22,7 @@ import {
 
 const db = SQLite.openDatabase('_journal_database.db');
 
-export default function Home({navigation, route, currentSort, currentDisplay, currentFilter, handleSort, handleDisplay, handleFilter }) {
+export default function Home({navigation, route, currentSort, currentDisplay, currentFilter,}) {
   //for theme
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -426,7 +420,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
       </View>
         
-      <View style={{backgroundColor: theme.colors.primary, width: "100%", padding: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: theme.colors.borderColor, borderBottomWidth: 1, borderBottomColor: theme.colors.borderColor, }} > 
+      {/* <View style={{backgroundColor: theme.colors.primary, width: "100%", padding: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: theme.colors.borderColor, borderBottomWidth: 1, borderBottomColor: theme.colors.borderColor, }} > 
 
         <Text style={{textAlign: 'center', fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}} >Recent Entries</Text>
 
@@ -435,7 +429,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
           <MaterialCommunityIcons name="sort" size={24} color={theme.colors.textColor} />
 
         </TouchableOpacity>
-      </View>
+      </View> */}
 
     </View>
 
@@ -457,14 +451,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
         type={handleAddButton} 
         handleModal={handleVisibleAddModal} 
       />
-    
-      <SortModal 
-        visible={sortModal} handleModal={handleSortModal}
-        fetchAllData={fetchAllData} fetchData={fetchData} 
-        currentSortSetting={currentSort} currentDisplaySetting={currentDisplay} currentFilterSetting={currentFilter}
-        handleSort={handleSort} handleDisplay={handleDisplay} handleFilter={handleFilter}
-      />
-
 
   </>
   )
