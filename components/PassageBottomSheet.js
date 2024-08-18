@@ -98,8 +98,16 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 			if( checkVerse[0] !== scripture ){
 
 				splitVerse = scripture.split(":");
-				book = splitVerse[0].slice(0, splitVerse[0].length-3).trim();
-				chapter = splitVerse[0].slice(splitVerse[0].length-3, splitVerse[0].length).trim();
+				let regex = /Psalms|Psalm/g;
+				let regexFound = splitVerse[0].match(regex) // on an array when found
+				if(regexFound == "Psalm" || "Psalms"){
+					book = splitVerse[0].slice(0, splitVerse[0].length-3).trim(); // for hundreds in chapter
+					chapter = splitVerse[0].slice(splitVerse[0].length-3, splitVerse[0].length).trim();
+				}else{
+					book = splitVerse[0].slice(0, splitVerse[0].length-2).trim(); // for tens in chapter limit is 99
+					chapter = splitVerse[0].slice(splitVerse[0].length-2, splitVerse[0].length).trim();
+				}
+
 
 				let checkStartVerse = splitVerse[1].split("-");
 				if( checkStartVerse[0] !== splitVerse[1]){
@@ -114,7 +122,7 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 					book = 'Psalms'
 				}
 	
-				translation.verses.forEach(function (item) {
+				translation.verses.forEach(function (item) { // actual fetching according to the extracted values
 					if(item.book_name === book && item.chapter === parseInt(chapter) ){
 			
 						if(end !== 0){

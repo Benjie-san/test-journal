@@ -121,25 +121,21 @@ const getVerse = (scripture = "Genesis 1:1-3", translation) => {
 		if( checkVerse[0] !== scripture ){
 		
 			splitVerse = scripture.split(":");
-			let regex = /\b/;
-			console.log(splitVerse[0].match(regex))
-			// if(splitVerse[0].match(regex)){
-			// 	book = splitVerse[0].slice(0, splitVerse[0].length-3).trim();
-			// 	chapter = splitVerse[0].slice(splitVerse[0].length-3, splitVerse[0].length).trim();
-			// }
-
-			book = splitVerse[0].slice(0, splitVerse[0].length-2).trim();
-			chapter = splitVerse[0].slice(splitVerse[0].length-2, splitVerse[0].length).trim();
-	
-			console.log(book);
-			console.log(chapter);
-
+			let regex = /Psalms|Psalm/g;
+			let regexFound = splitVerse[0].match(regex) // on an array when found
+			if(regexFound == "Psalm" || "Psalms"){
+				book = splitVerse[0].slice(0, splitVerse[0].length-3).trim(); // for hundreds in chapter
+				chapter = splitVerse[0].slice(splitVerse[0].length-3, splitVerse[0].length).trim();
+			}else{
+				book = splitVerse[0].slice(0, splitVerse[0].length-2).trim(); // for tens in chapter limit is 99
+				chapter = splitVerse[0].slice(splitVerse[0].length-2, splitVerse[0].length).trim();
+			}
 
 			let checkStartVerse = splitVerse[1].split("-");
 			if( checkStartVerse[0] !== splitVerse[1]){
-				range = splitVerse[1].split("-");
-				start = parseInt(range[0]);
-				end = parseInt(range[1]);
+				range = splitVerse[1].split("-"); //range of the verse
+				start = parseInt(range[0]); // the number start of the verse
+				end = parseInt(range[1]); // the number at the end of the verse range
 			} else{
 				start = parseInt(splitVerse[1]);
 			
