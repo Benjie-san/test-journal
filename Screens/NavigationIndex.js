@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View, Platform } from "react-native";
 
-import { NavigationContainer } from "@react-navigation/native";
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 //import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
@@ -34,7 +33,6 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
     const RenderHome = (props) => ( 
         <Home {...props} 
             currentSort={currentSort} currentDisplay={currentDisplay} currentFilter={currentFilter}
-            handleSort={handleSort} handleDisplay={handleDisplay} handleFilter={handleFilter}
         /> 
     );
     const RenderEntry = (props) => ( <Entry {...props} /> );
@@ -42,7 +40,14 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
     const RenderBible = (props) => <Bible {...props}/>;
     const RenderSearch = (props) => ( <Search {...props} />);
     const RenderMore = (props) => ( <More {...props} /> );
-    const RenderSettings = (props) => (<Settings {...props} currentTheme={currentTheme} currentFontSize={currentFontSize} handleTheme={handleTheme} handleFontSize={handleFontSize}  />);
+    const RenderSettings = (props) => (
+        <Settings {...props} 
+        currentTheme={currentTheme} currentFontSize={currentFontSize}
+        currentSort={currentSort} currentDisplay={currentDisplay} currentFilter={currentFilter} 
+
+        handleTheme={handleTheme} handleFontSize={handleFontSize} 
+        handleSort={handleSort} handleDisplay={handleDisplay} handleFilter={handleFilter} 
+        />);
     const RenderArchive = (props) => ( <Archive {...props}   /> );
     const RenderTrash = (props) => ( <Trash {...props}   /> );
 
@@ -88,7 +93,7 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
                 },
                 animation:'slide_from_right',
                 headerTintColor: theme.colors.textColor,
-               
+            
             }}
         >
 
@@ -170,20 +175,20 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
     return(
         <Tab.Navigator
             initialRouteName="Home"
-            activeColor="#1d9bf0"
             barStyle={{ backgroundColor: theme.colors.primary}}
         >
             <Tab.Screen
                 component={StackHome}
                 name="Home"
                 options={{
+                    tabBarLabel: <Text style={{textAlign : "center", color: '#0998e7'}}>Home</Text>,
                     tabBarIcon: ({ focused }) => {
                         return (
                             <View style={{ alignItems: "center", justifyContent: "center" }}>
                                 <Ionicons
                                     name={focused ? "md-home" : "md-home-outline"}
                                     size={24}
-                                    color="#1d9bf0"
+                                    color="#0998e7"
                                 />
                             </View>
                         );
@@ -212,14 +217,14 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
             component={StackSearch}
             name="Search"
             options={{
-                title: "Search",
+                tabBarLabel: <Text style={{textAlign : "center", color: '#e67b0c'}}>Search</Text>,
                 tabBarIcon: ({ focused }) => {
                     return (
                         <View style={{ alignItems: "center", justifyContent: "center" }}>
                             <Ionicons
                                 name={focused ? "md-search" : "md-search-outline"}
                                 size={24}
-                                color="#1d9bf0"
+                                color="#e67b0c"
                             />
                         </View>
                     );
@@ -232,14 +237,14 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
                 component={StackMore}
                 name="More"
                 options={{
-                    title: "More",
+                    tabBarLabel: <Text style={{textAlign : "center", color: '#faca2a'}}>More</Text>,
                     tabBarIcon: ({ focused }) => {
                         return (
                             <View style={{ alignItems: "center", justifyContent: "center" }}>
                                 <MaterialIcons
                                     name={focused ? "more" : "more-horiz"}
                                     size={24}
-                                    color="#1d9bf0"
+                                    color="#faca2a"
                                 />
                             </View>
                         );

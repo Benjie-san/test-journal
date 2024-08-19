@@ -3,7 +3,7 @@ import React from 'react';
 import Modal from "react-native-modal";
 import { useTheme } from 'react-native-paper';
 
-export default function SettingsModal({visible, handleModal, children, globalStyle}) {
+export default function SettingsModal({visible, handleModal, children, header}) {
   const theme = useTheme();
 
   return (
@@ -30,6 +30,7 @@ export default function SettingsModal({visible, handleModal, children, globalSty
             },
           ]}
         >
+          <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, paddingBottom: 10,}}>{header}</Text>
           {children}
     
         </View>

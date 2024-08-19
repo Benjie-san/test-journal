@@ -3,36 +3,146 @@ import React,{useState} from 'react'
 import SettingsModal from './SettingsModal';
 import { useTheme, RadioButton } from 'react-native-paper';
 
-export default function Settings({currentTheme, currentFontSize, handleTheme, handleFontSize}) {
+// COMPONENTS FOR SETTINGS
+
+// For settings selection opening their modals
+const SettingSelection = ({modal, name, current}) =>{
   const theme = useTheme();
+  return(
+    <TouchableOpacity onPress={() => modal(true)}>
+      <View>
+        <Text  style={{ fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, }} >{name}</Text>
+        <Text  style={{ fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor,opacity: 0.5 }} >{current}</Text>
+      </View>
+  
+    </TouchableOpacity>
+  );
+}
+
+// For settings modal, the items inside them
+const SettingsRadioButton = ({settingFunction, status, value, name}) => {
+  const theme = useTheme();
+  return (
+  <TouchableOpacity style={styles.selectionBtn} onPress={() => settingFunction(value)}>
+    <RadioButton
+      color={theme.colors.altColor}
+      uncheckedColor={theme.colors.textColor}
+      value={value} 
+      onPress={ () => settingFunction(value) } 
+      status={ status == value ? 'checked' : 'unchecked' }
+    
+    />
+    <View> 
+      <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>{name}</Text>
+    </View>
+  
+  </TouchableOpacity>
+)};
+
+
+export default function Settings({currentTheme, currentFontSize, currentSort, currentFilter, currentDisplay, handleTheme,
+  handleFontSize, handleSort, handleFilter, handleDisplay}) {
+  const theme = useTheme();
+
+  //USESTATES
+
+  //FOR THEME
   const [themeModal, setThemeModal] = useState(false);
+  const [themeSetting, setThemeSetting] = useState(currentTheme);
+  const [themeChecked, setThemeChecked] = useState(currentTheme);
+
+  //FOR FONT SIZE
   const [fontSizeModal, setFontSizeModal] = useState(false);
-  const [themeSetting, setThemeSetting] = useState(currentTheme)
-  const [checked, setChecked] = useState(currentTheme);
   const [fontSize, setFontSize] = useState(currentFontSize);
-  const [fontSizeChecked, setfontSizeChecked] = useState(currentFontSize);
+  const [fontSizeChecked, setFontSizeChecked] = useState(currentFontSize);
 
-  const handleThemeSetting = (name) =>{
-		setChecked(name);
-    handleTheme(name);
-    setThemeSetting(name);
-    setThemeModal(false);
+  //FOR SORT 
 
+  const [sortModal, setSortModal] = useState(false);
+  const [sort, setSort] = useState(currentSort.current);
+  const [sortChecked, setSortChecked] = useState(currentSort.current);
+
+  // //FOR FILTER
+
+  // const [filterModal, setFilterModal] = useState(false);
+  // const [filter, setFilter] = useState(currentFilter);
+  // const [filterChecked, setFilterChecked] = useState(currentFilter);
+
+
+  //FOR DISPLAY
+
+  const [displayModal, setDisplayModal] = useState(false);
+  const [display, setDisplay] = useState(currentDisplay.current);
+  const [displayChecked, setDisplayChecked] = useState(currentDisplay.current);
+
+    //For modals opening and closing
+    const handleThemeModal = (item) =>{
+      setThemeModal(item);
+    }
+    const handleFontSizeModal = (item) =>{
+      setFontSizeModal(item);
+    }
+    const handleSortModal = (item) =>{
+      setSortModal(item);
+    }
+    
+    // const handleFilterModal = (item) =>{
+    //   setFilterModal(item);
+    // }
+
+    const handleDisplayModal = (item) =>{
+      setDisplayModal(item);
+    }
+
+  //functions for setting the settings
+
+  const handleThemeSetting = (name) =>{ 
+    handleTheme(name); //function from App.js
+    setThemeSetting(name); //setting the state that shows the current
+		setThemeChecked(name); // for radio button status
+    setThemeModal(false); // setting the modal
 	}
 
   const handleFontSizeSettings = (item) =>{
     handleFontSize(item);
-    setfontSizeChecked(item);
     setFontSize(item);
-    setFontSizeModal(false)
+    setFontSizeChecked(item);
+    setFontSizeModal(false);
   }
 
-  const handleThemeModal = (item) =>{
-    setThemeModal(item);
+  const handleSortSettings = (item)=>{
+    handleSort(item);
+    setSort(item);
+    setSortChecked(item);
+    setSortModal(false);
   }
-  const handleFontSizeModal = (item) =>{
-    setFontSizeModal(item);
+
+  // const handleFilterSettings = ()=>{
+  //   handleFilter(item);
+  //   setFilter(item);
+  //   setFilterChecked(item);
+  //   setFilterModal(false);
+  // }
+
+  const handleDisplaySettings = (item) =>{
+    handleDisplay(item);
+    setDisplay(item);
+    setDisplayChecked(item);
+    setDisplayModal(false);
   }
+
+  /*
+    THOUGHT PROCESS RN:
+
+    SET THE STATS, FUNCTIONS OF MODALS AND WHEN RADIO BTNS
+    SET THE SETTING SELECTIONS
+    THEN SET THE RADIO BUTTONS (SET WITH COMPONENTS MADE ABOVE)
+    
+    NOTE:
+    dont pass functions with paramters, it is immediately called upon render, dunno why
+
+    dont put comments after an element
+  */
   
   return (
     <>
@@ -40,113 +150,77 @@ export default function Settings({currentTheme, currentFontSize, handleTheme, ha
       
       <View style={styles.settings}>
 
-          <View style={[styles.itemSettings]} > 
-            <Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize+4}} >General</Text>
+        <View style={[styles.itemSettings]} > 
+          <Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize+4}} >General</Text>
+          
+          {/*THEME*/}
 
-            <TouchableOpacity onPress={() => handleThemeModal(true)}>
-              <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}} >Default Theme</Text>
-              <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, opacity: 0.8}} >{themeSetting}</Text>
-            </TouchableOpacity>
+          <SettingSelection modal={handleThemeModal} name="Current Theme" current={themeSetting} />
 
-            <TouchableOpacity onPress={() => handleFontSizeModal(true)}>
-              <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}} >Default Font Size</Text>
-              <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, opacity: 0.8}} >{fontSize}</Text>
-            </TouchableOpacity>
-            
-          </View>
-{/* 
-        <View style={[styles.hr]}></View>
-         */}
-          {/* <View style={[styles.itemSettings]} >
-            <Text style={{color: theme.colors.altColor, fontSize:  theme.fonts.fontSize+4}} >Sort</Text>
+          {/*FONT SIZE*/}
+          <SettingSelection modal={handleFontSizeModal} name="Current Font Size" current={fontSize} />
+          
+        </View>
 
-            <TouchableOpacity>
-              <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}} >Default Entries Sort Order</Text>
-              <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, opacity: 0.8}} >Last Modified</Text>
-            </TouchableOpacity>
+        {/*DIVIDER*/}
+        <View style={[styles.hr]}></View> 
 
-          </View>
+        {/*SORT*/}
+        <View style={[styles.itemSettings]} >
 
-        <View style={[styles.hr]}></View>
+          <Text style={{color: theme.colors.altColor, fontSize:  theme.fonts.fontSize+4}} >Sort</Text>
 
-          <View style={[styles.itemSettings]} >
-            <Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize+4}} >Reminder</Text>
-            <TouchableOpacity>
-              <Text  style={{fontSize:  theme.fonts.fontSize+2, color: theme.colors.textColor}} >Default Notification Time</Text>
-              <Text  style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, opacity: 0.8}} >6 AM</Text>
-            </TouchableOpacity>
-          </View> */}
+          <SettingSelection modal={handleSortModal} name="Current Sort" current={sort} />
+
+        </View>
+
+        <View style={[styles.hr]}></View> 
+
+        {/*DISPLAY*/}
+        <View style={[styles.itemSettings]} >
+
+            <Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize+4}} >Display</Text>
+
+            <SettingSelection modal={handleDisplayModal} name="Current Display" current={display} />
+        </View>
 
       </View>
 
     </View>
 
-    {/*modal for theme*/}
-    <SettingsModal visible={themeModal} handleModal={handleThemeModal} >
+    {/*THEME MODAL*/}
+    <SettingsModal visible={themeModal} handleModal={handleThemeModal} header="Set Theme:" >
 
-      <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, paddingBottom: 10,}}>Set Theme:</Text>
-      
-      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleThemeSetting("Light")}>
-        <RadioButton
-          color={theme.colors.altColor}
-          uncheckedColor={theme.colors.textColor}
-          value={"Light"} 
-          onPress={ () => handleThemeSetting("Light") } 
-          status={ checked == "Light" ? 'checked' : 'unchecked' }
-        
-        />
-        <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>Light Mode</Text>
-      </TouchableOpacity>
+      <SettingsRadioButton settingFunction={handleThemeSetting} status={themeChecked} value="Light" name="Light Mode" />
+      <SettingsRadioButton settingFunction={handleThemeSetting} status={themeChecked} value="Dark" name="Dark Mode" />
 
-      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleThemeSetting("Dark")} >
-        <RadioButton
-          value={"Dark"} 
-          color={theme.colors.altColor}
-          onPress={ () => handleThemeSetting("Dark") } 
-          status={ checked == "Dark" ? 'checked' : 'unchecked' }
-          uncheckedColor={theme.colors.textColor}
-        />
-        <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>Dark Mode</Text>
-      </TouchableOpacity>
     </SettingsModal>
 
-    {/*modal for fontsize*/}
-    <SettingsModal visible={fontSizeModal} handleModal={handleFontSizeModal} >
-      <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, paddingBottom: 10,}}>Set Font Size:</Text>
+    {/*FONT SIZE MODAL*/}
+    <SettingsModal visible={fontSizeModal} handleModal={handleFontSizeModal} header="Set Font Size:" >
 
-      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleFontSizeSettings("Small")}>
-        <RadioButton
-          value={"Small"} 
-          color={theme.colors.altColor}
-          onPress={ () => handleFontSizeSettings("Small") } 
-          status={ fontSizeChecked == "Small" ? 'checked' : 'unchecked' } 
-          uncheckedColor={theme.colors.textColor}
-          />
-        <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}}>Small</Text>
-      </TouchableOpacity>
+      <SettingsRadioButton settingFunction={handleFontSizeSettings} status={fontSizeChecked} value="Small" name="Small" />
+      <SettingsRadioButton settingFunction={handleFontSizeSettings} status={fontSizeChecked} value="Medium" name="Medium" />
+      <SettingsRadioButton settingFunction={handleFontSizeSettings} status={fontSizeChecked} value="Large" name="Large" />
 
-      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleFontSizeSettings("Medium")}>
-        <RadioButton
-          value={"Medium"}
-          color={theme.colors.altColor}
-          onPress={ () => handleFontSizeSettings("Medium") } 
-          status={ fontSizeChecked == "Medium" ? 'checked' : 'unchecked' }
-          uncheckedColor={theme.colors.textColor}
-        />
-        <Text style={{fontSize: theme.fonts.fontSize, color:  theme.colors.textColor}}>Medium</Text>
-      </TouchableOpacity>
+    </SettingsModal>
 
-      <TouchableOpacity style={styles.selectionBtn} onPress={() => handleFontSizeSettings("Large")}>
-        <RadioButton
-          value={"Large"} 
-          color={theme.colors.altColor}
-          onPress={ () => handleFontSizeSettings("Large") } 
-          status={ fontSizeChecked == "Large" ? 'checked' : 'unchecked' }
-          uncheckedColor={theme.colors.textColor}
-        />
-        <Text style={{fontSize: theme.fonts.fontSize, color:  theme.colors.textColor}}>Large</Text>
-      </TouchableOpacity>
-      
+    {/*SORT MODAL*/}
+    <SettingsModal visible={sortModal} handleModal={handleSortModal} header="Set Sort:" > 
+
+      <SettingsRadioButton settingFunction={handleSortSettings} status={sortChecked} value="By Modified Time" name="By Modified Time" />
+      <SettingsRadioButton settingFunction={handleSortSettings} status={sortChecked} value="By Created Time" name="By Created Time" />
+
+    </SettingsModal>
+
+    {/*DISLPAY MODAL*/}
+    <SettingsModal visible={displayModal} handleModal={handleDisplayModal} header="Set Display:" > 
+
+      <SettingsRadioButton settingFunction={handleDisplaySettings} status={displayChecked} value="List" name="List" />
+      <SettingsRadioButton settingFunction={handleDisplaySettings} status={displayChecked} value="Details" name="Details" />
+      <SettingsRadioButton settingFunction={handleDisplaySettings} status={displayChecked} value="Grid" name="Grid" />
+      <SettingsRadioButton settingFunction={handleDisplaySettings} status={displayChecked} value="Large Grid" name="Large Grid" />
+
     </SettingsModal>
 
     </>
@@ -188,7 +262,9 @@ const styles = StyleSheet.create({
     width:"100%",
     borderWidth:1,
     height: 1,
-    borderColor: '#cccccc'
+    borderColor: '#cccccc',
+    opacity: 0.5,
+    marginTop: 10,
   },
   selectionBtn:{
     flexDirection: 'row',

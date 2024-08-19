@@ -394,7 +394,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     >
     
       {/*Today's passage*/}
-      <View style={[styles.passageToday, {backgroundColor: theme.colors.primary, }]}>
+      <View style={[styles.passageToday, {backgroundColor: theme.colors.primary, borderBottomWidth: 1, borderBottomColor: theme.colors.borderColor,}]}>
 
         { verseLoading ? <ActivityIndicator style={{width: '40%'}} /> : (
           <View style={[{flexDirection: 'column'}]}>

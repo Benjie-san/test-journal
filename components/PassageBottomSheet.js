@@ -84,30 +84,24 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 	}
 
 	const getVerse = (scripture = "Genesis 1:1-3", translation) => {
-		let splitVerse = [];
-		let range = [];
+		let splitVerse = [], range = [], verseTextResult = [], verseNumberResult = [], passage = []
 		let book = "";
-		let chapter = 0;
-		let start = 0;
-		let end = 0;
-		let verseTextResult = [];
-		let verseNumberResult = []
-		let passage = [];
+		let chapter = 0, start = 0, end = 0;
+
 		if(scripture !== '' && scripture !== undefined && scripture !== null){
-			let checkVerse = scripture.split(":");
-			if( checkVerse[0] !== scripture ){
+		
+			if( scripture.indexOf(':') > -1  ){
 
 				splitVerse = scripture.split(":");
 				let regex = /Psalms|Psalm/g;
 				let regexFound = splitVerse[0].match(regex) // on an array when found
-				if(regexFound == "Psalm" || "Psalms"){
+				if(regexFound == "Psalm" || regexFound == "Psalms"){
 					book = splitVerse[0].slice(0, splitVerse[0].length-3).trim(); // for hundreds in chapter
 					chapter = splitVerse[0].slice(splitVerse[0].length-3, splitVerse[0].length).trim();
 				}else{
 					book = splitVerse[0].slice(0, splitVerse[0].length-2).trim(); // for tens in chapter limit is 99
 					chapter = splitVerse[0].slice(splitVerse[0].length-2, splitVerse[0].length).trim();
 				}
-
 
 				let checkStartVerse = splitVerse[1].split("-");
 				if( checkStartVerse[0] !== splitVerse[1]){
@@ -142,6 +136,24 @@ export default function PassageBottomSheet({visible, handleModal, scripture, han
 					}
 				});
 
+			}
+			else{
+			
+				let splitScripture = scripture.split(" ");
+				if(splitScripture.length == 2){
+					book = splitScripture[0];
+					chapter = splitScripture[1];
+				}else if (splitScripture.length == 3){
+					book = splitScripture[0]+" "+splitScripture[1];
+					chapter = splitScripture[2];
+				}
+				
+				//outputs the whole chapter
+				translation.verses.forEach(function (item) {
+					if(item.book_name === book && item.chapter === parseInt(chapter) ){
+						passage.push(`${item.verse} ${item.text}`);
+					}
+				});
 			}
 			
 		setFetchedVerse(verseTextResult);
