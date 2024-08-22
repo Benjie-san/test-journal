@@ -710,8 +710,11 @@ return (
 			</KeyboardAwareScrollView>
 
 			{isKeyboardVisible ? (
-				<View style={{minHeight: 50, backgroundColor: 'red', position: 'sticky', bottom: 0}}>
+				<View style={{minHeight: 50, backgroundColor: theme.colors.primary, position: 'sticky', bottom: 0}}>
 					<Text>TAB</Text>
+					<Text>TAB</Text>
+					<Text>TAB</Text>
+
 				</View>
 			) : null}
 				
