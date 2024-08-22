@@ -1,4 +1,4 @@
-import { Text, View, TextInput, TouchableOpacity, Share, AppState, ActivityIndicator, Alert} from 'react-native';
+import { Text, View, TextInput, TouchableOpacity, Keyboard, AppState, ActivityIndicator, Alert} from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from "react-native-modal";
@@ -26,24 +26,44 @@ import PassageBottomSheet from './PassageBottomSheet';
 import AlertModal from './AlertModal'; // small box that shows up for informing if saved or updated
 import styles from '../styles/entryStyle';
 
-
 const db = SQLite.openDatabase('_journal_database.db');
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
+const Input = ({type, textParam, changeText, param, item, minHeight }) => {
+	const theme = useTheme(); //for theme
+
+	const basicStyles = {
+		fonts:{
+			color: theme.colors.textColor,  
+			fontSize: theme.fonts.fontSize,
+		}
+	}
+	return(
+		<View style={[styles.inputContainer,]}>
+			<Text  style={basicStyles.fonts}>{type === "sermon" ? textParam[0]: type == "opm" ? textParam[1] : textParam[2]}</Text>
+			<TextInput 
+				style={[styles.input, {minHeight: minHeight,
+				fontSize: theme.fonts.fontSize}]} 
+				editable onChangeText={ text => changeText(text, param) } 
+				value={item} 
+				multiline={true} 
+			/>
+		</View>
+	);
+}
+
 export default function Entry({navigation, route }){
 const theme = useTheme(); //for theme
-const isFocused = useIsFocused();
+const isFocused = useIsFocused(); // checking for when entry is focused on the screen
 const {entryId, verse, entryType, index, itemId, state} = route.params;
 
 //themes
-
 const basicStyles = {
 	fonts:{
 		color: theme.colors.textColor,  
 		fontSize: theme.fonts.fontSize,
 	}
 }
-
 
 //for showing modals
 const [dateModalVisible, setDateModalVisible] = useState(false);
@@ -60,7 +80,7 @@ const [observation, setObservation] = useState("");
 const [application, setApplication] = useState("");
 const [prayer, setPrayer] = useState("");
 const [question, setQuestion] = useState("");
-//
+
 const [type, setType] = useState(entryType);
 const [status, setStatus] = useState("");
 
@@ -204,12 +224,7 @@ const handlePassageTranslation = () =>{
 	}
 }
 
-const [passageModalVisble, setPassageModalVisible] = useState(false);
-
-const handlePassageVisible = (item) => {
-    setPassageModalVisible(item);
-}
-
+// for alerts
 const [alertModalVisible, setAlertModalVisible] = useState(false);
 
 const [message, setMessage] = useState("");
@@ -239,11 +254,13 @@ const handleDiscard = (item) =>{
 	return item
 }
 
+// for keyboard
+const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
 // HANDLE FUNCTIONS
 const handleDateModal = () => {
 	setDateModalVisible(!dateModalVisible)
 }
-
 
 // when closed is pressed
 
@@ -360,6 +377,27 @@ const updateEntry = () => {
 	});
 }
 
+const entrySaver = (type, entryId, message) => {
+	console.log(entryId)
+	db.transaction((tx) => {
+		tx.executeSql(
+		'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, createdDate, settingState ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+		[date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), parseInt(entryId), months[index], Date.now(), "normal"],
+		(tx, results) => {
+				console.log(message);
+				fetchEntry(entryId);
+				setCurrentState("update");
+				setDisableSave(false);
+				changed.current = false;
+		},
+		(error) => {
+		// Handle error
+		console.log("Save Entry ERROR:", error);
+		}
+		);
+	});
+}
+
 //saving entry
 const saveEntry = () => {
 	// adding entry to db
@@ -367,44 +405,10 @@ const saveEntry = () => {
 	if(!isEmpty.every((item)=>item=="")){
 
 		if(type=="journal" || type == "sermon"){
-			db.transaction((tx) => {
-				tx.executeSql(
-				'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, createdDate, settingState ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-				[date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), parseInt(itemId), months[index], Date.now(), "normal"],
-				(tx, results) => {
-						console.log("Success added Journal entry!!!");
-						fetchEntry(itemId);
-						setCurrentState("update");
-						setDisableSave(false);
-						changed.current = false;
-				},
-				(error) => {
-				// Handle error
-				console.log("Save Entry ERROR:", error);
-				}
-				);
-			});
+			entrySaver(type, itemId, "Journal Entry Saved");
 		}
 		else{
-			db.transaction((tx) => {
-				tx.executeSql(
-				'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, createdDate, settingState) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-				[date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), parseInt(dataId), months[index], Date.now(), "normal"],
-				(tx, results) => {
-				console.log("Success added OPM entry!!!");
-					fetchEntry(dataId);
-					setCurrentState("update");
-					setDisableSave(false);
-					changed.current = false;
-
-
-				},
-				(error) => {
-				// Handle error
-				console.log( "Save Entry ERROR:", error);
-				}
-				);
-			});
+			entrySaver(type, dataId, "OPM Entry Saved");
 		}
 	}
 
@@ -413,8 +417,7 @@ const saveEntry = () => {
 const fetchEntry = (id) =>{
     db.transaction((tx) => {
         tx.executeSql(
-            "SELECT * FROM entries WHERE dataId = ?;",
-        [id],
+            "SELECT * FROM entries WHERE dataId = ?;",[id],
             (_, result) => {
                 const rows = result.rows;
                 let dataArray = [];
@@ -483,7 +486,33 @@ const animatedStyle = useAnimatedStyle( ()=>{
 }, [show]);
 
 //USE EFFECTS
+useEffect(() => {
+	const keyboardDidShowListener = Keyboard.addListener(
+	'keyboardDidShow',
+		() => {
+			setKeyboardVisible(true); // or some other action
+		}
+	);
 
+	const keyboardDidHideListener = Keyboard.addListener(
+	'keyboardDidHide',
+		() => {
+			setKeyboardVisible(false); // or some other action
+		}
+		);
+
+	return () => {
+		keyboardDidHideListener.remove();
+		keyboardDidShowListener.remove();
+	};
+}, []);
+
+//getting scripture once entry is loaded
+useEffect(() => {
+	getVerse(scripture, esv);
+}, [scripture]);
+
+//for setting OPM dataId
 useEffect(() => {
 	let date = new Date();
     if(type == "opm"){
@@ -609,125 +638,99 @@ useEffect(() => {
 
 return (
 	<>
-		<View style={{ flex: 1,margin: 0, backgroundColor: theme.colors.secondary, }} >
-		
-			{ !entryLoading ? (<ActivityIndicator style={[styles.flex]} size={'large'}/>) : (
-				<View style={[styles.modal, {backgroundColor: theme.colors.secondary,}]}>
+	<View style={{ flex: 1,margin: 0, backgroundColor: theme.colors.secondary, }} >
+
+	{ !entryLoading ? (<ActivityIndicator style={[styles.flex]} size={'large'}/>) : (
+		<View style={[styles.modal, {backgroundColor: theme.colors.secondary,}]}>
+			
+			<KeyboardAwareScrollView
+				style={{ backgroundColor: theme.colors.secondary }}
+				resetScrollToCoords={{ x: 0, y: 0 }}
+				scrollEnabled={true}
+			> 
+				{/*SCRIPTURE*/}
+				<View style={[styles.inputContainer, ]}>
+					<Text  style={basicStyles.fonts}>
+						{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }
+					</Text>
 					
-						<KeyboardAwareScrollView
-							style={{ backgroundColor: theme.colors.secondary }}
-							resetScrollToCoords={{ x: 0, y: 0 }}
-							scrollEnabled={true}
-						> 
-							{/*SCRIPTURE*/}
-							<View style={[styles.inputContainer, ]}>
-								<Text  style={basicStyles.fonts}>
-									{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }
-								</Text>
-								
-								<TouchableOpacity style={{padding: 10, backgroundColor:'#bfbfbf', borderRadius: 5, justifyContent: 'space-between', flexDirection: 'row', alignItems:'center', }} onPress={ () => handleExpandable() }>
+					<TouchableOpacity style={{padding: 10, backgroundColor:'#bfbfbf', borderRadius: 5, justifyContent: 'space-between', flexDirection: 'row', alignItems:'center', }} onPress={ () => handleExpandable() }>
 
-								{/* <Text style={{fontSize: theme.fonts.fontSize}}>{scripture}</Text> */}
+						<TextInput style={[{fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
 
-									<TextInput style={[{fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
+						<TouchableOpacity onPress={ () => handlePassageTranslation() } style={{padding: 5,}}>
+							<Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize}}>{passageTranslation}</Text>
+						</TouchableOpacity>
 
-									<TouchableOpacity onPress={ () => handlePassageTranslation() } style={{padding: 5,}}>
-										<Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize}}>{passageTranslation}</Text>
-									</TouchableOpacity>
+					</TouchableOpacity>
 
-								</TouchableOpacity>
+					<Animated.View style={[animatedStyle, { borderRadius: 5, }]}>
+					
+						<View onLayout={onLayout} style={{width: '100%', position: 'absolute', marginTop: 10,borderRadius: 5, gap: 5, padding: 10,  backgroundColor:'#bfbfbf', flexBasis: 'auto', minHeight: 50 }}>
 
-								<Animated.View style={[animatedStyle, { borderRadius: 5, }]}>
-								
-									<View onLayout={onLayout} style={{width: '100%', position: 'absolute', marginTop: 10,borderRadius: 5, gap: 5, padding: 10,  backgroundColor:'#bfbfbf', flexBasis: 'auto', minHeight: 50 }}>
-
-										{ passage.length > 0 ? 
-											(
-												passage?.map( (item, key) => (
-													<Text key={key} style={{fontSize: theme.fonts.fontSize, marginBottom: 10}} >{item}</Text>
-												))
-											):
-											(<Text>No Verse Found</Text>)
-										}
-										
-									</View>
-								
-								</Animated.View>
-
-							</View>
-
-							<View style={[styles.inputContainer,]}>
-								<Text  style={basicStyles.fonts}>{type === "sermon" ? "Theme:": type == "opm" ? 'OPM Theme:' : 'Title:'}</Text>
-								<TextInput style={[styles.input, {minHeight: 50, fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "title") } value={title} multiline={true} />
-							</View>
-
-							{ entryType != "journal" ?
+							{ passage.length > 0 ? 
 								(
-									<View style={styles.inputContainer}>
-									<Text  style={basicStyles.fonts}>Question:</Text>
-									<TextInput style={[styles.input, {minHeight: 50, fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "question") } value={question} multiline={true} />
-									</View>
-								) : null
+									passage?.map( (item, key) => (
+										<Text key={key} style={{fontSize: theme.fonts.fontSize, marginBottom: 10}} >{item}</Text>
+									))
+								):
+								(<Text>No Verse Found</Text>)
 							}
-							<View style={[styles.inputContainer, {}]}>
-								<Text  style={basicStyles.fonts}>{type === "sermon" ? "Sermon Points:": type == "opm" ? 'Key Points:' : 'Observation:'}</Text>
-								<TextInput 
-									style={[styles.input, { fontSize: theme.fonts.fontSize}]} 
-									editable 
-									onChangeText={ text => handleChangeText(text, "observation") } 
-									value={observation}  
-									multiline={true} 	
-									
-								/>
-							</View>
+							
+						</View>
+					
+					</Animated.View>
 
-							<View style={styles.inputContainer}>
-								<Text  style={basicStyles.fonts}>{type === "sermon" ? "Recommendations:": type == "opm" ? 'Recommendations:' : 'Application:'}</Text>
-								<TextInput style={[styles.input,{ fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "application")} value={application}  multiline={true} />
-							</View>
-
-							<View style={styles.inputContainer} >
-								<Text style={basicStyles.fonts}>{type == "sermon" ? "Reflection:": type == "opm" ? 'Reflection/Realization:' : 'Prayer:'}</Text>
-								<TextInput style={[styles.input, { fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "prayer") } value={prayer}  multiline={true} />
-
-								{/* <View style={[styles.flex,{paddingTop: 20,}]}>
-									<TouchableOpacity 
-										style={[styles.border, {  backgroundColor: theme.colors.secondary, borderColor: theme.colors.borderColor,alignItems: 'center', justifyContent: 'space-evenly', flexDirection: 'row', padding: 10, gap: 5, width: 100,elevation: 5 }]} 
-										onPress={ () => handlePassageVisible(true) }
-									>
-									<FontAwesome5 name="bible" size={24} color={theme.colors.textColor} />
-									<Text style={{color: theme.colors.textColor , fontSize: theme.fonts.fontSize}}>Bible</Text>
-
-									</TouchableOpacity>
-								</View> */}
-
-							</View>
-
-						
-						
-						</KeyboardAwareScrollView>
-						
 				</View>
 
-			)
-			}
-		
-			<AlertModal message={message} visible={alertModalVisible} />
+				{/*THEME / TITLE*/}
+				<Input type={type} textParam={["Theme:", "OPM Theme:", "Title:"]} 
+				changeText={handleChangeText} param="title" item={title} minHeight={50} />
+
+				{/*QUESTION*/}
+				{ entryType != "journal" ?
+					(
+				
+						<Input type={type} textParam={["Question:", "Question:", "Question:"]}
+						changeText={handleChangeText} param="question" item={question} minHeight={50}/>
+
+					) : null
+				}
+				
+				{/* OBSERVATION / SERMON POINTS */}
+				<Input type={type} textParam={["Sermon Points:", "Key Points:", "Observation:"]} changeText={handleChangeText} param="observation" item={observation} minHeight={100} />
+
+				{/*APPLICATION / RECOMMENDATIONS*/}
+				<Input type={type} textParam={["Propositions:", "Recommendations:", "Application:"]} changeText={handleChangeText} param="application" item={application} minHeight={100}/>
+
+				{/*PRAYER / REFLECTION*/}							
+
+				<Input type={type} textParam={["Reflection:", "Reflection/Realization:", "Prayer:"]} changeText={handleChangeText} param="prayer" item={prayer} minHeight={100} />
 			
-			<PassageBottomSheet 
-				visible={passageModalVisble} handleModal={handlePassageVisible} 
-				scripture={scripture} type={entryType} handlePassage={handlePassage} 
-			/>
-			
+			</KeyboardAwareScrollView>
+
+			{isKeyboardVisible ? (
+				<View style={{minHeight: 50, backgroundColor: 'red', position: 'sticky', bottom: 0}}>
+					<Text>TAB</Text>
+				</View>
+			) : null}
+				
 		</View>
 
-		<MenuModal 
-			visible={menuVisible} handleCloseModal={handleMenuVisible} 
-			deleteEntry={deleteEntry} 
-			status={status} handleStatus={handleStatus} 
-			entry={entryToBeShared} type={entryType} 
-			handleSettingState={handleSettingState} settingState={settingState}
-		/>
+	)
+	}
+
+		<AlertModal message={message} visible={alertModalVisible} />
+		
+	</View>
+
+	<MenuModal 
+		visible={menuVisible} handleCloseModal={handleMenuVisible} 
+		deleteEntry={deleteEntry} 
+		status={status} handleStatus={handleStatus} 
+		entry={entryToBeShared} type={entryType} 
+		handleSettingState={handleSettingState} settingState={settingState}
+	/>
 	</>
 )
 

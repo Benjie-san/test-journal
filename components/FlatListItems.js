@@ -9,13 +9,11 @@ const FlatListItems = ({item, handleDisplayEntryFetch, display}) => {
     const themeTextColor =  theme.colors.textColor;
     const renderLayout = {
         list:{
-            width:'99%',
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
         },
         details:{
-            width:'99%',
             flexDirection: 'column',
             justifyContent: 'flex-start',
             flexGrow: 0,
@@ -103,11 +101,11 @@ const FlatListItems = ({item, handleDisplayEntryFetch, display}) => {
             :
             display == "Details" ? 
                 (<>
-                    <Text style={{color: themeTextColor, fontSize: themeFontSize+2, overflow:'hidden', flex: 1, fontWeight: 'bold'}}>{item.scripture}</Text>
-                    <Text style={{color: themeTextColor, fontSize: themeFontSize, overflow:'hidden', flex: 1, }}>{item.title}</Text>
+                    <Text style={{color: theme.colors.altColor, fontSize: themeFontSize+1, overflow:'hidden', flex: 1, fontWeight: 'bold'}}>{item.scripture}</Text>
+                    <Text style={{color: themeTextColor, fontSize: themeFontSize-1, overflow:'hidden', flex: 1, }}>{item.title}</Text>
                     <View style={{width: '100%', flexDirection: 'row', justifyContent: 'space-between'}}>
-                        <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden',}}>{item.date}</Text>
-                        <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                        <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden', opacity: 0.7}}>{item.date}</Text>
+                        <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden', opacity: 0.7}}>{formatLastModified(Number(item.modifiedDate))}</Text>
                     </View>
                 
                 </>) 

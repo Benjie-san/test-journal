@@ -9,11 +9,11 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#fff",
+      "backgroundColor": "#0C3591",
       "dark": {
         "image": "./assets/splash.png",
         "resizeMode": "contain",
-        "backgroundColor": "#000"
+        "backgroundColor": "#0C3591"
       }
     },
     "assetBundlePatterns": [
@@ -26,7 +26,7 @@
       "package": "com.journal.journal",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#fff"
       },
       "googleServicesFile": "./android/app/google-services.json"
       

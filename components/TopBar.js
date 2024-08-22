@@ -8,7 +8,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Tab = createMaterialTopTabNavigator();
 
-
 const RenderFlatlist = ({notes, noteListLoading, handleDisplayEntryFetch, display}) => {
   const theme = useTheme();
 
@@ -187,7 +186,7 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    padding:10,
+    padding:5,
   },
 
 });

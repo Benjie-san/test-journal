@@ -251,7 +251,7 @@ export default function App() {
     <>
 
       <PaperProvider theme={customTheme}>
-      <StatusBar/>
+      <StatusBar style="auto"/>
         <SafeAreaProvider>
           <NavigationContainer>
             <NavigationIndex 
