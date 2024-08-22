@@ -711,7 +711,7 @@ return (
 
 			{isKeyboardVisible ? (
 				<View style={{minHeight: 50, backgroundColor: theme.colors.primary, position: 'sticky', bottom: 0}}>
-					<Text>TAB</Text>
+					<Text style={styles.border}>TAB</Text>
 					<Text>TAB</Text>
 					<Text>TAB</Text>
 
