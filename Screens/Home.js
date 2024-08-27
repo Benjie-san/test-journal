@@ -39,8 +39,10 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   //states for sorting
   const [allCount, setAllCount] = useState(0);
   const [journalCount, setJournalCount] = useState(0);
+  const [sermonCount, setSermonCount] = useState(0);
+
   const [opmCount, setOpmCount] = useState(0);
-  const sortButtonCount = [allCount, journalCount, opmCount];
+  const sortButtonCount = [allCount, journalCount, sermonCount, opmCount];
 
   //for dates
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -169,16 +171,19 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   };
 
   //for fetching entries of Journal & OPM
-  const dataFetcher = (query, dependencies) => {
+  const dataFetcher = (query, dependencies, type) => {
     db.transaction((tx) => {
       tx.executeSql(
         query, dependencies,
         (_, result) => {
           const rows = result.rows;
-      
-          if(dependencies[0] == "journal"){
+          if(type == "journal"){
             setJournalCount(rows.length);
-          }else{ setOpmCount(rows.length) }
+          }
+          if(type == "sermon"){
+            setSermonCount(rows.length);
+          }
+          else{ setOpmCount(rows.length) }
 
           const dataArray = [];
           for (let i = 0; i < rows.length; i++) {
@@ -186,10 +191,10 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
             dataArray.push(item);
           }
 
-          if(dependencies[0] == "journal"){
-            setNotesJournal(dataArray);
-          }else{
+          if(type == 'opm'){
             setNotesOPM(dataArray);
+          }else{
+            setNotesJournal(dataArray);
           }
 
         },
@@ -201,21 +206,25 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   }
 
   const fetchData = (type, sort, filter) => {
-    let query = 'SELECT * FROM entries WHERE settingState="normal" AND type = ? '
+    let query = 'SELECT * FROM entries WHERE settingState = "normal" AND type="opm" '
+
+    if(type !== "opm"){
+      query = 'SELECT * FROM entries WHERE settingState="normal" AND type="journal" OR type="sermon" '
+    }
     if(filter == "All"){
       if(sort == "By Modified Time"){
-        dataFetcher( query + "ORDER BY modifiedDate DESC;", [type]);
+        dataFetcher( query + "ORDER BY modifiedDate DESC;", [], type);
       }
       else{
-        dataFetcher( query + "ORDER BY createdDate ASC;", [type]);
+        dataFetcher( query + "ORDER BY createdDate ASC;", [], type);
       }
     }
     else{
       if(sort == "By Modified Time"){
-        dataFetcher( query + "AND month = ? ORDER BY modifiedDate DESC;", [type, filter]);
+        dataFetcher( query + "AND month = ? ORDER BY modifiedDate DESC;", [type, filter], type);
       }
       else{
-        dataFetcher( query + "AND month = ? ORDER BY createdDate ASC;", [type, filter]);
+        dataFetcher( query + "AND month = ? ORDER BY createdDate ASC;", [type, filter], type);
       }
     }
   };
@@ -376,8 +385,8 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
 
       fetchAllData(currentSort.current, filterSetter(currentFilter.current));
       fetchData("journal", currentSort.current,  filterSetter(currentFilter.current));
-      fetchData("opm", currentSort.current, filterSetter(currentFilter.current) );
- 
+      //fetchData("opm", currentSort.current, filterSetter(currentFilter.current) );
+
     }
   }, [isFocused]);
 

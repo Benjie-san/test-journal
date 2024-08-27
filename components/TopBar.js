@@ -139,7 +139,7 @@ const TopBar = ({navigation, route, notes, notesJournal, notesOPM, noteListLoadi
           component={RenderJournal} 
           options={{
               tabBarIcon: ({ focused })=>{
-                return( < SortBtn name="Journal" count={sortButtonCount[1]} focused={focused}  /> )
+                return( < SortBtn name="Journal" count={sortButtonCount[1]+sortButtonCount[2]} focused={focused}  /> )
               },
           }}
         />
@@ -148,7 +148,7 @@ const TopBar = ({navigation, route, notes, notesJournal, notesOPM, noteListLoadi
           component={RenderOPM} 
           options={{
               tabBarIcon: ({ focused })=>{
-                return( < SortBtn name="OPM" count={sortButtonCount[2]} focused={focused} /> )
+                return( < SortBtn name="OPM" count={sortButtonCount[3]} focused={focused} /> )
               },
           }}
         />
