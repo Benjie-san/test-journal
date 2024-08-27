@@ -1,6 +1,6 @@
 export default DarkScheme = {
     "primary": "#111315",
-    "secondary": "#30353C",
+    "secondary": "#1e1e21",
     "tertiary": "#444b55",
     "textColor": "#fff",    
     "altTextColor": "#000",

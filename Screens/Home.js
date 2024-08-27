@@ -39,10 +39,8 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   //states for sorting
   const [allCount, setAllCount] = useState(0);
   const [journalCount, setJournalCount] = useState(0);
-  const [sermonCount, setSermonCount] = useState(0);
-
   const [opmCount, setOpmCount] = useState(0);
-  const sortButtonCount = [allCount, journalCount, sermonCount, opmCount];
+  const sortButtonCount = [allCount, journalCount, opmCount];
 
   //for dates
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -179,9 +177,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
           const rows = result.rows;
           if(type == "journal"){
             setJournalCount(rows.length);
-          }
-          if(type == "sermon"){
-            setSermonCount(rows.length);
           }
           else{ setOpmCount(rows.length) }
 
@@ -384,8 +379,8 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     if(isFocused){
 
       fetchAllData(currentSort.current, filterSetter(currentFilter.current));
-      fetchData("journal", currentSort.current,  filterSetter(currentFilter.current));
-      //fetchData("opm", currentSort.current, filterSetter(currentFilter.current) );
+      fetchData("journal", currentSort.current, filterSetter(currentFilter.current));
+      fetchData("opm", currentSort.current, filterSetter(currentFilter.current) );
 
     }
   }, [isFocused]);

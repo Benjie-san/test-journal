@@ -22,7 +22,7 @@ const FlatListItems = ({item, handleDisplayEntryFetch, display}) => {
             textAlign: 'left',
         },
         grid:{
-            width: '32%',
+            width: '31%',
             flexGrow: 0,
             flexWrap: 'wrap',
             flexDirection: 'column',
@@ -30,7 +30,7 @@ const FlatListItems = ({item, handleDisplayEntryFetch, display}) => {
 
         },
         largeGrid:{
-            width: '49%',
+            width: '48%',
             flexGrow: 0,
             flexWrap: 'wrap',
             flexDirection: 'column',
@@ -81,7 +81,10 @@ const FlatListItems = ({item, handleDisplayEntryFetch, display}) => {
                     padding: 14,
                     margin: 3,
                     borderRadius: 5,
+                    borderColor: theme.colors.borderColor,
+                    borderWidth: 1,
                     overflow:'hidden',
+
                 }
             ]}
             onPress={ ()=> handleDisplayEntryFetch(item) }

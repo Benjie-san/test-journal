@@ -482,8 +482,9 @@ const animatedStyle = useAnimatedStyle( ()=>{
 		return{
 			height: animatedHeight.value,
 			overflow: 'hidden',
+			flexBasis: 'auto',
 		};
-}, [show]);
+}, [show, height]);
 
 //USE EFFECTS
 useEffect(() => {
@@ -656,7 +657,7 @@ return (
 					
 					<TouchableOpacity style={{padding: 10, backgroundColor:'#bfbfbf', borderRadius: 5, justifyContent: 'space-between', flexDirection: 'row', alignItems:'center', }} onPress={ () => handleExpandable() }>
 
-						<TextInput style={[{fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
+						<TextInput placeholder="Enter Text" style={[{fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
 
 						<TouchableOpacity onPress={ () => handlePassageTranslation() } style={{padding: 5,}}>
 							<Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize}}>{passageTranslation}</Text>
@@ -666,7 +667,7 @@ return (
 
 					<Animated.View style={[animatedStyle, { borderRadius: 5, }]}>
 					
-						<View onLayout={onLayout} style={{width: '100%', position: 'absolute', marginTop: 10,borderRadius: 5, gap: 5, padding: 10,  backgroundColor:'#bfbfbf', flexBasis: 'auto', minHeight: 50 }}>
+						<View onLayout={onLayout} style={{width: '100%', position: 'absolute', marginTop: 10,borderRadius: 5, gap: 5, padding: 10,  backgroundColor:'#bfbfbf', flexBasis: 'auto', minHeight: 50,  }}>
 
 							{ passage.length > 0 ? 
 								(
