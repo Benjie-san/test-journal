@@ -1,6 +1,6 @@
 import Modal from "react-native-modal";
 import { StyleSheet, Text, View,} from 'react-native';
-import styles from "../styles/entryStyle";
+import styles from "../../styles/entryStyle";
 import {useTheme} from 'react-native-paper';
 
 const AlertModal = ({visible, message, globalStyle}) =>{   

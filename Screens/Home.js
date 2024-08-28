@@ -8,9 +8,9 @@ import { useIsFocused } from '@react-navigation/native';
 import { useTheme } from 'react-native-paper';
 
 // import for components
-import Navbar from '../components/Navbar';
-import TopBar from '../components/TopBar';
-import AddModal from '../components/AddModal';
+import Navbar from '../components/homeComponents/Navbar';
+import TopBar from '../components/homeComponents/TopBar';
+import AddModal from '../components/homeComponents/AddModal';
 
 //import vector-icons
 import AntDesign from '@expo/vector-icons/AntDesign';

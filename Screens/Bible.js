@@ -4,7 +4,10 @@ import Modal from "react-native-modal";
 import React,{useState, useEffect} from 'react'
 import * as SQLite from 'expo-sqlite';
 import {useTheme, RadioButton} from 'react-native-paper';
+import Feather from '@expo/vector-icons/Feather';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
+//bibles
 import asv from '../constants/asv.json';
 import esv from '../constants/esv.json';
 import tagalog from '../constants/tagab.json';
@@ -12,10 +15,41 @@ import tagalog from '../constants/tagab.json';
 export default function Bible({navigation}) {
 const theme = useTheme();
 
+
+//HEADER
+useEffect(() => {
+  navigation.setOptions({
+      headerStyle: {backgroundColor: theme.colors.primary, justifyContent: 'space-between'},
+
+    headerLeft: () => (
+        <Feather name="menu" size={24} color={theme.colors.textColor} />
+    ),
+    headerTitle: () => (
+
+      <View style={{flexDirection: 'row', alignItems: "center",gap:10}}>
+        <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize}}>
+          Romans 1 ESV
+        </Text>
+
+      </View>
+
+    ),
+    headerRight: () => (
+
+      <View style={{flexDirection: 'row', alignItems: "center", gap:10, }}>
+        <MaterialIcons name="search" size={24} color={theme.colors.textColor} />
+      
+      </View>
+
+    ),
+      
+  });
+}, []);
+
     return (
         <>
 
-            <View style={styles.container}>
+            <View style={[styles.container, {backgroundColor: theme.colors.secondary}]}>
                 <Text>BIBLE</Text>
             </View>
         </>

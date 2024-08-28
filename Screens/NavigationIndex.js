@@ -11,9 +11,9 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { FontAwesome5 } from '@expo/vector-icons';
 
-import Settings from "../components/Settings";
-import Archive from "../components/Archive";
-import Trash from '../components/Trash'
+import Settings from "../components/moreComponents/Settings";
+import Archive from "../components/moreComponents/Archive";
+import Trash from '../components/moreComponents/Trash'
 import Entry from '../components/Entry';
 
 import { useTheme } from 'react-native-paper';

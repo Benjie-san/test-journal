@@ -2,11 +2,11 @@ import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-nati
 import React,{ useState, useEffect } from 'react';
 import Modal from "react-native-modal";
 import { useTheme, RadioButton } from 'react-native-paper'; 
-import asv from '../constants/asv.json';
-import esv from '../constants/esv.json';
-import tagalog from '../constants/tagab.json';
+import asv from '../../constants/asv.json';
+import esv from '../../constants/esv.json';
+import tagalog from '../../constants/tagab.json';
 import { Entypo } from '@expo/vector-icons';
-import styles from '../styles/passageStyle';
+import styles from '../../styles/passageStyle';
 
 const translationsName = ["ESV","ASV", "Tagalog"];
 

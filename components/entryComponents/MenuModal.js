@@ -6,7 +6,7 @@ import Feather from '@expo/vector-icons/Feather';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from 'react-native-paper';
 import Modal from "react-native-modal";
-import styles from '../styles/entryStyle';
+import styles from '../../styles/entryStyle';
 
 const MenuModal = ({visible, handleCloseModal, status, entry, type, handleStatus, handleSettingState, settingState}) => {
     const theme = useTheme(); //for theme

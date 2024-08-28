@@ -8,7 +8,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { Foundation } from '@expo/vector-icons';
 import { Fontisto } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
-import styles from '../styles/passageStyle';
+import styles from '../../styles/passageStyle';
 const monthsComplete = ["All", "January", "February", "March", "April", "May",  "June", "July", "August", "September", "October", "November", "December"];
 
 

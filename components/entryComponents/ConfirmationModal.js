@@ -1,4 +1,4 @@
-import styles from '../styles/entryStyle';
+import styles from '../../styles/entryStyle';
 import { Text, View, TouchableOpacity,} from 'react-native';
 import Modal from "react-native-modal";
 import { useTheme } from 'react-native-paper';

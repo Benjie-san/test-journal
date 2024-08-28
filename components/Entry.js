@@ -1,11 +1,12 @@
 import { Text, View, TextInput, TouchableOpacity, Keyboard, AppState, ActivityIndicator, Alert} from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import Modal from "react-native-modal";
 import * as SQLite from 'expo-sqlite';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useTheme } from 'react-native-paper';
+
+// Navigation
+import { useIsFocused } from '@react-navigation/native';
 
 // JSON bibles
 import asv from '../constants/asv.json';
@@ -13,17 +14,11 @@ import esv from '../constants/esv.json';
 import tagalog from '../constants/tagab.json';
 
 // Icons
-import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
-import { MaterialIcons } from '@expo/vector-icons';
-
-// Navigation
-import { useIsFocused } from '@react-navigation/native';
 
 //Component Imports
-import MenuModal from './MenuModal';
-import PassageBottomSheet from './PassageBottomSheet';
-import AlertModal from './AlertModal'; // small box that shows up for informing if saved or updated
+import MenuModal from './entryComponents/MenuModal';
+import AlertModal from './entryComponents/AlertModal'; // small box that shows up for informing if saved or updated
 import styles from '../styles/entryStyle';
 
 const db = SQLite.openDatabase('_journal_database.db');
@@ -244,36 +239,18 @@ const handleAlertModalVisible = (item) =>{
 }
 
 const [discardModal, setDiscardModal] = useState(false);
-const eventDiscard = useRef(null);
 
 const handleDiscardModal = (item) =>{
 	setDiscardModal(item)
-}
-
-const handleDiscard = (item) =>{
-	return item
 }
 
 // for keyboard
 const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
 // HANDLE FUNCTIONS
-const handleDateModal = () => {
-	setDateModalVisible(!dateModalVisible)
-}
 
 // when closed is pressed
 
-const onChangeDate = ({type}, selectedDate) =>{
-	if(type == "set"){   
-		setDateModalVisible(false);
-		const currentDate = selectedDate;
-		setEntryDate(currentDate);
-		handleChangeDate(currentDate.toDateString());
-	} else{
-		handleDateModal();
-	}
-}
 
 const handleChangeDate = (item) =>{
 	setDate(item);
@@ -606,7 +583,7 @@ useEffect( () =>
 		]
 	);
 
-}),[navigation, changed, ]);
+}),[navigation, changed,]);
 
 
 //HEADER
