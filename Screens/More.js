@@ -19,6 +19,12 @@ export default function More({navigation}) {
   const handleOpenTrash = () =>{
     navigation.navigate("Trash");
   }
+  const handleOpenTutorial = () =>{
+    navigation.navigate("Tutorial");
+  }
+  const handleOpenAbout = () =>{
+    navigation.navigate("About");
+  }
 
   return (
     <>
@@ -45,13 +51,13 @@ export default function More({navigation}) {
           
         </View>
 
-        {/* <View style={styles.moreViewRow}>
-          <TouchableOpacity style={styles.moreBtn}>
+        <View style={styles.moreViewRow}>
+          <TouchableOpacity style={styles.moreBtn} onPress={handleOpenTutorial}>
               <MaterialIcons name="menu-book" size={28}  color={theme.colors.textColor} />
               <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Tutorial</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.moreBtn}>
+          <TouchableOpacity style={styles.moreBtn} onPress={handleOpenAbout}>
               <Feather name="info" size={28}  color={theme.colors.textColor} />
               <Text  style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >About</Text>
           </TouchableOpacity>
@@ -62,7 +68,7 @@ export default function More({navigation}) {
           </TouchableOpacity>
           
 
-        </View> */}
+        </View>
 
 
 

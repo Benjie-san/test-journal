@@ -14,6 +14,9 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import Settings from "../components/moreComponents/Settings";
 import Archive from "../components/moreComponents/Archive";
 import Trash from '../components/moreComponents/Trash'
+import Tutorial from '../components/moreComponents/Tutorial'
+import About from '../components/moreComponents/About'
+
 import Entry from '../components/Entry';
 
 import { useTheme } from 'react-native-paper';
@@ -50,6 +53,9 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
         />);
     const RenderArchive = (props) => ( <Archive {...props}   /> );
     const RenderTrash = (props) => ( <Trash {...props}   /> );
+    const RenderTutorial = (props) => ( <Tutorial {...props}   /> );
+    const RenderAbout = (props) => ( <About {...props}   /> );
+
 
     //STACKS OF COMPONENTS
     const StackHome = () => (
@@ -165,6 +171,18 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
                 name="Trash"
                 component={RenderTrash}
                 options={{ headerTitle: "Settings",}}
+            />
+
+            <MoreStack.Screen
+                name="Tutorial"
+                component={RenderTutorial}
+                options={{ headerTitle: "Tutorial",}}
+            />
+
+            <MoreStack.Screen
+                name="About"
+                component={RenderAbout}
+                options={{ headerTitle: "About",}}
             />
         
             <MoreStack.Screen name="MoreEntry" component={RenderEntry} />

@@ -1,0 +1,107 @@
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import React,{useState, useEffect} from 'react';
+import { useTheme } from 'react-native-paper';
+import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
+import Entypo from '@expo/vector-icons/Entypo'; 
+import content from '../../constants/content.json'
+
+const ExpandableComponent = ({title, children}) =>{
+  const theme = useTheme();
+  const [show, setShow] = useState(false);
+  const [height, setHeight] = useState(0);
+
+  const onLayout = (event) => {
+  const layoutHeight = event.nativeEvent.layout.height;
+
+    if(layoutHeight > 0 && layoutHeight !== height){
+        setHeight(layoutHeight);
+      }
+  }
+      
+  const animatedStyle = useAnimatedStyle( ()=>{
+    const animatedHeight = show ? withTiming(height) : withTiming(0);
+    return{
+      height: animatedHeight,
+      overflow: 'hidden',
+      flexBasis: 'auto',
+    }
+  });
+  
+  return(
+    <View >
+      <TouchableOpacity 
+        onPress={() => setShow(!show)} 
+        style={[styles.expandableContainer,{  borderBottomWidth: 1, borderColor: theme.colors.textColor, }]}
+      >
+        <Text style={{fontSize: theme.fonts.fontSize+1, color: theme.colors.textColor}}>{title}</Text> 
+
+        <Entypo name={show ? "chevron-thin-up" : "chevron-thin-down"} size={28} color={theme.colors.textColor}/>
+
+      </TouchableOpacity>
+
+      <Animated.View style={animatedStyle}>
+
+        <View onLayout={onLayout} style={{position: 'absolute', width: '100%', padding:10, gap: 10, borderBottomWidth: 1, borderColor: theme.colors.textColor,}} >
+          {children}  
+        </View>
+      
+      </Animated.View>
+      
+    </View>
+  );
+}
+
+export default function About() {
+  const theme = useTheme();
+  
+  return (
+    <View style={{flex: 1, backgroundColor: theme.colors.secondary,}}>
+      <ScrollView>
+
+        <ExpandableComponent title={content.cbcsof.title}>
+          {
+            content.cbcsof.items.map( (item, index) =>(
+                <Text key={index} style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, gap: 10}}>{item}</Text>  
+            ) )
+          }
+        </ExpandableComponent>
+
+        <ExpandableComponent title={content.covenant.title}>
+          {
+            content.covenant.items.map( (item, index) =>(
+              <Text key={index} style={
+                {fontSize: theme.fonts.fontSize, 
+                color: theme.colors.textColor, 
+                gap: 10,
+                fontWeight: item[0] == "O" ? "bold" : "normal"
+              }}>
+                { item }
+              </Text>  
+          ) )
+          }
+        </ExpandableComponent>
+
+        <ExpandableComponent title={content.cbcdmp.title}>
+          {
+            content.cbcdmp.items.map( (item, index) =>(
+                <Text key={index} style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, gap: 10}}>{item}</Text>  
+            ) )
+          }
+        </ExpandableComponent>
+
+      </ScrollView>
+
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  expandableContainer:{
+    width: '100%',
+    padding: 12,
+    justifyContent: "space-between",
+    flexDirection: "row",
+    alignItems: "center",
+    boderBottomWidth: 1,
+  }
+})
