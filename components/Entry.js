@@ -20,6 +20,7 @@ import Feather from '@expo/vector-icons/Feather';
 import MenuModal from './entryComponents/MenuModal';
 import AlertModal from './entryComponents/AlertModal'; // small box that shows up for informing if saved or updated
 import styles from '../styles/entryStyle';
+import { preventAutoHide } from 'expo-splash-screen';
 
 const db = SQLite.openDatabase('_journal_database.db');
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -61,7 +62,6 @@ const basicStyles = {
 }
 
 //for showing modals
-const [dateModalVisible, setDateModalVisible] = useState(false);
 const [menuVisible, setMenuVisible] = useState(false);
 
 //data fields
@@ -82,8 +82,6 @@ const [status, setStatus] = useState("");
 const [passage, setPassage] = useState(""); 
 const [passageTranslation, setPassageTranslation] = useState("ESV")
 
-const [currentEntry, setCurrentEntry] = useState();
-
 const [currentState, setCurrentState] = useState(state); //handling state in saving
 const [settingState, setSettingState] = useState(""); // for setting the state in archive
 
@@ -101,8 +99,6 @@ const [show, setShow] = useState(false);
 const appState = useRef(AppState.currentState);
 const [appCurrentState, setAppCurrentState] = useState(appState.current);
 
-//for dates
-const [entryDate, setEntryDate] = useState(new Date());
 
 //for sharing
 const entryToBeShared = {
@@ -244,8 +240,6 @@ const handleDiscardModal = (item) =>{
 	setDiscardModal(item)
 }
 
-// for keyboard
-const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
 // HANDLE FUNCTIONS
 
@@ -413,34 +407,36 @@ const fetchEntry = (id) =>{
     });
 }
 
-const setItems = (currentEntry) => {
-    setDataId(Number(currentEntry?.dataId));
-    setId(currentEntry?.id);
-    setDate(currentEntry?.date);
-    setTitle(currentEntry?.title);
-    setScripture(currentEntry?.scripture);
-    setQuestion(currentEntry?.question);
-    setObservation(currentEntry?.observation);
-    setApplication(currentEntry?.application);
-    setPrayer(currentEntry?.prayer);
-    setType(currentEntry?.type);
-    setStatus(currentEntry?.status);
-    setSettingState(currentEntry?.settingState);
+const setItems = (dataArray) => {
+    setDataId(Number(dataArray?.dataId));
+    setDate(dataArray?.date);
+    setTitle(dataArray?.title);
+    setScripture(dataArray?.scripture);
+    setQuestion(dataArray?.question);
+    setObservation(dataArray?.observation);
+    setApplication(dataArray?.application);
+    setPrayer(dataArray?.prayer);
+    setType(dataArray?.type);
+    setStatus(dataArray?.status);
+    setSettingState(dataArray?.settingState);
 }
 
 const handleEntry = () => {
     setDisableSave(true);
     if(currentState == "add"){
         saveEntry();
+		handleAlertModalVisible(true);
     }
     else{
-        if( currentEntry?.scripture !== scripture || currentEntry?.title !== title || currentEntry?.question !== question || currentEntry?.observation !== observation || currentEntry?.application !== application || currentEntry?.prayer !== prayer || currentEntry?.status !== status ){  
+        if( changed.current){  
             updateEntry();
+			handleAlertModalVisible(true);
         }
     }
-    handleAlertModalVisible(true);
     
 }
+
+console.log(changed.current)
 
 //For Animation of SCRIPTURE EXPANDABLE
 
@@ -455,7 +451,6 @@ const onLayout = (event) => {
 
 const animatedStyle = useAnimatedStyle( ()=>{
 	animatedHeight.value = show ? withTiming(height) : withTiming(0);
-
 		return{
 			height: animatedHeight.value,
 			overflow: 'hidden',
@@ -464,26 +459,8 @@ const animatedStyle = useAnimatedStyle( ()=>{
 }, [show, height]);
 
 //USE EFFECTS
-useEffect(() => {
-	const keyboardDidShowListener = Keyboard.addListener(
-	'keyboardDidShow',
-		() => {
-			setKeyboardVisible(true); // or some other action
-		}
-	);
 
-	const keyboardDidHideListener = Keyboard.addListener(
-	'keyboardDidHide',
-		() => {
-			setKeyboardVisible(false); // or some other action
-		}
-		);
 
-	return () => {
-		keyboardDidHideListener.remove();
-		keyboardDidShowListener.remove();
-	};
-}, []);
 
 //getting scripture once entry is loaded
 useEffect(() => {
@@ -499,6 +476,7 @@ useEffect(() => {
 
 }, []);
 
+//for loading when opened
 useEffect(() => {
     const interval = setTimeout(() => {
         if(entryLoading == false){
@@ -516,6 +494,7 @@ useEffect(() => {
 
 }, [currentState, entryLoading, fetchEntry]);
 
+//for small modal
 useEffect(() => {
     if(alertModalVisible == true){
         const interval = setTimeout(() => {
@@ -584,9 +563,8 @@ useEffect( () =>
 	);
 
 }),[navigation, changed,]);
-// const parent = navigation?.dangerouslyGetParent();
-// console.log(parent);
 
+//for hiding bottom tab
 useEffect(() => {
 	navigation.getParent()?.setOptions({
 		tabBarStyle: {
