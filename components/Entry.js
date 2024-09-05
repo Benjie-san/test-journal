@@ -584,7 +584,23 @@ useEffect( () =>
 	);
 
 }),[navigation, changed,]);
+// const parent = navigation?.dangerouslyGetParent();
+// console.log(parent);
 
+useEffect(() => {
+	navigation.getParent()?.setOptions({
+		tabBarStyle: {
+			display: 'none'
+		}
+	});
+	return () => {
+	navigation.getParent()?.setOptions({
+		tabBarStyle: {
+			display: 'flex'
+		}
+	});
+	}
+}, [])
 
 //HEADER
 useEffect(() => {

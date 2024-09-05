@@ -10,7 +10,6 @@ const Tab = createMaterialTopTabNavigator();
 
 const RenderFlatlist = ({notes, noteListLoading, handleDisplayEntryFetch, display}) => {
   const theme = useTheme();
-
   return(
     <>
     {noteListLoading ? <ActivityIndicator style={styles.flex} size={'large'}/> :
@@ -85,12 +84,14 @@ const SortBtn = ({name, count, focused}) => {
   const theme = useTheme();
   return(
     <View style={[styles.sortingBtn]}>
-      <Text style={[{color: focused ? "#1d9bf0" : theme.colors.textColor, fontSize: theme.fonts.fontSize-1}]}>
+      <Text style={[{color: focused ? theme.colors.altColor : theme.colors.borderColor, fontSize: theme.fonts.fontSize-1}]}>
         {name}
       </Text>
 
-      <View style={[styles.itemCount,{backgroundColor: focused ? "#1d9bf0" : '#808080'  }]}>
-          <Text style={{textAlign: 'center', color: focused ? '#fff' : '#f5f5f5'}}>
+      <View style={[styles.itemCount,{backgroundColor: focused ? "#1d9bf0" : '#cccccc'}]}>
+          <Text style={{textAlign: 'center', 
+            color: theme.name == "light" ? focused ? '#fff' : '#f5f5f5' : 
+            focused ? '#fff':'#767676'}}>
             {count}
           </Text>
       </View>

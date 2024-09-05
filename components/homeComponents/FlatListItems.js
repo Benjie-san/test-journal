@@ -81,8 +81,6 @@ const FlatListItems = ({item, handleDisplayEntryFetch, display}) => {
                     padding: 14,
                     margin: 3,
                     borderRadius: 5,
-                    borderColor: theme.colors.borderColor,
-                    borderWidth: 1,
                     overflow:'hidden',
 
                 }
@@ -104,7 +102,7 @@ const FlatListItems = ({item, handleDisplayEntryFetch, display}) => {
             :
             display == "Details" ? 
                 (<>
-                    <Text style={{color: theme.colors.altColor, fontSize: themeFontSize+1, overflow:'hidden', flex: 1, fontWeight: 'bold'}}>{item.scripture}</Text>
+                    <Text style={{color: theme.colors.textColor, fontSize: themeFontSize, overflow:'hidden', flex: 1, fontWeight: 'bold'}}>{item.scripture}</Text>
                     <Text style={{color: themeTextColor, fontSize: themeFontSize-1, overflow:'hidden', flex: 1, }}>{item.title}</Text>
                     <View style={{width: '100%', flexDirection: 'row', justifyContent: 'space-between'}}>
                         <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden', opacity: 0.7}}>{item.date}</Text>

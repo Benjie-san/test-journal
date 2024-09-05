@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, Platform } from "react-native";
 
-import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
-//import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+//import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Home, Brp, Search, More, Bible} from "./index";
@@ -21,8 +21,8 @@ import Entry from '../components/Entry';
 
 import { useTheme } from 'react-native-paper';
 
-//const Tab = createBottomTabNavigator();
-const Tab = createMaterialBottomTabNavigator();
+const Tab = createBottomTabNavigator();
+//const Tab = createMaterialBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
 const BibleStack = createNativeStackNavigator();
 
@@ -60,7 +60,7 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
     //STACKS OF COMPONENTS
     const StackHome = () => (
         <HomeStack.Navigator
-            screenOptions={{ 
+                screenOptions={{ 
                 headerStyle: {
                     backgroundColor: theme.colors.primary,
                 },
@@ -84,7 +84,7 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
                 component={RenderBrp}
             />
 
-            <HomeStack.Screen name="Entry" component={RenderEntry} />
+            <HomeStack.Screen name="Entry" component={RenderEntry}/>
         </HomeStack.Navigator>
     );
 
@@ -193,20 +193,24 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
     return(
         <Tab.Navigator
             initialRouteName="Home"
-            barStyle={{ backgroundColor: theme.colors.primary}}
+            screenOptions={{
+                tabBarStyle:{ backgroundColor: theme.colors.primary}
+            }}
         >
             <Tab.Screen
                 component={StackHome}
                 name="Home"
                 options={{
-                    tabBarLabel: <Text style={{textAlign : "center", color: '#0998e7'}}>Home</Text>,
+                    tabBarStyle:{ backgroundColor: theme.colors.primary},
+                    headerShown: false,
+                    tabBarShowLabel:false,
                     tabBarIcon: ({ focused }) => {
                         return (
                             <View style={{ alignItems: "center", justifyContent: "center" }}>
                                 <Ionicons
                                     name={focused ? "md-home" : "md-home-outline"}
                                     size={24}
-                                    color="#0998e7"
+                                    color={focused ? theme.colors.altColor : theme.colors.borderColor}
                                 />
                             </View>
                         );
@@ -235,14 +239,15 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
             component={StackSearch}
             name="Search"
             options={{
-                tabBarLabel: <Text style={{textAlign : "center", color: '#e67b0c'}}>Search</Text>,
+                headerShown: false,
+                tabBarShowLabel:false,
                 tabBarIcon: ({ focused }) => {
                     return (
                         <View style={{ alignItems: "center", justifyContent: "center" }}>
                             <Ionicons
-                                name={focused ? "md-search" : "md-search-outline"}
+                                name={"md-search-outline"}
                                 size={24}
-                                color="#e67b0c"
+                                color={focused ? theme.colors.altColor : theme.colors.borderColor}
                             />
                         </View>
                     );
@@ -255,14 +260,15 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
                 component={StackMore}
                 name="More"
                 options={{
-                    tabBarLabel: <Text style={{textAlign : "center", color: '#faca2a'}}>More</Text>,
+                    headerShown: false,
+                    tabBarShowLabel:false,
                     tabBarIcon: ({ focused }) => {
                         return (
                             <View style={{ alignItems: "center", justifyContent: "center" }}>
                                 <MaterialIcons
-                                    name={focused ? "more" : "more-horiz"}
+                                    name={"more-horiz"}
                                     size={24}
-                                    color="#faca2a"
+                                    color={focused ? theme.colors.altColor : theme.colors.borderColor}
                                 />
                             </View>
                         );
