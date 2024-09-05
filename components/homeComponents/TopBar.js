@@ -88,7 +88,7 @@ const SortBtn = ({name, count, focused}) => {
         {name}
       </Text>
 
-      <View style={[styles.itemCount,{backgroundColor: focused ? "#1d9bf0" : '#cccccc'}]}>
+      <View style={[styles.itemCount,{backgroundColor: focused ? theme.colors.altColor : '#cccccc'}]}>
           <Text style={{textAlign: 'center', 
             color: theme.name == "light" ? focused ? '#fff' : '#f5f5f5' : 
             focused ? '#fff':'#767676'}}>
@@ -113,9 +113,13 @@ const TopBar = ({navigation, route, notes, notesJournal, notesOPM, noteListLoadi
     <Tab.Navigator
         initialRouteName='All'
         barStyle={{width:"100%"}}
+      
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: false,
+          tabBarIndicatorStyle: {
+            backgroundColor: theme.colors.altColor,
+          },
           tabBarIconStyle: {
               alignItems:'center',
               justifyContent: 'center',

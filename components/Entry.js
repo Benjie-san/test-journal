@@ -436,8 +436,6 @@ const handleEntry = () => {
     
 }
 
-console.log(changed.current)
-
 //For Animation of SCRIPTURE EXPANDABLE
 
 const animatedHeight = useSharedValue(0);
@@ -568,13 +566,15 @@ useEffect( () =>
 useEffect(() => {
 	navigation.getParent()?.setOptions({
 		tabBarStyle: {
-			display: 'none'
+			display: 'none',
+			backgroundColor: theme.colors.primary
 		}
 	});
 	return () => {
 	navigation.getParent()?.setOptions({
 		tabBarStyle: {
-			display: 'flex'
+			display: 'flex',
+			backgroundColor: theme.colors.primary
 		}
 	});
 	}

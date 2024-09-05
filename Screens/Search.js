@@ -21,6 +21,9 @@ export default function Search({navigation}) {
    const [searchItem, setSearchItem] = useState("");
    const [searchedResult, setsSearchedResult] = useState([]);
 
+   const themeFontSize = theme.fonts.fontSize;
+   const themeTextColor =  theme.colors.textColor;
+
    const openDisplayEntry = (item) => {
       navigation.navigate("Search", {
          screen: 'SearchEntry',
@@ -87,6 +90,10 @@ export default function Search({navigation}) {
          }
    };
 
+   function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+   }
+
    //HEADER
    useLayoutEffect(() => {
       navigation.setOptions({
@@ -121,14 +128,27 @@ export default function Search({navigation}) {
                      keyExtractor={(item) => item.id.toString()}
                      renderItem={({ item }) => (
                   
+                     
                      <TouchableOpacity
-                        style={ [styles.entry, {backgroundColor: theme.colors.primary, elevation: 2, gap: 5}] }
+                        style={ [styles.entry, styles.detailsLayout, {backgroundColor: theme.colors.primary, elevation: 2, gap: 5}] }
                         onPress={ ()=> openDisplayEntry(item) }
                      >
-                        <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize-2, overflow:'hidden', flex: 1}}>{item.title}</Text>
 
-                        <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize-2, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                        <View style={{width: '100%', flexDirection: 'column', }}>
 
+                           {item.settingState !== "normal" ? (
+                              <Text style={{color: theme.colors.textColor, fontSize: themeFontSize, overflow:'hidden', flex: 1, fontWeight: 'bold'}}>{ capitalizeFirstLetter(item.settingState)}</Text>
+                           ) : null }
+                           <Text style={{color: theme.colors.textColor, fontSize: themeFontSize, overflow:'hidden', flex: 1, fontWeight: 'bold'}}>{item.scripture}</Text>
+
+                        </View>
+
+                        <Text style={{color: themeTextColor, fontSize: themeFontSize-1, overflow:'hidden', flex: 1, }}>{item.title}</Text>
+
+                        <View style={{width: '100%', flexDirection: 'row', justifyContent: 'space-between'}}>
+                           <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden', opacity: 0.7}}>{item.date}</Text>
+                           <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden', opacity: 0.7}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                        </View>
                      </TouchableOpacity>
                   )}
                /> 
@@ -178,5 +198,13 @@ const styles = StyleSheet.create({
       justifyContent: 'space-between',
       alignItems: 'center',
       backgroundColor: '#fff',
+   },
+   detailsLayout:{
+      flexDirection: 'column',
+      justifyContent: 'flex-start',
+      flexGrow: 0,
+      flexWrap: 'wrap',
+      alignItems: 'flex-start',
+      textAlign: 'left',
    },
 })

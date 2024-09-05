@@ -410,13 +410,13 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
         ) }
 
         { entriesId.includes(todayVerse?.id) ?
-          (<Pressable disabled style={[styles.addEntryShortcut,]}>
+          (<Pressable disabled style={[styles.addEntryShortcut, {backgroundColor: theme.colors.altColor}]}>
               <AntDesign name="check" size={20} color="white" />
               <Text style={{fontSize: theme.fonts.fontSize+2, color: "#ffffff",  paddingRight: 5}}>Entry Added</Text>
           </Pressable>)
           :
           (  <TouchableOpacity onPress={ () => handleAddButton("today")}
-        style={[styles.addEntryShortcut, { paddingRight: 10,}]}>
+        style={[styles.addEntryShortcut, { paddingRight: 10, backgroundColor: theme.colors.altColor}]}>
             <AntDesign name="plus" size={20} color="white" />
             <Text style={{fontSize: theme.fonts.fontSize+2, color: "#ffffff", paddingRight: 5}}>Add Entry</Text>
           </TouchableOpacity>)
@@ -496,7 +496,6 @@ const styles = StyleSheet.create({
   },
   addEntryShortcut:{
     padding: 10,
-    backgroundColor: "#1d9bf0",
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-evenly',

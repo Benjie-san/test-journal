@@ -10,7 +10,9 @@ export default function Trash({navigation}) {
     const theme = useTheme();
     const [trashEntries, setTrashEntries] = useState([]);
     const isFocused = useIsFocused();
-
+    const themeFontSize = theme.fonts.fontSize;
+    const themeTextColor =  theme.colors.textColor;
+    
     const openDisplayEntry = (item) => {
         navigation.navigate("More", {
             screen: 'MoreEntry',
@@ -109,15 +111,17 @@ export default function Trash({navigation}) {
                         contentInsetAdjustmentBehavior="automatic"
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
-                        
+                    
                         <TouchableOpacity
-                        style={ [styles.entry, {backgroundColor: theme.colors.primary, elevation: 2, gap: 5}] }
-                        onPress={ ()=> openDisplayEntry(item) }
+                            style={ [styles.entry, styles.detailsLayout, {backgroundColor: theme.colors.primary, elevation: 2, gap: 5}] }
+                            onPress={ ()=> openDisplayEntry(item) }
                         >
-                        <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize-2, overflow:'hidden', flex: 1}}>{item.title}</Text>
-
-                        <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize-2, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
-
+                            <Text style={{color: theme.colors.textColor, fontSize: themeFontSize, overflow:'hidden', flex: 1, fontWeight: 'bold'}}>{item.scripture}</Text>
+                            <Text style={{color: themeTextColor, fontSize: themeFontSize-1, overflow:'hidden', flex: 1, }}>{item.title}</Text>
+                            <View style={{width: '100%', flexDirection: 'row', justifyContent: 'space-between'}}>
+                                <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden', opacity: 0.7}}>{item.date}</Text>
+                                <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden', opacity: 0.7}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                            </View>
                         </TouchableOpacity>
                     )}
                 /> 
@@ -131,41 +135,49 @@ export default function Trash({navigation}) {
 }
 
 const styles = StyleSheet.create({
-flex:{
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-},
-border:{
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: 'black',
-},
-btn:{
-    borderBottomWidth:1,
-    padding: 10,
-    alignItems: 'center',
-    margin: 5,
-},
-container:{
-    flex:1,
-    backgroundColor: '#fff',
-},
-searchedlist:{
-    flex: 1,
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex:{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    border:{
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: 'black',
+    },
+    btn:{
+        borderBottomWidth:1,
+        padding: 10,
+        alignItems: 'center',
+        margin: 5,
+    },
+    container:{
+        flex:1,
+        backgroundColor: '#fff',
+    },
+    searchedlist:{
+        flex: 1,
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
 
-    padding:10,
-},
-entry:{
-    marginBottom: 5,
-    borderRadius: 5,
-    padding: 14,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-},
+        padding:10,
+    },
+    entry:{
+        marginBottom: 5,
+        borderRadius: 5,
+        padding: 14,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+    },
+    detailsLayout:{
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        flexGrow: 0,
+        flexWrap: 'wrap',
+        alignItems: 'flex-start',
+        textAlign: 'left',
+    },
 })

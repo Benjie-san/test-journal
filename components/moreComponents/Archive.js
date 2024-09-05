@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TextInput, FlatList, Pressable, Image, TouchableOpacity, Dimensions } from 'react-native'
+import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native'
 import React,{useState, useLayoutEffect, useEffect} from 'react'
 import * as SQLite from 'expo-sqlite';
 import { useIsFocused } from '@react-navigation/native';
@@ -9,6 +9,8 @@ const db = SQLite.openDatabase('_journal_database.db');
 export default function Archive({navigation}) {
     const theme = useTheme();
     const [archivedEntries, setArchivedEntries] = useState([]); 
+    const themeFontSize = theme.fonts.fontSize;
+    const themeTextColor =  theme.colors.textColor;
     const isFocused = useIsFocused();
 
     const openDisplayEntry = (item) => {
@@ -97,76 +99,86 @@ export default function Archive({navigation}) {
     return (
         <>
 
-            <View style={styles.container}>
+        <View style={styles.container}>
 
-            <View style={[styles.searchedlist, {backgroundColor: theme.colors.secondary}]}>
-            {archivedEntries.length === 0 ? (
-                <Text style={{fontSize: theme.fonts.fontSize+14, paddingBottom: 150}}></Text>
-            ) : (
-                <>
-                    <FlatList
-                        style={{width: '100%'}}
-                        data={archivedEntries}
-                        contentInsetAdjustmentBehavior="automatic"
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={({ item }) => (
-                        
-                        <TouchableOpacity
-                            style={ [styles.entry, {backgroundColor: theme.colors.primary, elevation: 2, gap: 5}] }
-                            onPress={ ()=> openDisplayEntry(item) }
-                        >
-                        <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize-2, overflow:'hidden', flex: 1}}>{item.title}</Text>
+        <View style={[styles.searchedlist, {backgroundColor: theme.colors.secondary}]}>
+        {archivedEntries.length === 0 ? (
+            <Text style={{fontSize: theme.fonts.fontSize+14, paddingBottom: 150}}></Text>
+        ) : (
+            <>
+                <FlatList
+                    style={{width: '100%'}}
+                    data={archivedEntries}
+                    contentInsetAdjustmentBehavior="automatic"
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                    
+                    <TouchableOpacity
+                        style={ [styles.entry, styles.detailsLayout, {backgroundColor: theme.colors.primary, elevation: 2, gap: 5}] }
+                        onPress={ ()=> openDisplayEntry(item) }
+                    >
+                        <Text style={{color: theme.colors.textColor, fontSize: themeFontSize, overflow:'hidden', flex: 1, fontWeight: 'bold'}}>{item.scripture}</Text>
+                        <Text style={{color: themeTextColor, fontSize: themeFontSize-1, overflow:'hidden', flex: 1, }}>{item.title}</Text>
+                        <View style={{width: '100%', flexDirection: 'row', justifyContent: 'space-between'}}>
+                            <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden', opacity: 0.7}}>{item.date}</Text>
+                            <Text style={{color: themeTextColor, fontSize: themeFontSize-2, overflow:'hidden', opacity: 0.7}}>{formatLastModified(Number(item.modifiedDate))}</Text>
+                        </View>
+                    </TouchableOpacity>
+                )}
+            /> 
+            </>        
+        )}
+        </View>
 
-                        <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize-2, overflow:'hidden',}}>{formatLastModified(Number(item.modifiedDate))}</Text>
-
-                        </TouchableOpacity>
-                    )}
-                /> 
-                </>        
-            )}
-            </View>
-
-            </View>
+        </View>
         </>
     )
 }
 
 const styles = StyleSheet.create({
-flex:{
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-},
-border:{
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: 'black',
-},
-btn:{
-    borderBottomWidth:1,
-    padding: 10,
-    alignItems: 'center',
-    margin: 5,
-},
-container:{
-    flex:1,
-    backgroundColor: '#fff',
-},
-searchedlist:{
-    flex: 1,
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex:{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    border:{
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: 'black',
+    },
+    btn:{
+        borderBottomWidth:1,
+        padding: 10,
+        alignItems: 'center',
+        margin: 5,
+    },
+    container:{
+        flex:1,
+        backgroundColor: '#fff',
+    },
+    searchedlist:{
+        flex: 1,
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
 
-    padding:10,
-},
-entry:{
-    marginBottom: 5,
-    borderRadius: 5,
-    padding: 14,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-},
+        padding:10,
+    },
+    entry:{
+        marginBottom: 5,
+        borderRadius: 5,
+        padding: 14,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+    },
+    detailsLayout:{
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        flexGrow: 0,
+        flexWrap: 'wrap',
+        alignItems: 'flex-start',
+        textAlign: 'left',
+    },
 })

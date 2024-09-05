@@ -32,20 +32,20 @@ export default function More({navigation}) {
 
         <View style={styles.moreViewRow} >
           <TouchableOpacity style={styles.moreBtn} onPress={ ()=> handleOpenArchive() } >
-              {/* <Feather name="archive" size={28}  color={theme.colors.textColor} /> */}
-              <Entypo name="archive" size={28} color={theme.colors.textColor} />
+              <Feather name="archive" size={28}  color={theme.colors.textColor} />
+              {/* <Entypo name="archive" size={28} color={theme.colors.textColor} /> */}
               <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Archive</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.moreBtn} onPress={ ()=> handleOpenTrash() }>
-              {/* <Feather name="trash" size={28}  color={theme.colors.textColor} /> */}
-              <Entypo name="trash" size={28} color={theme.colors.textColor} />
+              <Feather name="trash" size={28}  color={theme.colors.textColor} />
+              {/* <Entypo name="trash" size={28} color={theme.colors.textColor} /> */}
               <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Trash</Text>
           </TouchableOpacity>
 
           <TouchableOpacity  style={styles.moreBtn} onPress={handleOpenSettings} >
-              {/* <Feather name="settings" size={28} color={theme.colors.textColor} /> */}
-              <FontAwesome5 name="cogs" size={28} color={theme.colors.textColor} />
+              <Feather name="settings" size={28} color={theme.colors.textColor} />
+              {/* <FontAwesome5 name="cogs" size={28} color={theme.colors.textColor} /> */}
               <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Settings</Text>
           </TouchableOpacity>
           
@@ -53,7 +53,7 @@ export default function More({navigation}) {
 
         <View style={styles.moreViewRow}>
           <TouchableOpacity style={styles.moreBtn} onPress={handleOpenTutorial}>
-              <MaterialIcons name="menu-book" size={28}  color={theme.colors.textColor} />
+              <Entypo name="open-book" size={28} color={theme.colors.textColor} />
               <Text style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor}} >Tutorial</Text>
           </TouchableOpacity>
 
