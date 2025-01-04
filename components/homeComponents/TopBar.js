@@ -40,7 +40,6 @@ const RenderFlatlist = ({notes, noteListLoading, handleDisplayEntryFetch, displa
     </>
   );
 }
-<RenderFlatlist />
 const FlatListComponent = ({notes, noteListLoading, handleDisplayEntryFetch, display }) => {
   const theme = useTheme();
   return(

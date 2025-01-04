@@ -51,7 +51,7 @@ const Input = ({type, textParam, changeText, param, item, minHeight }) => {
 export default function Entry({navigation, route }){
 const theme = useTheme(); //for theme
 const isFocused = useIsFocused(); // checking for when entry is focused on the screen
-const {entryId, verse, entryType, index, itemId, state} = route.params;
+const {entryId, verse, entryType, index, itemId, state, entry} = route.params;
 
 //themes
 const basicStyles = {
@@ -87,7 +87,7 @@ const [settingState, setSettingState] = useState(""); // for setting the state i
 
 //const [entriesId, setEntriesId] = useState([]);
 
-const [entryLoading, setEntryLoading] = useState(false);
+const [entryLoading, setEntryLoading] = useState(true);
 
 const changed = useRef(false); // checking if there are changes in the text inputs
 
@@ -352,8 +352,8 @@ const entrySaver = (type, entryId, message) => {
 	console.log(entryId)
 	db.transaction((tx) => {
 		tx.executeSql(
-		'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, createdDate, settingState ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
-		[date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), parseInt(entryId), months[index], Date.now(), "normal"],
+		'INSERT INTO entries (date, title, question, scripture, observation, application, prayer, status, type, modifiedDate, dataId, month, createdDate, settingState, year ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+		[date, title, question, scripture, observation, application, prayer, '#8CFF31', type, Date.now(), parseInt(entryId), months[index], Date.now(), "normal", new Date().getFullYear()],
 		(tx, results) => {
 				console.log(message);
 				fetchEntry(entryId);
@@ -396,9 +396,10 @@ const fetchEntry = (id) =>{
                     const item = rows.item(i);
                     dataArray.push(item);
                 }
-                setEntryLoading(true);
+                
                 setItems(...dataArray);
 				changed.current = false;
+				setEntryLoading(false);
             },
             (_, error) => {
                 console.log("fetch error: ", error)
@@ -477,14 +478,14 @@ useEffect(() => {
 //for loading when opened
 useEffect(() => {
     const interval = setTimeout(() => {
-        if(entryLoading == false){
+        if(entryLoading == true){
             if(currentState == "update"){
-                fetchEntry(entryId);
+                setItems(entry);
             }else{
-                setEntryLoading(true);
+                setEntryLoading(false);
             }
         }       
-    }, 1000)
+    }, 2000)
 
     return () => {
     clearTimeout(interval)
@@ -612,7 +613,7 @@ return (
 	<>
 	<View style={{ flex: 1,margin: 0, backgroundColor: theme.colors.secondary, }} >
 
-	{ !entryLoading ? (<ActivityIndicator style={[styles.flex]} size={'large'}/>) : (
+	{ entryLoading ? (<ActivityIndicator style={[styles.flex]} size={'large'}/>) : (
 		<View style={[styles.modal, {backgroundColor: theme.colors.secondary,}]}>
 			
 			<KeyboardAwareScrollView

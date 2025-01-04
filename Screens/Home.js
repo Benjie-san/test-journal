@@ -72,6 +72,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     navigation.navigate("BRP");
   }
 
+  //Function for opening the entry in add entry button
   const openEntry = (type, scripture) => {
     navigation.navigate("Home", {
       screen: 'Entry',
@@ -85,6 +86,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     });
   }
 
+  //Function for opening the entry in home screen
   const openDisplayEntry = (item) => {
     navigation.navigate("Home", {
       screen: 'Entry',
@@ -92,6 +94,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
         entryId: item.dataId,
         entryType: item.type,
         state: 'update',
+        entry: item,
       },
     });
   }
@@ -137,18 +140,18 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
       }
     else{
       await FileSystem.downloadAsync(
-            Asset.fromModule(require('../assets/brpDatabase.db')).uri,
-            FileSystem.documentDirectory + 'SQLite/brpDatabase.db'
+            Asset.fromModule(require('../assets/brpDatabase2025.db')).uri,
+            FileSystem.documentDirectory + 'SQLite/brpDatabase2025.db'
       );
   }
-    return SQLite.openDatabase("brpDatabase.db");
+    return SQLite.openDatabase("brpDatabase2025.db");
   };
 
   const fetchTodayVerse = async () => {
     const dbBrp = await openBrpDatabase();
     return new Promise( () => {
       dbBrp.transaction((tx) => {
-          tx.executeSql('SELECT * FROM brp2024 WHERE month = ? AND day = ?', [today.month, today.day],
+          tx.executeSql('SELECT * FROM brp2025 WHERE month = ? AND day = ?', [today.month, today.day],
           (_, result) => {
             const rows = result.rows;
             const dataArray = [];
@@ -334,7 +337,37 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
         },
 
       );
-    });
+    },null, null);
+
+    //for altering the table
+    db.transaction((tx) => {
+      tx.executeSql(
+        `PRAGMA table_info('entries');`, 
+        [],
+        (_, { rows: { _array } }) => { 
+          const columnNames = _array.map((column) => column.name);
+          if (!columnNames.includes('year')) {
+            tx.executeSql(
+              `ALTER TABLE entries ADD COLUMN year TEXT;`, 
+              [],
+              (_, { rowsAffected, insertId }) => {
+                console.log('Table altered successfully!', rowsAffected); 
+              },
+              (_, error) => {
+                console.error('Error altering table:', error); 
+              }
+            );
+          } else {
+            console.log('Column already exists.');
+          }
+        },
+        (_, error) => {
+          console.error('Error checking table info:', error); 
+        }
+      );
+    }, 
+    null, 
+    null); 
   };
   
   //option for deleting all entries

@@ -1,7 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View, FlatList, } from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import Entypo from '@expo/vector-icons/Entypo'; 
-import data from '../constants/2024.json';
+import data from '../constants/2025.json';
 import * as SQLite from 'expo-sqlite';
 import { useIsFocused } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system';
@@ -12,7 +12,10 @@ import { useTheme } from 'react-native-paper';
 const dbJournal = SQLite.openDatabase("_journal_database.db");
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 const theme2024 =["SYSTEMS IMPROVEMENT", "SYSTEMS IMPROVEMENT", "MACRO-EVANGELISM","MACRO-EVANGELISM", 'ACCOUNT SETTLEMENT', 'ACCOUNT SETTLEMENT', "RELATIONAL DISCIPLESHIP", "RELATIONAL DISCIPLESHIP", "TRAINING-CENTERED", "TRAINING-CENTERED", "CHURCH", "CHURCH"];
+
+const theme2025 = ["TRAINING", "DISCIPLESHIP", "THEOLOGICAL", "CONTEXT-RELEVANT", "IMMERSIONAL", "INTENTIONAL", "REDEMPTIONAL", "OFFENSIVE", "MISSIONAL", "HOLISTIC", "SMART CHRISTMAS"];
 
 const todayDate = new Date();
 const today ={
@@ -27,11 +30,11 @@ async function openBrpDatabase() {
       }
    else{
       await FileSystem.downloadAsync(
-            Asset.fromModule(require('../assets/brpDatabase.db')).uri,
-            FileSystem.documentDirectory + 'SQLite/brpDatabase.db'
+            Asset.fromModule(require('../assets/brpDatabase2025.db')).uri,
+            FileSystem.documentDirectory + 'SQLite/brpDatabase2025.db'
       );
    }
-   return SQLite.openDatabase("brpDatabase.db");
+   return SQLite.openDatabase("brpDatabase2025.db");
 }
 
 const ExpandableComponent = ({onRef, item, index, navigation}) =>{
@@ -98,7 +101,7 @@ const ExpandableComponent = ({onRef, item, index, navigation}) =>{
       const dbBrp = await openBrpDatabase();
       return new Promise( () => {
          dbBrp.transaction((tx) => {
-            tx.executeSql('SELECT * FROM brp2024 WHERE month = ?', [item],
+            tx.executeSql('SELECT * FROM brp2025 WHERE month = ?', [item],
             (_, result) => {
                const rows = result.rows;
                const dataArray = [];
@@ -122,8 +125,8 @@ const ExpandableComponent = ({onRef, item, index, navigation}) =>{
    const fetchMonthCompletion = (item) =>{
       dbJournal.transaction((tx) => {
          tx.executeSql(
-            "SELECT * FROM entries WHERE month = ? ;",
-            [item],
+            "SELECT * FROM entries WHERE month = ? and year = ? ;",
+            [item, today.year],
             (_, result) => {
                const rows = result.rows;
                const dataArray = [];
@@ -138,8 +141,8 @@ const ExpandableComponent = ({onRef, item, index, navigation}) =>{
                      dataArray4.push(parseInt(item.dataId));
                   }
                }
-               setIdArray(dataArray2);
-               setIdcomplete(dataArray4);
+               setIdArray(dataArray2);// all id of the saved items in the DB
+               setIdcomplete(dataArray4); // id of the complete items in DB
             },
             (_, error) => {
                alert("No Entry yet")
@@ -227,7 +230,7 @@ const ExpandableComponent = ({onRef, item, index, navigation}) =>{
          >
             <Text style={{fontSize: theme.fonts.fontSize+3, color: theme.colors.textColor}}>{item.category_name}</Text> 
 
-            {show ? (<Text style={{fontSize: theme.fonts.fontSize, paddingLeft: 10,  color: theme.colors.textColor, }}>{theme2024[index]}</Text>):null}
+            {show ? (<Text style={{fontSize: theme.fonts.fontSize, paddingLeft: 10,  color: theme.colors.textColor, }}>{theme2025[index]}</Text>):null}
 
             <Entypo name={show ? "chevron-thin-up" : "chevron-thin-down"} size={28} color={theme.colors.textColor}/>
 
