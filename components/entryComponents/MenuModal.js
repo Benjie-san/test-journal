@@ -10,7 +10,13 @@ import styles from '../../styles/entryStyle';
 
 const MenuModal = ({visible, handleCloseModal, status, entry, type, handleStatus, handleSettingState, settingState}) => {
     const theme = useTheme(); //for theme
-    
+
+	let entryPassage = "";
+	if(entry?.passage.length > 0){
+		entryPassage = entry?.passage.map( item => "\n" + item + "\n" );
+	}
+	console.log(entryPassage.toString());
+
 	const alertModal = (title, message) => 	Alert.alert(
 		title,
 		message,
@@ -29,7 +35,7 @@ const MenuModal = ({visible, handleCloseModal, status, entry, type, handleStatus
     const onShare = async () => {
         let message = "";
         if(type == "journal"){
-            message =  `Date:\n${entry.date}\n\nScripture:\n${entry.scripture}\n\n${entry.passage.toString()}\n\nTitle:\n${entry.title}\n\nObservation:\n${entry.observation}\n\nApplication:\n${entry.application}\n\nPrayer:\n${entry.prayer}\n`
+            message =  `Date:\n${entry.date}\n\nScripture:\n${entry.scripture}\n\n${entryPassage.toString().replaceAll(",", "")}\n\nTitle:\n${entry.title}\n\nObservation:\n${entry.observation}\n\nApplication:\n${entry.application}\n\nPrayer:\n${entry.prayer}\n`
         }else if(type == "opm"){
             message =  `Date:\n${entry.date}\n\nOPM Passage:\n${entry.scripture}\n\nTheme:\n${entry.title}\n\nQuestion:\n${entry.question}\n\nKey Points:\n${entry.observation}\n\nRecommendations:\n${entry.application}\n\nReflection/Realization:\n${entry.prayer}\n\n`
         } else if(type == "sermon"){

@@ -1,6 +1,6 @@
 //import for react stuffs
 import { StyleSheet, Text, View, TouchableOpacity, Pressable, ActivityIndicator } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Asset} from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 import * as SQLite from 'expo-sqlite';
@@ -30,6 +30,8 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
   const [notes, setNotes] = useState([]);// showing all the data
   const [notesJournal, setNotesJournal] = useState([]);// showing all the data
   const [notesOPM, setNotesOPM] = useState([]);// showing all the data
+
+  const currentNote = useRef({});
 
   //const [notesId, setNotesId] = useState([]);
   const [entriesId, setEntriesId] = useState([]);
@@ -91,8 +93,8 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     navigation.navigate("Home", {
       screen: 'Entry',
       params: {
-        entryId: item.dataId,
-        entryType: item.type,
+        entryId: item?.dataId,
+        entryType: item?.type,
         state: 'update',
         entry: item,
       },
@@ -427,6 +429,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
         paddingBottom: insets.bottom,
         paddingLeft: insets.left,
         paddingRight: insets.right,
+        backgroundColor: theme.colors.primary,
       }]}
     >
     
@@ -437,7 +440,7 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
           <View style={[{flexDirection: 'column'}]}>
             <Text style={{fontSize: theme.fonts.fontSize+4, fontWeight: 'bold', color: theme.colors.textColor,}}>Today's Passage</Text>
             <Text style={{fontSize: theme.fonts.fontSize+3, color:  theme.colors.textColor}}>{todayVerse.verse}</Text>
-            <Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}}>{today.month + " " + today.day}</Text>
+            <Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor}}>{today.month + " " + today.day + ", " + today.year}</Text>
           </View>
 
         ) }

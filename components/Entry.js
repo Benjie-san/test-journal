@@ -69,8 +69,8 @@ const [id, setId] = useState(0);
 const [dataId, setDataId] = useState(0);
 
 const [date, setDate] = useState(new Date().toDateString());
-const [title, setTitle] = useState("");
 const [scripture, setScripture] = useState(verse);
+const [title, setTitle] = useState();
 const [observation, setObservation] = useState("");
 const [application, setApplication] = useState("");
 const [prayer, setPrayer] = useState("");
@@ -396,10 +396,7 @@ const fetchEntry = (id) =>{
                     const item = rows.item(i);
                     dataArray.push(item);
                 }
-                
                 setItems(...dataArray);
-				changed.current = false;
-				setEntryLoading(false);
             },
             (_, error) => {
                 console.log("fetch error: ", error)
@@ -420,6 +417,8 @@ const setItems = (dataArray) => {
     setType(dataArray?.type);
     setStatus(dataArray?.status);
     setSettingState(dataArray?.settingState);
+	changed.current = false;
+	setEntryLoading(false);
 }
 
 const handleEntry = () => {
@@ -459,8 +458,6 @@ const animatedStyle = useAnimatedStyle( ()=>{
 
 //USE EFFECTS
 
-
-
 //getting scripture once entry is loaded
 useEffect(() => {
 	getVerse(scripture, esv);
@@ -475,23 +472,30 @@ useEffect(() => {
 
 }, []);
 
-//for loading when opened
 useEffect(() => {
-    const interval = setTimeout(() => {
-        if(entryLoading == true){
-            if(currentState == "update"){
-                setItems(entry);
-            }else{
-                setEntryLoading(false);
-            }
-        }       
-    }, 2000)
+	if(entryLoading == true){
+		setItems(entry);
+	}
+}, [entry, setItems, entryLoading])
 
-    return () => {
-    clearTimeout(interval)
-    }
 
-}, [currentState, entryLoading, fetchEntry]);
+// //for loading when opened
+// useEffect(() => {
+//     const interval = setTimeout(() => {
+//         if(entryLoading == true){
+//             if(currentState == "update"){
+//                 setItems(entry);
+//             }else{
+//                 setEntryLoading(false);
+//             }
+//         }       
+//     }, 1000)
+
+//     return () => {
+//     clearTimeout(interval)
+//     }
+
+// }, [currentState, entryLoading, fetchEntry,]);
 
 //for small modal
 useEffect(() => {
@@ -534,6 +538,7 @@ useEffect(() => {
     };
 }, [isFocused, currentState, saveEntry, updateEntry]);
 
+//for back button
 useEffect( () =>
 	navigation.addListener('beforeRemove', (e) => {
 	if (changed.current == false) {
@@ -611,6 +616,8 @@ useEffect(() => {
 
 return (
 	<>
+
+	
 	<View style={{ flex: 1,margin: 0, backgroundColor: theme.colors.secondary, }} >
 
 	{ entryLoading ? (<ActivityIndicator style={[styles.flex]} size={'large'}/>) : (
