@@ -15,7 +15,6 @@ const MenuModal = ({visible, handleCloseModal, status, entry, type, handleStatus
 	if(entry?.passage.length > 0){
 		entryPassage = entry?.passage.map( item => "\n" + item + "\n" );
 	}
-	console.log(entryPassage.toString());
 
 	const alertModal = (title, message) => 	Alert.alert(
 		title,

@@ -6,4 +6,5 @@ export default DarkScheme = {
     "altTextColor": "#000",
     "altColor": "#1d9bf0",
     "borderColor": "#cccccc",
+    "name": "dark",
 }

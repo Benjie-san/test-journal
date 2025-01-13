@@ -6,4 +6,5 @@ export default LightScheme = {
     "altTextColor": "#fff",
     "altColor": "#1d9bf0",
     "borderColor": "#cccccc",
+    "name": "light",
 }

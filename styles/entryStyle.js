@@ -21,21 +21,17 @@ const styles = StyleSheet.create({
    },
    inputContainer:{
       width: "100%",
-      textAlign: 'left',
       justifyContent: 'center',
-      alignItems: 'left',
-      padding: 10,
-
+      padding: 15,
    },
    input:{    
-      flex:1,
-      minHeight: 100,
       maxHeight: 800,
-      borderRadius: 5,
-      backgroundColor: '#bfbfbf',
+      borderRadius: 10,
       width: "100%",
-      padding: 10,
-   
+      padding: 15,
+      borderWidth: 1,
+      textAlign: 'left',
+
    },
    touchableContainer:{
       width: "100%",

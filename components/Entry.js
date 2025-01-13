@@ -15,31 +15,48 @@ import tagalog from '../constants/tagab.json';
 
 // Icons
 import Feather from '@expo/vector-icons/Feather';
+import Entypo from '@expo/vector-icons/Entypo';
 
 //Component Imports
 import MenuModal from './entryComponents/MenuModal';
 import AlertModal from './entryComponents/AlertModal'; // small box that shows up for informing if saved or updated
 import styles from '../styles/entryStyle';
-import { preventAutoHide } from 'expo-splash-screen';
 
 const db = SQLite.openDatabase('_journal_database.db');
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-const Input = ({type, textParam, changeText, param, item, minHeight }) => {
+const Input = ({type, textTitleParam, inputPlaceHolderParam,changeText, param, item, minHeight }) => {
+	const [isFocused, setIsFocused] = useState(false);
 	const theme = useTheme(); //for theme
 
 	const basicStyles = {
 		fonts:{
 			color: theme.colors.textColor,  
 			fontSize: theme.fonts.fontSize,
+			fontWeight: 'bold',
+			
 		}
 	}
 	return(
-		<View style={[styles.inputContainer,]}>
-			<Text  style={basicStyles.fonts}>{type === "sermon" ? textParam[0]: type == "opm" ? textParam[1] : textParam[2]}</Text>
-			<TextInput 
-				style={[styles.input, {minHeight: minHeight,
-				fontSize: theme.fonts.fontSize}]} 
+		<View style={[styles.inputContainer,{gap: 5,}]}>
+			<Text  style={[basicStyles.fonts,]}>{type === "sermon" ? textTitleParam[0]: type == "opm" ? textTitleParam[1] : textTitleParam[2]}</Text>
+			<TextInput
+				onFocus={() => setIsFocused(true)}
+				style={[styles.input, {
+					borderColor: isFocused ? theme.colors.altColor : "#cccccc",
+					color: theme.colors.textColor,
+					minHeight: minHeight,
+					fontSize: theme.fonts.fontSize,
+					backgroundColor: theme.colors.primary,
+					textAlignVertical: param == "title" ? 'center' : param == "question" ? "center" : "top"}
+				]} 
+				placeholder={type === "sermon" ? 
+					inputPlaceHolderParam[0]:  
+					type == "opm" ? 
+					inputPlaceHolderParam[1] : 
+					inputPlaceHolderParam[2]
+				}
+				placeholderTextColor="#cccccc"
 				editable onChangeText={ text => changeText(text, param) } 
 				value={item} 
 				multiline={true} 
@@ -472,9 +489,15 @@ useEffect(() => {
 
 }, []);
 
+// //for loading when opened
 useEffect(() => {
 	if(entryLoading == true){
-		setItems(entry);
+		
+		if(currentState == "update"){
+			setItems(entry);
+		}else{
+			setEntryLoading(false);
+		}
 	}
 }, [entry, setItems, entryLoading])
 
@@ -514,9 +537,9 @@ useEffect(() => {
 //for drawer when pressed
 useEffect(() => {
     const subscription = AppState.addEventListener('change', nextAppState => {
-
+	
     if (appState.current.match(/inactive|background/) &&
-    nextAppState === 'active') {
+    nextAppState === 'active' && changed.current == false) {
         return;
     }else{
         if(isFocused === true){
@@ -589,7 +612,10 @@ useEffect(() => {
 //HEADER
 useEffect(() => {
     navigation.setOptions({
-        headerStyle: {backgroundColor: theme.colors.primary},
+		headerShadowVisible: false,
+        headerStyle: {backgroundColor: theme.colors.primary, elevation: 0,
+			shadowOpacity: 0,
+			borderBottomWidth: 0,},
 	
         headerTitle: () => (
             <Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, fontWeight: 'bold'}}>{entryType == "sermon" ? "Sermon Note" : entryType == "journal" ? "Journal Entry" : "OPM Reflection"}</Text>
@@ -614,44 +640,60 @@ useEffect(() => {
     });
 }, [navigation, entryType, handleEntry, currentState]);
 
+
+//
+console.log(entryType)
+//
+
+
 return (
 	<>
 
 	
-	<View style={{ flex: 1,margin: 0, backgroundColor: theme.colors.secondary, }} >
+	<View style={{ flex: 1,margin: 0, backgroundColor: theme.colors.primary, }} >
 
 	{ entryLoading ? (<ActivityIndicator style={[styles.flex]} size={'large'}/>) : (
-		<View style={[styles.modal, {backgroundColor: theme.colors.secondary,}]}>
+		<View style={[styles.modal, {backgroundColor: theme.colors.primary,}]}>
 			
 			<KeyboardAwareScrollView
-				style={{ backgroundColor: theme.colors.secondary }}
+				style={{ backgroundColor: theme.colors.primary }}
 				resetScrollToCoords={{ x: 0, y: 0 }}
 				scrollEnabled={true}
 			> 
 				{/*SCRIPTURE*/}
-				<View style={[styles.inputContainer, ]}>
-					<Text  style={basicStyles.fonts}>
-						{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage:' : 'Scripture:' }
+				<View style={[styles.inputContainer, {gap:5}]}>
+					<Text  style={[basicStyles.fonts, {fontWeight: 'bold'}]}>
+						{type === "sermon" ? "Text:" : type == "opm" ? 'OPM Passage' : 'Scripture' }
 					</Text>
 					
-					<TouchableOpacity style={{padding: 10, backgroundColor:'#bfbfbf', borderRadius: 5, justifyContent: 'space-between', flexDirection: 'row', alignItems:'center', }} onPress={ () => handleExpandable() }>
+					<TouchableOpacity style={{padding: 10, backgroundColor: theme.colors.primary, borderRadius: 10, justifyContent: 'space-between', flexDirection: 'row', alignItems:'center', borderColor: '#cccccc', borderWidth: 1,}} onPress={ () => handleExpandable() }>
 
-						<TextInput placeholder="Enter Text" style={[{fontSize: theme.fonts.fontSize}]} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
+						<TextInput  placeholderTextColor="#cccccc" placeholder="Enter Text here" style={[{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, }]} editable onChangeText={ text => handleChangeText(text, "scripture") } value={scripture}/>
 
-						<TouchableOpacity onPress={ () => handlePassageTranslation() } style={{padding: 5,}}>
+						{ !show ? ( 
+						<View >
+							<Entypo name="chevron-small-up" size={18} color="#cccccc" />
+							<Entypo name="chevron-small-down" size={18} color="#cccccc" />
+						</View>) : 
+						(<TouchableOpacity onPress={ () => handlePassageTranslation() } style={{padding: 5,}}>
 							<Text style={{color: theme.colors.altColor, fontSize: theme.fonts.fontSize}}>{passageTranslation}</Text>
-						</TouchableOpacity>
+						</TouchableOpacity> ) }
 
 					</TouchableOpacity>
 
-					<Animated.View style={[animatedStyle, { borderRadius: 5, }]}>
+				
+					<Animated.View style={[animatedStyle, { borderRadius: 10, borderColor: show ? '#cccccc' : theme.colors.primary, borderWidth: 1,}]}>
 					
-						<View onLayout={onLayout} style={{width: '100%', position: 'absolute', marginTop: 10,borderRadius: 5, gap: 5, padding: 10,  backgroundColor:'#bfbfbf', flexBasis: 'auto', minHeight: 50,  }}>
+						<View onLayout={onLayout} style={{width: '100%', position: 'absolute', borderRadius: 10, gap: 5, padding: 10,  backgroundColor: theme.colors.primary, flexBasis: 'auto', minHeight: 50,}}>
 
 							{ passage.length > 0 ? 
 								(
 									passage?.map( (item, key) => (
-										<Text key={key} style={{fontSize: theme.fonts.fontSize, marginBottom: 10}} >{item}</Text>
+										<Text key={key} style={{
+											fontSize: theme.fonts.fontSize, 
+											marginBottom: 0, color: 
+											theme.colors.textColor}} >{item}
+										</Text>
 									))
 								):
 								(<Text>No Verse Found</Text>)
@@ -664,28 +706,39 @@ return (
 				</View>
 
 				{/*THEME / TITLE*/}
-				<Input type={type} textParam={["Theme:", "OPM Theme:", "Title:"]} 
+				<Input type={type} textTitleParam={["Theme", "OPM Theme", "Title"]}
+				inputPlaceHolderParam={["Write the Theme", "Write the OPM Theme", "What is the title?"]}
 				changeText={handleChangeText} param="title" item={title} minHeight={50} />
 
 				{/*QUESTION*/}
 				{ entryType != "journal" ?
 					(
 				
-						<Input type={type} textParam={["Question:", "Question:", "Question:"]}
+						<Input type={type} textTitleParam={["Question", "Question", "Question"]}
+						inputPlaceHolderParam={["Write the Question", "Write the Question", "What is the question?"]}
 						changeText={handleChangeText} param="question" item={question} minHeight={50}/>
 
 					) : null
 				}
 				
 				{/* OBSERVATION / SERMON POINTS */}
-				<Input type={type} textParam={["Sermon Points:", "Key Points:", "Observation:"]} changeText={handleChangeText} param="observation" item={observation} minHeight={100} />
+				<Input type={type} 
+				textTitleParam={["Sermon Points", "Key Points", "Observation"]} 
+				inputPlaceHolderParam={["Write the Sermon Points..", "Write the Key Points..", "What are your observations?"]}
+				changeText={handleChangeText} param="observation" item={observation} minHeight={120} />
 
 				{/*APPLICATION / RECOMMENDATIONS*/}
-				<Input type={type} textParam={["Propositions:", "Recommendations:", "Application:"]} changeText={handleChangeText} param="application" item={application} minHeight={100}/>
+				<Input type={type} 
+				textTitleParam={["Propositions", "Recommendations", "Application"]}
+				inputPlaceHolderParam={["Write the propositions..", "Write the recommendations..", "How will you apply this?"]}
+				changeText={handleChangeText} param="application" item={application} minHeight={120}/>
 
 				{/*PRAYER / REFLECTION*/}							
 
-				<Input type={type} textParam={["Reflection:", "Reflection/Realization:", "Prayer:"]} changeText={handleChangeText} param="prayer" item={prayer} minHeight={100} />
+				<Input type={type} 
+				textTitleParam={["Reflection", "Reflection/Realization", "Prayer"]} 
+				inputPlaceHolderParam={["Write your reflection..", "Enter your reflection/realization..", "Write your prayer.."]}
+				changeText={handleChangeText} param="prayer" item={prayer} minHeight={120} />
 			
 			</KeyboardAwareScrollView>
 
