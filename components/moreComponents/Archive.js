@@ -20,6 +20,7 @@ export default function Archive({navigation}) {
                 entryId: item.dataId,
                 entryType: item.type,
                 state: 'update',
+                entry: item,
             },
         });
     }

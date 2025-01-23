@@ -489,7 +489,7 @@ useEffect(() => {
 
 }, []);
 
-// //for loading when opened
+//for loading when opened
 useEffect(() => {
 	if(entryLoading == true){
 		
@@ -502,23 +502,7 @@ useEffect(() => {
 }, [entry, setItems, entryLoading])
 
 
-// //for loading when opened
-// useEffect(() => {
-//     const interval = setTimeout(() => {
-//         if(entryLoading == true){
-//             if(currentState == "update"){
-//                 setItems(entry);
-//             }else{
-//                 setEntryLoading(false);
-//             }
-//         }       
-//     }, 1000)
 
-//     return () => {
-//     clearTimeout(interval)
-//     }
-
-// }, [currentState, entryLoading, fetchEntry,]);
 
 //for small modal
 useEffect(() => {
@@ -642,7 +626,7 @@ useEffect(() => {
 
 
 //
-console.log(entryType)
+//console.log(entryType)
 //
 
 

@@ -420,7 +420,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
     }
   }, [isFocused]);
 
-
   return (
   <>
     {/*MAIN VIEW*/}
@@ -429,7 +428,6 @@ export default function Home({navigation, route, currentSort, currentDisplay, cu
         paddingBottom: insets.bottom,
         paddingLeft: insets.left,
         paddingRight: insets.right,
-        backgroundColor: theme.colors.primary,
       }]}
     >
     

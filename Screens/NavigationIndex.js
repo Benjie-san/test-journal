@@ -74,7 +74,7 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
             <HomeStack.Screen   
                 name="HomeStack"
                 component={RenderHome}
-                options={{ headerShown: false, headerTitleAlign: "center",
+                options={{ headerShown: false,
                 }}
             />  
 
@@ -88,30 +88,30 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
         </HomeStack.Navigator>
     );
 
-    const StackBible = () => (
-        <BibleStack.Navigator
-            screenOptions={{ 
-                headerStyle: {
-                    backgroundColor: theme.colors.primary,
-                },
-                headerTitleStyle:{
-                    color: theme.colors.textColor,
-                },
-                animation:'slide_from_right',
-                headerTintColor: theme.colors.textColor,
+    // const StackBible = () => (
+    //     <BibleStack.Navigator
+    //         screenOptions={{ 
+    //             headerStyle: {
+    //                 backgroundColor: theme.colors.primary,
+    //             },
+    //             headerTitleStyle:{
+    //                 color: theme.colors.textColor,
+    //             },
+    //             animation:'slide_from_right',
+    //             headerTintColor: theme.colors.textColor,
             
-            }}
-        >
+    //         }}
+    //     >
 
-            <BibleStack.Screen name="BibleStack" component={RenderBible} options={{ 
-                tabBarStyle: {
-                    display: "none",
-                },
-                tabBarButton: () => null,
-            }} />
+    //         <BibleStack.Screen name="BibleStack" component={RenderBible} options={{ 
+    //             tabBarStyle: {
+    //                 display: "none",
+    //             },
+    //             tabBarButton: () => null,
+    //         }} />
         
-        </BibleStack.Navigator>
-    );
+    //     </BibleStack.Navigator>
+    // );
 
     const StackSearch = () => (
         <SearchStack.Navigator
@@ -194,14 +194,15 @@ export default function NavigationIndex ({ currentTheme, currentFontSize, curren
         <Tab.Navigator
             initialRouteName="Home"
             screenOptions={{
-                tabBarStyle:{ backgroundColor: theme.colors.primary}
+                tabBarStyle: {backgroundColor: theme.colors.primary},
+                tabBarActiveBackgroundColor: theme.colors.primary,
+                tabBarInactiveBackgroundColor: theme.colors.primary,
             }}
         >
             <Tab.Screen
                 component={StackHome}
                 name="Home"
                 options={{
-                    tabBarStyle:{ backgroundColor: theme.colors.primary},
                     headerShown: false,
                     tabBarShowLabel:false,
                     tabBarIcon: ({ focused }) => {

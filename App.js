@@ -246,7 +246,6 @@ export default function App() {
 
   //EXPO NOTIF
 
-  
 
 
   return (

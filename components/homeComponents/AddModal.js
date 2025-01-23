@@ -22,9 +22,9 @@ const AddModal = ({visible, type, handleModal}) => {
                 animationOut="fadeOut"
                 onBackButtonPress={handleModal}
                 onBackdropPress={handleModal}
-                backdropOpacity={0.5}
+                backdropOpacity={0}
                 animated
-                backdropTransitionOutTiming={0}
+                backdropTransitionOutTiming={1}
                 hideModalContentWhileAnimating
             >
             
@@ -38,6 +38,7 @@ const AddModal = ({visible, type, handleModal}) => {
                     flexDirection:'column',
                     justifyContent:"center",
                     width: '70%',
+                    gap: 10,
                 }} >
                 <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
                     <MaterialIcons name="post-add" size={28} color={theme.colors.textColor} />           
@@ -46,7 +47,13 @@ const AddModal = ({visible, type, handleModal}) => {
                 
                 <TouchableOpacity 
                     onPress={() => handlePress()} 
-                    style={[styles.btn, {alignItems: "left", backgroundColor: theme.colors.secondary, flexDirection: 'row', gap: 5}]}
+                    style={[styles.btn, { alignItems: "left",
+                        borderWidth: 1,
+                        borderColor: theme.colors.textColor,
+                        backgroundColor: theme.colors.primary, 
+                        flexDirection: 'row', 
+                        gap: 5
+                    }]}
                 >
                     <Entypo name="book" size={26} color={theme.colors.textColor} />
                     <Text style={{fontSize: theme.fonts.fontSize+2, color: theme.colors.textColor, textAlign:'right'}}>Journal Entry</Text>
@@ -54,7 +61,9 @@ const AddModal = ({visible, type, handleModal}) => {
 
                 <TouchableOpacity 
                     onPress={() => handlePress("opm")} 
-                    style={[styles.btn, {alignItems: "left", flexDirection: 'row', gap: 10, backgroundColor:  theme.colors.secondary}]}
+                    style={[styles.btn, { alignItems: "left", 
+                        borderWidth: 1,
+                        borderColor: theme.colors.textColor,flexDirection: 'row', gap: 10, backgroundColor:  theme.colors.primary}]}
                 >
                     <Entypo name="open-book" size={26} color={theme.colors.textColor} />
                     <Text style={{fontSize: theme.fonts.fontSize+2,  color: theme.colors.textColor,}}>OPM Reflection</Text>
@@ -80,6 +89,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         margin: 5,
         borderRadius: 10,
-        elevation: 2,
+       
     },
 })

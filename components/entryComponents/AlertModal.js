@@ -14,7 +14,13 @@ const AlertModal = ({visible, message, globalStyle}) =>{
          animationOut="fadeOut"
          backdropOpacity={0}
       >
-         <View style={{backgroundColor: theme.colors.secondary , padding: 10, borderRadius: 10, borderWidth:1, borderColor: theme.colors.borderColor, elevation: 5}}>
+         <View style={{
+            backgroundColor: theme.colors.primary, 
+            padding: 10, 
+            borderRadius: 10, 
+            borderWidth:1, 
+            borderColor: theme.colors.borderColor, 
+            }}>
             <Text style={{color: theme.colors.textColor, fontSize: theme.fonts.fontSize}}>{message}</Text>
          </View>
       </Modal>

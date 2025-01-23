@@ -20,6 +20,7 @@ export default function Trash({navigation}) {
                 entryId: item.dataId,
                 entryType: item.type,
                 state: 'update',
+                entry: item
             },
         });
     }
