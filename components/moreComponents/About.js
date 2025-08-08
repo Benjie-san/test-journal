@@ -42,6 +42,14 @@ export default function About() {
           }
         </ExpandableComponent>
 
+        <ExpandableComponent title={content.poimen.title}>
+          {
+            content.poimen.items.map( (item, index) =>(
+                <Text key={index} style={{fontSize: theme.fonts.fontSize, color: theme.colors.textColor, gap: 10}}>{item}</Text>  
+            ) )
+          }
+        </ExpandableComponent>
+
       </ScrollView>
 
     </View>
